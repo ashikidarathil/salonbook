@@ -19,15 +19,15 @@ Tick `[x]` as each item is done. One sub-phase ≈ one PR. Update [PROGRESS.md](
 - [x] 1.3 Import both repos with full history via `git subtree` into `backend/` and `frontend/`; add `docs/`
 - [x] 1.4 Root files: `.gitignore`, `README.md`, single husky + commitlint at root
 - [x] 1.5 Render → switch repo to `salonbook`, Root Directory `backend`
-- [ ] 1.6 Vercel → switch repo to `salonbook`, Root Directory `frontend`
-- [ ] 1.7 Verify both deploy from the new repo; archive the two old repos on GitHub
+- [x] 1.6 Vercel → switch repo to `salonbook`, Root Directory `frontend`
+- [x] 1.7 Verify both deploy from the new repo; archive the two old repos on GitHub
 
 ## Phase 2 — CI for the combined repo
-- [ ] 2.1 `.github/workflows/ci.yml`: runs on PR + push to main, Node 20
-- [ ] 2.2 Path filters: backend job only if `backend/**` changed, frontend job only if `frontend/**` changed
-- [ ] 2.3 Jobs: install (`npm ci`) → typecheck → lint → build; commitlint on PR
+- [x] 2.1 `.github/workflows/ci.yml`: runs on PR + push to main, Node 20
+- [x] 2.2 Path filters: backend job only if `backend/**` changed, frontend job only if `frontend/**` changed
+- [x] 2.3 Jobs: install (`npm ci`) → typecheck → lint → build; commitlint on PR
 - [ ] 2.4 Branch protection on `main`: require PR + green CI
-- [ ] 2.5 Vercel PR preview URLs working
+- [x] 2.5 Vercel PR preview URLs working
 
 ## Phase 3 — Fresh infrastructure (see setup-guide.md)
 - [ ] 3.1 Atlas: new cluster/user/URI
