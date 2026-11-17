@@ -16,7 +16,9 @@ export default function PaymentFailurePage() {
   const navigate = useNavigate();
   const { bookingId } = useParams<{ bookingId: string }>();
   const dispatch = useAppDispatch();
-  const { currentBooking } = useAppSelector((state) => state.booking);
+  const { currentBooking: storedBooking } = useAppSelector((state) => state.booking);
+  // The store keeps the last viewed item until the new one loads; only use it if it matches the URL
+  const currentBooking = storedBooking?.id === bookingId ? storedBooking : null;
 
   useEffect(() => {
     if (bookingId) dispatch(fetchBookingDetails(bookingId));

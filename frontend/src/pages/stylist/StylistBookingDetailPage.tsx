@@ -32,7 +32,13 @@ export default function StylistBookingDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { currentBooking, loading, error } = useAppSelector((state) => state.booking);
+  const {
+    currentBooking: storedBooking,
+    loading,
+    error,
+  } = useAppSelector((state) => state.booking);
+  // The store keeps the last viewed item until the new one loads; only use it if it matches the URL
+  const currentBooking = storedBooking?.id === id ? storedBooking : null;
 
   useEffect(() => {
     if (id) dispatch(fetchBookingDetails(id));
@@ -76,7 +82,7 @@ export default function StylistBookingDetailPage() {
 
   return (
     <LoadingGate
-      loading={loading}
+      loading={loading || (!currentBooking && !error)}
       error={error}
       data={currentBooking}
       resetError={() => id && dispatch(fetchBookingDetails(id))}
