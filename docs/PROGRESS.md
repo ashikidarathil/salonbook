@@ -37,3 +37,6 @@
 - 2026-11-17 — 3.1 + 3.8 done: Render `MONGODB_URI` → `salonbook_prod` (same Atlas cluster; old
   `salon_booking` kept as backup, delete after a week). Admin created + seed run. Verified live: 8 branches,
   8 categories, 20 services, 16 stylists, Kochi Men's Haircut ₹290, 54 slots on a Monday.
+- 2026-11-17 — Added Phase 8 (readable URLs / slugs) to the plan at the user's request. Also done since
+  last entry: images seeded (PR #4), service detail crash fix (PR #5), demo reviews + 4 home stylists (PR #6,
+  seed:reviews run on prod), detail-page loading fix (PR #7).
