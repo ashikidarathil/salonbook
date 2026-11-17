@@ -10,7 +10,8 @@
     "lint": "eslint . --ext .ts",
     "format": "prettier --write .",
     "docker:up": "docker compose up --build",
-    "docker:down": "docker compose down"
+    "docker:down": "docker compose down",
+    "create-admin": "ts-node src/scripts/createAdmin.ts"
   },
   "keywords": [],
   "author": "",
