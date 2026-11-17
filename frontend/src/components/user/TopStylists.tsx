@@ -12,10 +12,13 @@ interface TopStylist {
   stylistId: string;
   stylistName: string;
   avatar?: string;
+  specialization?: string;
   averageRating: number;
   totalReviews: number;
   bookingCount: number;
 }
+
+const HOME_STYLIST_COUNT = 4;
 
 export function TopStylists() {
   const [stylists, setStylists] = useState<TopStylist[]>([]);
@@ -25,7 +28,7 @@ export function TopStylists() {
   useEffect(() => {
     const fetchTopStylists = async () => {
       try {
-        const data = await reviewService.getTopStylists(6);
+        const data = await reviewService.getTopStylists(HOME_STYLIST_COUNT);
         setStylists(data);
       } catch (error) {
         console.error('Failed to fetch top stylists:', error);
@@ -43,9 +46,9 @@ export function TopStylists() {
           <Skeleton className="h-10 w-64" />
           <Skeleton className="h-6 w-24" />
         </div>
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Skeleton key={i} className="h-80 w-full" />
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: HOME_STYLIST_COUNT }, (_, i) => (
+            <Skeleton key={i} className="h-72 w-full" />
           ))}
         </div>
       </section>
@@ -83,7 +86,9 @@ export function TopStylists() {
                 </div>
               </div>
               <h3 className="mb-1 text-lg font-semibold">{stylist.stylistName}</h3>
-              <p className="mb-3 text-xs text-muted-foreground">Expert Professional</p>
+              <p className="mb-3 text-xs text-muted-foreground">
+                {stylist.specialization || 'Expert Professional'}
+              </p>
               <div className="flex items-center justify-center gap-1 mb-4">
                 <div className="flex">
                   {[1, 2, 3, 4, 5].map((i) => (
