@@ -37,8 +37,17 @@ import {
   WEEKLY_SHIFT,
   WORKING_DAYS,
 } from './seedData';
+import { serviceImages, stylistImages } from './seedImages';
 
 const upsert = { upsert: true, new: true, setDefaultsOnInsert: true } as const;
+// Only (re)place images that are empty or still a seed image, never ones uploaded in the admin panel
+const replaceableImage = (field: string) => ({
+  $or: [
+    { [field]: null },
+    { [field]: { $exists: false } },
+    { [field]: /^https:\/\/images\.unsplash\.com\// },
+  ],
+});
 const roundTo10 = (n: number) => Math.round(n / 10) * 10;
 
 async function main(): Promise<void> {
@@ -94,6 +103,14 @@ async function main(): Promise<void> {
       upsert,
     );
     serviceIds.set(s.name, doc._id as Types.ObjectId);
+
+    const image = serviceImages[s.name];
+    if (image) {
+      await ServiceModel.updateOne(
+        { _id: doc._id, ...replaceableImage('imageUrl') },
+        { $set: { imageUrl: image.url } },
+      );
+    }
   }
 
   // Branches + every category and service enabled at each branch
@@ -171,6 +188,18 @@ async function main(): Promise<void> {
     );
     const stylistId = stylist._id as Types.ObjectId;
 
+    const photo = stylistImages[st.name];
+    if (photo) {
+      await UserModel.updateOne(
+        { _id: user._id, ...replaceableImage('profilePicture') },
+        { $set: { profilePicture: photo.url } },
+      );
+      await StylistModel.updateOne(
+        { _id: stylistId, ...replaceableImage('profilePicture') },
+        { $set: { profilePicture: photo.url } },
+      );
+    }
+
     // One active branch per stylist
     await StylistBranchModel.updateMany(
       { stylistId, branchId: { $ne: branchId }, isActive: true },
@@ -202,7 +231,8 @@ async function main(): Promise<void> {
 
   console.log(
     `Done: ${categories.length} categories, ${services.length} services, ` +
-      `${branches.length} branches, ${stylists.length} stylists`,
+      `${branches.length} branches, ${stylists.length} stylists, ` +
+      `${Object.keys(serviceImages).length + Object.keys(stylistImages).length} images`,
   );
 }
 

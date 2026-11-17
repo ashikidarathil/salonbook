@@ -1,7 +1,7 @@
 # Progress
 
-**Current:** Phase 2 done → next Phase 3 (fresh infrastructure)
-**Next step:** 3.1 Atlas (user resets cluster) — see setup-guide.md
+**Current:** Phase 3 — Fresh infrastructure
+**Next step:** 3.2 Upstash Redis, then 3.3–3.4 Cloudinary folder + Render env cleanup
 
 ## Log
 - 2026-11-17 — Investigated live site. Data fails because the backend CORS check rejects
@@ -34,3 +34,6 @@
   on PRs, and one aggregate "CI result" check. Vercel previews already on every PR.
 - 2026-11-17 — 2.4 done. Private repo couldn't run Actions (GitHub billing block) → history scanned for
   secrets (clean) → repo made public. `main` protected: PR + "CI result" required. Phase 2 complete.
+- 2026-11-17 — 3.1 + 3.8 done: Render `MONGODB_URI` → `salonbook_prod` (same Atlas cluster; old
+  `salon_booking` kept as backup, delete after a week). Admin created + seed run. Verified live: 8 branches,
+  8 categories, 20 services, 16 stylists, Kochi Men's Haircut ₹290, 54 slots on a Monday.
