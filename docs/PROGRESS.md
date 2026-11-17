@@ -1,7 +1,7 @@
 # Progress
 
-**Current:** Phase 1 — Merge into one repo
-**Next step:** 1.6 — point Vercel at `salonbook`, Root Directory `frontend`
+**Current:** Phase 2 done → next Phase 3 (fresh infrastructure)
+**Next step:** 3.1 Atlas (user resets cluster) — see setup-guide.md
 
 ## Log
 - 2026-11-17 — Investigated live site. Data fails because the backend CORS check rejects
@@ -25,3 +25,12 @@
   frontend CI since March. Old folder `Saloon Booking Managment/` kept as backup — docs now live here.
 - 2026-11-17 — 1.5 done: Render deploys from `salonbook`, Root Directory `backend`, still Docker runtime
   (backend/Dockerfile). Verified live: health 200, all public endpoints 200, CORS OK.
+- 2026-11-17 — 1.6 done: Vercel deploys from `salonbook`, Root Directory `frontend`. First prod deploy was
+  blocked (commit author email not linked to GitHub) → repo git email set to the GitHub no-reply address.
+  PR #1 merged, prod deploy verified live.
+- 2026-11-17 — 1.7 done: old repos salon-booking-backend / salon-booking-frontend archived (read-only).
+  Phase 1 complete.
+- 2026-11-17 — 2.1–2.3, 2.5: single CI workflow (`.github/workflows/ci.yml`) with path filters, commitlint
+  on PRs, and one aggregate "CI result" check. Vercel previews already on every PR.
+- 2026-11-17 — 2.4 done. Private repo couldn't run Actions (GitHub billing block) → history scanned for
+  secrets (clean) → repo made public. `main` protected: PR + "CI result" required. Phase 2 complete.

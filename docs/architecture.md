@@ -41,8 +41,8 @@ USER (customer booking), STYLIST (schedule, bookings, wallet), ADMIN (branches, 
 ## GitHub & CI/CD (today → target)
 | | Today | Target (after Phase 1–2) |
 |---|---|---|
-| Repos | `salon-booking-backend`, `salon-booking-frontend` | one repo `salonbook` with `backend/`, `frontend/`, `docs/` |
-| CI | lint + build on push to main (frontend: push only) | one workflow, runs on every PR, only for the folder that changed |
+| Repos | `salonbook` (old two repos archived) | — |
+| CI | — | `.github/workflows/ci.yml`: one workflow on every PR + push to main; backend/frontend jobs run only when their folder changed; commitlint on PRs; single required check **CI result** |
 | CD | Vercel + Render auto-deploy on push to main | same, pointed at the subfolders (Root Directory setting) |
 | Previews | — | Vercel preview URL on every PR |
 
