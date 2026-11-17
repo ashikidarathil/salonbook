@@ -1,0 +1,356 @@
+'use client';
+
+import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
+import { fetchPublicStylists } from '@/features/stylistInvite/stylistInviteThunks';
+import { fetchMyFavorites } from '@/features/wishlist/wishlistSlice';
+import { useWishlist } from '@/hooks/useWishlist';
+import { useDebounce } from '@/hooks/useDebounce';
+import { APP_ROUTES } from '@/common/constants/app.routes';
+import { LoadingGate } from '@/components/common/LoadingGate';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import Pagination from '@/components/pagination/Pagination';
+import { Icon } from '@iconify/react';
+import { Header } from '@/components/user/Header';
+import { Footer } from '@/components/user/Footer';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
+
+const ITEMS_PER_PAGE = 9;
+
+export default function StylistsListingPage() {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { stylists, loading, error, pagination } = useAppSelector((state) => state.stylistInvite);
+
+  const { selectedBranch } = useAppSelector((state) => state.branch);
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 500);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [positionFilter, setPositionFilter] = useState('all');
+
+  const { isFavorite, handleToggleFavorite, isAuthenticated } = useWishlist();
+
+  useEffect(() => {
+    const savedBranch = localStorage.getItem('selectedBranch');
+    if (!savedBranch) {
+      localStorage.setItem('returnPath', APP_ROUTES.USER.STYLISTS);
+      navigate('/branches');
+    }
+  }, [navigate]);
+
+  const loadStylists = useCallback(() => {
+    if (!selectedBranch?.id) return;
+
+    dispatch(
+      fetchPublicStylists({
+        page: currentPage,
+        limit: ITEMS_PER_PAGE,
+        search: debouncedSearch || undefined,
+        branchId: selectedBranch.id,
+        position: positionFilter === 'all' ? undefined : positionFilter,
+      }),
+    );
+  }, [dispatch, currentPage, debouncedSearch, selectedBranch, positionFilter]);
+
+  useEffect(() => {
+    if (selectedBranch?.id) {
+      loadStylists();
+    }
+  }, [loadStylists, selectedBranch, positionFilter, debouncedSearch]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchMyFavorites());
+    }
+  }, [dispatch, isAuthenticated]);
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setCurrentPage(1);
+  };
+
+  const getPositionLabel = (pos?: string) => {
+    switch (pos) {
+      case 'SENIOR':
+        return 'Senior Stylist';
+      case 'JUNIOR':
+        return 'Junior Stylist';
+      case 'TRAINEE':
+        return 'Trainee Stylist';
+      default:
+        return 'Stylist';
+    }
+  };
+
+  const filterButtons = [
+    { label: 'All Stylists', value: 'all' },
+    { label: 'Senior Stylists', value: 'SENIOR' },
+    { label: 'Junior Stylists', value: 'JUNIOR' },
+    { label: 'Trainees', value: 'TRAINEE' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-background font-sans text-foreground flex flex-col w-full">
+      <Header />
+
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="relative py-16 overflow-hidden text-center  bg-gradient-to-b from-primary/10 via-primary/5 to-background md:py-20 ">
+          <div className="absolute top-0 w-full h-full -translate-x-1/2 pointer-events-none left-1/2 bg-gradient-to-b from-white/50 to-transparent" />
+          <div className="container relative z-10 flex flex-col items-center px-4 mx-auto">
+            <h1 className="mb-4 text-4xl font-bold md:text-5xl text-foreground font-heading">
+              Our Expert Stylists
+            </h1>
+            <p className="max-w-2xl mx-auto mb-10 text-lg text-muted-foreground">
+              Meet our talented team of professional stylists. Each brings unique expertise and
+              passion to create your perfect look.
+            </p>
+
+            <div className="flex flex-row items-center w-full max-w-2xl gap-1 sm:gap-2 p-1.5 sm:p-2 mx-auto border rounded-full shadow-sm bg-background border-border">
+              <div className="pl-3 sm:pl-4 text-muted-foreground">
+                <Icon icon="solar:magnifer-linear" className="size-4 sm:size-5" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search stylists..."
+                value={search}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="flex-1 h-10 w-full min-w-0 text-xs sm:text-sm bg-transparent border-none outline-none placeholder:text-muted-foreground/70"
+              />
+              <div className="hidden sm:block w-px h-6 mx-1 sm:mx-2 bg-border shrink-0" />
+              <div className="hidden sm:block">
+                <Select value={positionFilter} onValueChange={setPositionFilter}>
+                  <SelectTrigger className="w-[130px] sm:w-[180px] px-2 sm:px-3 text-xs sm:text-sm border-none shadow-none focus:ring-0 bg-transparent h-10 text-muted-foreground font-normal shrink-0">
+                    <SelectValue placeholder="All Positions" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white z-[2000]">
+                    <SelectItem value="all">All Positions</SelectItem>
+                    <SelectItem value="SENIOR">Senior Stylist</SelectItem>
+                    <SelectItem value="JUNIOR">Junior Stylist</SelectItem>
+                    <SelectItem value="TRAINEE">Trainee</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="container mx-auto px-4 md:px-6 py-8">
+          {/* Category Filter Buttons */}
+          <div className="relative w-full max-w-4xl mb-12 mx-auto">
+            <div className="flex items-center gap-3 px-4 pb-2 overflow-x-auto md:hidden scrollbar-hide">
+              {filterButtons.map((btn) => (
+                <Button
+                  key={btn.value}
+                  variant={positionFilter === btn.value ? 'default' : 'ghost'}
+                  className={
+                    positionFilter === btn.value
+                      ? 'rounded-full px-6 shadow-md shadow-primary/20 shrink-0'
+                      : 'rounded-full px-6 bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground shrink-0'
+                  }
+                  onClick={() => setPositionFilter(btn.value)}
+                >
+                  {btn.label}
+                </Button>
+              ))}
+            </div>
+
+            {/* Desktop View: Carousel */}
+            <div className="hidden px-12 md:block">
+              <Carousel
+                opts={{
+                  align: 'start',
+                  dragFree: true,
+                }}
+                className="w-full"
+              >
+                <CarouselContent className="-ml-4">
+                  {filterButtons.map((btn) => (
+                    <CarouselItem key={btn.value} className="pl-4 basis-auto sm:basis-auto">
+                      <Button
+                        variant={positionFilter === btn.value ? 'default' : 'ghost'}
+                        className={
+                          positionFilter === btn.value
+                            ? 'rounded-full px-6 shadow-md shadow-primary/20 shrink-0'
+                            : 'rounded-full px-6 bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground shrink-0'
+                        }
+                        onClick={() => setPositionFilter(btn.value)}
+                      >
+                        {btn.label}
+                      </Button>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="-left-12" />
+                <CarouselNext className="-right-12" />
+              </Carousel>
+            </div>
+          </div>
+
+          <LoadingGate
+            loading={loading && stylists.length === 0}
+            error={error}
+            data={stylists}
+            emptyMessage="No stylists found matching your criteria."
+            emptyIcon="hugeicons:search-not-found"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {stylists.map((stylist) => (
+                <Card
+                  key={stylist.id}
+                  className="group overflow-hidden border-border/60 shadow-sm hover:shadow-md transition-all duration-300 pt-0 flex flex-col"
+                >
+                  <div className="relative aspect-[4/3] bg-muted overflow-hidden">
+                    <img
+                      src={
+                        stylist.profilePicture ||
+                        'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=2069&auto=format&fit=crop'
+                      }
+                      alt={stylist.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    {stylist.rating && stylist.rating > 4.8 && (
+                      <div className="absolute top-4 left-4">
+                        <Badge className="bg-[#4CC9F0] hover:bg-[#4CC9F0]/90 text-white border-none shadow-sm rounded-md px-2.5 py-1">
+                          Top Rated
+                        </Badge>
+                      </div>
+                    )}
+                    <button
+                      className={`absolute top-4 right-4 p-2 bg-white/80 backdrop-blur-sm rounded-full transition-colors ${
+                        isFavorite(stylist.id)
+                          ? 'text-destructive bg-white shadow-sm'
+                          : 'text-muted-foreground hover:text-destructive hover:bg-white'
+                      }`}
+                      onClick={(e) => handleToggleFavorite(e, stylist.id)}
+                    >
+                      <Icon
+                        icon={isFavorite(stylist.id) ? 'solar:heart-bold' : 'solar:heart-linear'}
+                        className="size-5"
+                      />
+                    </button>
+                  </div>
+
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-start mb-1">
+                      <div>
+                        <CardTitle className="text-xl mb-1">{stylist.name}</CardTitle>
+                        <CardDescription className="flex items-center gap-1.5">
+                          {getPositionLabel(stylist.position)}{' '}
+                          <span className="text-muted-foreground/50">•</span> {stylist.experience}{' '}
+                          years exp.
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 mb-2">
+                      <div className="flex text-amber-400">
+                        {Array.from({ length: 5 }).map((_, i) => {
+                          const rating = stylist.rating || 0;
+                          return (
+                            <Icon
+                              key={i}
+                              icon={
+                                i < Math.floor(rating)
+                                  ? 'solar:star-bold'
+                                  : 'solar:star-bold-duotone'
+                              }
+                              className={`size-4 ${
+                                i >= Math.floor(rating) ? 'text-amber-400/30' : ''
+                              }`}
+                            />
+                          );
+                        })}
+                      </div>
+                      <span className="text-sm font-semibold ml-1">
+                        {(stylist.rating || 0).toFixed(1)}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        ({stylist.reviewCount || 0} reviews)
+                      </span>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="pb-4 flex-1">
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {stylist.assignedServices && stylist.assignedServices.length > 0 ? (
+                        stylist.assignedServices.map((service, idx) => (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20"
+                          >
+                            {service.charAt(0).toUpperCase() + service.slice(1)}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-secondary text-secondary-foreground text-xs font-medium">
+                          {stylist.specialization}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Icon icon="solar:map-point-bold" className="size-4 mr-1.5 text-primary" />
+                      {stylist.branchName || 'N/A'}
+                    </div>
+                  </CardContent>
+
+                  <CardFooter className="gap-3 pt-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-border/60"
+                      onClick={() =>
+                        navigate(APP_ROUTES.USER.STYLIST_DETAILS.replace(':stylistId', stylist.id))
+                      }
+                    >
+                      View Profile
+                    </Button>
+                    <Button
+                      className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
+                      onClick={() =>
+                        navigate(APP_ROUTES.USER.STYLIST_DETAILS.replace(':stylistId', stylist.id))
+                      }
+                    >
+                      Book Now
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+
+            <div className="mt-16">
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          </LoadingGate>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
