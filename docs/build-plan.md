@@ -15,10 +15,10 @@ Tick `[x]` as each item is done. One sub-phase ≈ one PR. Update [PROGRESS.md](
 
 ## Phase 1 — Merge into one repo
 - [x] 1.1 Pull latest `main` in both local repos (local is 10 commits behind GitHub)
-- [ ] 1.2 Create new GitHub repo `salonbook` (private)
-- [ ] 1.3 Import both repos with full history via `git subtree` into `backend/` and `frontend/`; add `docs/`
-- [ ] 1.4 Root files: `.gitignore`, `README.md`, single husky + commitlint at root
-- [ ] 1.5 Render → switch repo to `salonbook`, Root Directory `backend`
+- [x] 1.2 Create new GitHub repo `salonbook` (private)
+- [x] 1.3 Import both repos with full history via `git subtree` into `backend/` and `frontend/`; add `docs/`
+- [x] 1.4 Root files: `.gitignore`, `README.md`, single husky + commitlint at root
+- [x] 1.5 Render → switch repo to `salonbook`, Root Directory `backend`
 - [ ] 1.6 Vercel → switch repo to `salonbook`, Root Directory `frontend`
 - [ ] 1.7 Verify both deploy from the new repo; archive the two old repos on GitHub
 
@@ -61,7 +61,7 @@ Tick `[x]` as each item is done. One sub-phase ≈ one PR. Update [PROGRESS.md](
 
 ## Phase 6 — Code cleanup
 - [ ] 6.1 Remove commented-out code and stray `console.log`s (backend + frontend)
-- [ ] 6.2 Remove tracked junk (`dump.rdb`, logs, `.DS_Store`, backend `dist/`)
+- [x] 6.2 Remove tracked junk (`dump.rdb`, logs, `.DS_Store`, backend `dist/`) — done in Phase 1
 - [ ] 6.3 Fix all lint/typecheck warnings
 
 ## Phase 7 — New features
