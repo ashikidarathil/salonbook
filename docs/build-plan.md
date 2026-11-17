@@ -64,5 +64,23 @@ Tick `[x]` as each item is done. One sub-phase ≈ one PR. Update [PROGRESS.md](
 - [x] 6.2 Remove tracked junk (`dump.rdb`, logs, `.DS_Store`, backend `dist/`) — done in Phase 1
 - [ ] 6.3 Fix all lint/typecheck warnings
 
+## Phase 8 — Readable URLs (slugs)
+Replace database IDs in public URLs with readable names. Old ID links keep working and redirect.
+
+| Page | Today | After |
+|---|---|---|
+| Service detail | `/branches/6afc87…cb0/services/6afc87…c98` | `/branches/kochi/services/mens-haircut` |
+| Stylist profile | `/stylists/6afc87…dfc` | `/stylists/arjun-menon` |
+| Branch pages | `/branches/6afc87…cb0/...` | `/branches/kochi/...` |
+| Booking / checkout / payment | `/bookings/6afc87…` | `/bookings/BK-7F3A21` |
+
+- [ ] 8.1 Backend: `slug` field (unique, indexed) on Branch, Service, Stylist; auto-generated from the name on create/rename (`Men's Haircut` → `mens-haircut`, duplicates get `-2`)
+- [ ] 8.2 Backend: migration script to add slugs to existing records (`npm run migrate:slugs`), run on prod
+- [ ] 8.3 Backend: public endpoints accept a slug **or** an id (old links and bookmarks keep working)
+- [ ] 8.4 Backend: booking endpoints accept the booking number (`BK-XXXXXX`) as well as the id
+- [ ] 8.5 Frontend: all links and routes build URLs from slugs / booking numbers; an id URL redirects to the slug URL
+- [ ] 8.6 Admin: slug shown (and editable) on branch, service and stylist forms
+- [ ] 8.7 Seed scripts set slugs; verify every page in the browser (old id links redirect, new links load)
+
 ## Phase 7 — New features
 - [ ] 7.1 _(list features here as we decide them)_
