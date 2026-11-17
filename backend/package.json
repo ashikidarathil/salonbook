@@ -11,7 +11,8 @@
     "format": "prettier --write .",
     "docker:up": "docker compose up --build",
     "docker:down": "docker compose down",
-    "create-admin": "ts-node src/scripts/createAdmin.ts"
+    "create-admin": "ts-node src/scripts/createAdmin.ts",
+    "seed": "ts-node src/scripts/seed.ts"
   },
   "keywords": [],
   "author": "",
