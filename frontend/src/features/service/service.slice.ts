@@ -1,4 +1,6 @@
-import { createSlice, isPending, isRejected } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import { ownThunkMatchers } from '@/common/utils/ownThunkMatchers';
+import * as ownThunks from './serviceThunks';
 import type { ServiceState } from './service.types';
 import {
   fetchServices,
@@ -14,6 +16,7 @@ import {
   fetchPublicServicesPaginated,
 } from './serviceThunks';
 
+const own = ownThunkMatchers(ownThunks);
 const initialState: ServiceState = {
   services: [],
   loading: false,
@@ -94,20 +97,17 @@ const serviceSlice = createSlice({
       .addCase(fetchPublicServiceDetails.fulfilled, (state, action) => {
         state.currentService = action.payload;
       })
-      .addMatcher(isPending, (state) => {
+      .addMatcher(own.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addMatcher(isRejected, (state, action) => {
+      .addMatcher(own.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })
-      .addMatcher(
-        (action) => action.type.endsWith('/fulfilled'),
-        (state) => {
-          state.loading = false;
-        },
-      );
+      .addMatcher(own.fulfilled, (state) => {
+        state.loading = false;
+      });
   },
 });
 

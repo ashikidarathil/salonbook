@@ -1,4 +1,6 @@
-import { createSlice, isPending, isRejected } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import { ownThunkMatchers } from '@/common/utils/ownThunkMatchers';
+import * as ownThunks from './stylistInviteThunks';
 import type { StylistInviteState } from './stylistInvite.types';
 import {
   createStylistInvite,
@@ -15,6 +17,7 @@ import {
   fetchPublicStylistById,
 } from './stylistInviteThunks';
 
+const own = ownThunkMatchers(ownThunks);
 const initialState: StylistInviteState = {
   stylists: [],
   loading: false,
@@ -135,20 +138,17 @@ const slice = createSlice({
       .addCase(fetchPublicStylistById.fulfilled, (state, action) => {
         state.selectedStylist = action.payload;
       })
-      .addMatcher(isPending, (state) => {
+      .addMatcher(own.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addMatcher(isRejected, (state, action) => {
+      .addMatcher(own.rejected, (state, action) => {
         state.loading = false;
         state.error = (action.payload as string) || action.error.message || 'Something went wrong';
       })
-      .addMatcher(
-        (action) => action.type.endsWith('/fulfilled'),
-        (state) => {
-          state.loading = false;
-        },
-      );
+      .addMatcher(own.fulfilled, (state) => {
+        state.loading = false;
+      });
   },
 });
 

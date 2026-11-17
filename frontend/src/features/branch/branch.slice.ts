@@ -1,4 +1,6 @@
-import { createSlice, isPending, isRejected } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import { ownThunkMatchers } from '@/common/utils/ownThunkMatchers';
+import * as ownThunks from './branch.thunks';
 import type { Branch, BranchState } from './branch.types';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import {
@@ -26,6 +28,7 @@ const loadSavedBranch = (): Branch | null => {
   return null;
 };
 
+const own = ownThunkMatchers(ownThunks);
 const initialState: BranchState = {
   branches: [],
   nearestBranches: [],
@@ -108,20 +111,17 @@ const branchSlice = createSlice({
           b.id === action.payload.id ? action.payload : b,
         );
       })
-      .addMatcher(isPending, (state) => {
+      .addMatcher(own.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addMatcher(isRejected, (state, action) => {
+      .addMatcher(own.rejected, (state, action) => {
         state.loading = false;
         state.error = (action.payload as string) || action.error.message || 'Something went wrong';
       })
-      .addMatcher(
-        (action) => action.type.endsWith('/fulfilled'),
-        (state) => {
-          state.loading = false;
-        },
-      );
+      .addMatcher(own.fulfilled, (state) => {
+        state.loading = false;
+      });
   },
 });
 
