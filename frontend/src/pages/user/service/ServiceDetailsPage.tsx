@@ -38,12 +38,25 @@ export default function ServiceDetailsPage() {
   }>();
 
   const { isAuthenticated } = useAppSelector((state) => state.auth);
-  const { currentService, loading, error } = useAppSelector((state) => state.branchService);
+  const {
+    currentService: storedService,
+    loading,
+    error,
+  } = useAppSelector((state) => state.branchService);
+  // The store keeps the last viewed item until the new one loads; only use it if it matches the URL
+  const currentService =
+    storedService?.serviceId === serviceId && storedService?.branchId === branchId
+      ? storedService
+      : null;
   const { assignedStylists } = useAppSelector((state) => state.stylistBranch);
   const { reviews, isLoading: isLoadingReviews } = useAppSelector((state) => state.review);
 
   const [imageError, setImageError] = useState(false);
-  const [relatedServices, setRelatedServices] = useState<BranchServiceItem[]>([]);
+  // Tagged with the service they were loaded for, so another service's list never shows
+  const [related, setRelated] = useState<{ serviceId?: string; items: BranchServiceItem[] }>({
+    items: [],
+  });
+  const relatedServices = related.serviceId === serviceId ? related.items : [];
 
   const cart = useAppSelector((state) => state.cart);
 
@@ -90,7 +103,7 @@ export default function ServiceDetailsPage() {
             const related = result.payload.data.filter(
               (s: BranchServiceItem) => s.serviceId !== serviceId,
             );
-            setRelatedServices(related.slice(0, 8));
+            setRelated({ serviceId, items: related.slice(0, 8) });
           }
         } catch (error) {
           console.error('Failed to fetch related services:', error);
@@ -150,7 +163,7 @@ export default function ServiceDetailsPage() {
       <Header />
       <main className="flex-1">
         <LoadingGate
-          loading={loading}
+          loading={loading || (!currentService && !error)}
           error={error}
           data={currentService}
           resetError={() => dispatch(clearError())}

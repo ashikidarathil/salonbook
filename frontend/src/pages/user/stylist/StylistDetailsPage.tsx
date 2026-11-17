@@ -31,7 +31,16 @@ export default function StylistDetailsPage() {
   const { stylistId } = useParams<{ stylistId: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { selectedStylist, loading, error } = useAppSelector((state) => state.stylistInvite);
+  const {
+    selectedStylist: storedStylist,
+    loading,
+    error,
+  } = useAppSelector((state) => state.stylistInvite);
+  // The store keeps the last viewed item until the new one loads; only use it if it matches the URL
+  const selectedStylist =
+    storedStylist && (storedStylist.id === stylistId || storedStylist.userId === stylistId)
+      ? storedStylist
+      : null;
   const { isFavorite, handleToggleFavorite, isAuthenticated } = useWishlist();
   const { selectedBranch } = useAppSelector((state) => state.branch);
 
@@ -44,7 +53,11 @@ export default function StylistDetailsPage() {
     duration: number;
   } | null>(null);
 
-  const [reviews, setReviews] = useState<Review[]>([]);
+  // Tagged with the stylist they were loaded for, so another stylist's reviews never show
+  const [reviewState, setReviewState] = useState<{ stylistId?: string; items: Review[] }>({
+    items: [],
+  });
+  const reviews = reviewState.stylistId === selectedStylist?.id ? reviewState.items : [];
   const [loadingReviews, setLoadingReviews] = useState(false);
 
   useEffect(() => {
@@ -59,7 +72,7 @@ export default function StylistDetailsPage() {
             sortBy: 'rating',
             sortOrder: 'desc',
           });
-          if (isMounted) setReviews(res.reviews);
+          if (isMounted) setReviewState({ stylistId: selectedStylist.id, items: res.reviews });
         } catch (err) {
           console.error('Failed to fetch reviews:', err);
         } finally {
@@ -154,7 +167,7 @@ export default function StylistDetailsPage() {
       <Header />
       <main className="flex-1">
         <LoadingGate
-          loading={loading && !selectedStylist}
+          loading={(loading || !error) && !selectedStylist}
           error={error}
           data={selectedStylist}
           emptyMessage="Stylist not found."

@@ -21,7 +21,11 @@ export default function CheckoutPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const { currentBooking, loading: bookingLoading } = useAppSelector((state) => state.booking);
+  const { currentBooking: storedBooking, loading: bookingLoading } = useAppSelector(
+    (state) => state.booking,
+  );
+  // The store keeps the last viewed item until the new one loads; only use it if it matches the URL
+  const currentBooking = storedBooking?.id === bookingId ? storedBooking : null;
   const { loading: paymentLoading } = useAppSelector((state) => state.payment);
   const { wallet } = useAppSelector((state) => state.wallet);
   const { availableCoupons } = useAppSelector((state) => state.coupon);

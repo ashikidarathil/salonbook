@@ -59,7 +59,13 @@ export default function BookingDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { currentBooking, loading, error } = useAppSelector((state) => state.booking);
+  const {
+    currentBooking: storedBooking,
+    loading,
+    error,
+  } = useAppSelector((state) => state.booking);
+  // The store keeps the last viewed item until the new one loads; only use it if it matches the URL
+  const currentBooking = storedBooking?.id === id ? storedBooking : null;
   const { selectedBranch, loading: branchLoading } = useAppSelector((state) => state.branch);
   const { loading: paymentLoading } = useAppSelector((state) => state.payment);
   const { wallet } = useAppSelector((state) => state.wallet);
@@ -150,7 +156,7 @@ export default function BookingDetailPage() {
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-6 text-foreground">
       <LoadingGate
-        loading={loading}
+        loading={loading || (!currentBooking && !error)}
         error={error}
         data={currentBooking}
         emptyMessage="Booking not found"
