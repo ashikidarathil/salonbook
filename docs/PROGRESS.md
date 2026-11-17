@@ -1,7 +1,7 @@
 # Progress
 
 **Current:** Phase 1 — Merge into one repo
-**Next step:** 1.2–1.4 build combined repo `salonbook`
+**Next step:** 1.6 — point Vercel at `salonbook`, Root Directory `frontend`
 
 ## Log
 - 2026-11-17 — Investigated live site. Data fails because the backend CORS check rejects
@@ -19,3 +19,9 @@
   Follow-up 0.9 added (ranking counts deleted services).
 - 2026-11-17 — 0.9 merged (backend PR #4) + verified live: branches with visible services rank first.
   Phase 0 done except 0.8 (data, admin panel). 1.1 done (both local repos synced with GitHub).
+- 2026-11-17 — 1.2–1.4 done: private repo https://github.com/ashikidarathil/salonbook with full history of
+  both repos (git subtree). Root husky + commitlint, root .gitignore/README, docs/ moved in. Untracked
+  backend dist/, logs, dump.rdb, .DS_Store. Fixed 2 frontend lint errors (reviews pages) that had failed
+  frontend CI since March. Old folder `Saloon Booking Managment/` kept as backup — docs now live here.
+- 2026-11-17 — 1.5 done: Render deploys from `salonbook`, Root Directory `backend`, still Docker runtime
+  (backend/Dockerfile). Verified live: health 200, all public endpoints 200, CORS OK.
