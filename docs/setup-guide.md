@@ -70,3 +70,20 @@ cd frontend && npm i && npm run dev       # :5173  (uses frontend/.env.local)
 ```
 Local `FRONTEND_ORIGIN=http://localhost:5173`. Local Mongo/Redis via `docker compose up mongo redis`
 or point at Atlas/Upstash dev databases.
+
+## 9. Fresh data for the live site (admin + seed)
+Run from `backend/` on your Mac. The values stay in your terminal; nothing is committed.
+```bash
+cd backend
+export MONGODB_URI='mongodb+srv://USER:PASS@cluster.xxxx.mongodb.net/salonbook_prod?retryWrites=true&w=majority'
+
+# 1. Admin login for the live site
+ADMIN_EMAIL='you@example.com' ADMIN_PASSWORD='strong-password' ADMIN_NAME='Admin' npm run create-admin
+
+# 2. Branches, categories, services, prices, stylists, schedules (edit src/scripts/seedData.ts first if needed)
+SEED_STYLIST_PASSWORD='strong-password' SEED_CONFIRM=salonbook_prod npm run seed
+```
+- `SEED_CONFIRM` must equal the database name, so the seed can't hit the wrong database.
+- Both scripts are safe to re-run (they update by name/email, no duplicates).
+- Stylist logins: `<firstname>.<branch>@stylist.salonbook.online` (lowercase), all with `SEED_STYLIST_PASSWORD`.
+- Then switch Render's `MONGODB_URI` to the `salonbook_prod` string.
