@@ -1,0 +1,17 @@
+{
+  "name": "salonbook",
+  "private": true,
+  "description": "SalonBook monorepo: backend (Express API) + frontend (React/Vite)",
+  "scripts": {
+    "prepare": "husky",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "lint": "npm --prefix backend run lint && npm --prefix frontend run lint",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.4.2",
+    "@commitlint/config-conventional": "^20.4.2",
+    "husky": "^9.1.7"
+  }
+}

@@ -1,0 +1,3 @@
+staged=$(git diff --cached --name-only)
+if echo "$staged" | grep -q '^backend/'; then npm --prefix backend run lint; fi
+if echo "$staged" | grep -q '^frontend/'; then npm --prefix frontend run lint; fi

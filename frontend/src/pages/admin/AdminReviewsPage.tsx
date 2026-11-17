@@ -47,7 +47,7 @@ export default function AdminReviewsPage() {
     const params: ReviewPaginationParams = {
       page,
       limit,
-      search: search.trim() || undefined,
+      search: debouncedSearch.trim() || undefined,
       includeDeleted: true,
     };
 

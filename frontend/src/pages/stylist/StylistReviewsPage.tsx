@@ -37,7 +37,7 @@ export default function StylistReviewsPage() {
       stylistId: user?.id,
       page,
       limit,
-      search: search.trim() || undefined,
+      search: debouncedSearch.trim() || undefined,
     };
 
     if (dateRange !== 'all') {
