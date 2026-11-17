@@ -26,7 +26,7 @@ Tick `[x]` as each item is done. One sub-phase ≈ one PR. Update [PROGRESS.md](
 - [x] 2.1 `.github/workflows/ci.yml`: runs on PR + push to main, Node 20
 - [x] 2.2 Path filters: backend job only if `backend/**` changed, frontend job only if `frontend/**` changed
 - [x] 2.3 Jobs: install (`npm ci`) → typecheck → lint → build; commitlint on PR
-- [ ] 2.4 Branch protection on `main`: require PR + green CI
+- [x] 2.4 Branch protection on `main`: PR required (0 approvals, solo dev) + "CI result" check; no force push. Repo made public so Actions are free
 - [x] 2.5 Vercel PR preview URLs working
 
 ## Phase 3 — Fresh infrastructure (see setup-guide.md)
