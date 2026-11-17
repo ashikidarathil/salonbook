@@ -273,22 +273,35 @@ export default function ServiceDetailsPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-6">
-                        {currentService.whatIncluded.map((item, index) => (
-                          <div key={index} className="flex gap-4">
-                            <div className="p-1 mt-1 rounded h-fit bg-accent/10">
-                              <Icon icon="solar:check-circle-bold" className="text-accent size-5" />
+                        {currentService.whatIncluded.map((item, index) => {
+                          // Items are either "Title: detail" or just "Title"
+                          const separator = item.indexOf(':');
+                          const title = separator === -1 ? item : item.slice(0, separator);
+                          const detail = separator === -1 ? '' : item.slice(separator + 1).trim();
+                          return (
+                            <div key={index} className="flex gap-4">
+                              <div className="p-1 mt-1 rounded h-fit bg-accent/10">
+                                <Icon
+                                  icon="solar:check-circle-bold"
+                                  className="text-accent size-5"
+                                />
+                              </div>
+                              <div>
+                                <p className="text-foreground">
+                                  {title}
+                                  {detail && (
+                                    <>
+                                      :{' '}
+                                      <span className="text-muted-foreground">
+                                        {detail.charAt(0).toUpperCase() + detail.slice(1)}
+                                      </span>
+                                    </>
+                                  )}
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-foreground">
-                                {item.split(':')[0]}:
-                                <span className="text-muted-foreground">
-                                  {item.split(':')[1].charAt(0).toUpperCase() +
-                                    item.split(':')[1].slice(1)}
-                                </span>
-                              </p>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </CardContent>
                   </Card>
