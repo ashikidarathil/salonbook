@@ -1,0 +1,97 @@
+import winston from 'winston';
+import DailyRotateFile from 'winston-daily-rotate-file';
+import path from 'path';
+import { env } from './env';
+
+const levels = {
+  error: 0,
+  warn: 1,
+  info: 2,
+  debug: 3,
+  http: 4,
+};
+
+const colors = {
+  error: 'red',
+  warn: 'yellow',
+  info: 'green',
+  debug: 'blue',
+  http: 'magenta',
+};
+
+winston.addColors(colors);
+
+/* ===================== FORMATS ===================== */
+
+const consoleFormat = winston.format.combine(
+  winston.format.colorize({ all: true }),
+  winston.format.timestamp({ format: 'HH:mm:ss' }),
+  winston.format.metadata({ fillExcept: ['message', 'level', 'timestamp', 'label'] }),
+  winston.format.printf((info) => {
+    let out = `[${info.timestamp}] [${info.level}] ${info.message}`;
+    const meta = info.metadata as Record<string, unknown>;
+    if (meta && Object.keys(meta).length > 0) {
+      out += ` ${JSON.stringify(meta)}`;
+    }
+    return out;
+  }),
+);
+
+const fileFormat = winston.format.combine(
+  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+  winston.format.metadata({ fillExcept: ['message', 'level', 'timestamp', 'label'] }),
+  winston.format.errors({ stack: true }),
+  winston.format.json(),
+);
+
+/* ===================== TRANSPORTS ===================== */
+
+const transports: winston.transport[] = [
+  new winston.transports.Console({
+    format: consoleFormat,
+  }),
+
+  new DailyRotateFile({
+    filename: path.join('logs', 'combined', '%DATE%.log'),
+    datePattern: 'YYYY-MM-DD',
+    maxSize: '20m',
+    maxFiles: '14d',
+    format: fileFormat,
+  }),
+
+  new DailyRotateFile({
+    level: 'error',
+    filename: path.join('logs', 'errors', '%DATE%.log'),
+    datePattern: 'YYYY-MM-DD',
+    maxSize: '20m',
+    maxFiles: '14d',
+    format: fileFormat,
+  }),
+
+  new DailyRotateFile({
+    level: 'http',
+    filename: path.join('logs', 'http', '%DATE%.log'),
+    datePattern: 'YYYY-MM-DD',
+    maxSize: '20m',
+    maxFiles: '7d',
+    format: fileFormat,
+  }),
+];
+
+/* ===================== LOGGER ===================== */
+
+export const logger = winston.createLogger({
+  level: env.NODE_ENV === 'development' ? 'debug' : 'info',
+  levels,
+  transports,
+  exceptionHandlers: [
+    new DailyRotateFile({
+      filename: path.join('logs', 'exceptions', '%DATE%.log'),
+    }),
+  ],
+  rejectionHandlers: [
+    new DailyRotateFile({
+      filename: path.join('logs', 'rejections', '%DATE%.log'),
+    }),
+  ],
+});
