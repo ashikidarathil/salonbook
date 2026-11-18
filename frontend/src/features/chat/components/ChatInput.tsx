@@ -34,6 +34,7 @@ export function ChatInput({
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<number | null>(null);
+  const recordingStartRef = useRef(0);
 
   const handleSend = () => {
     if (!inputText.trim() || isClosed || !activeRoomId) return;
@@ -80,18 +81,30 @@ export function ChatInput({
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      // Chrome/Firefox record webm; Safari (Mac + iPhone) only records mp4
+      const preferred = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'].find(
+        (t) => MediaRecorder.isTypeSupported?.(t),
+      );
+      const mediaRecorder = new MediaRecorder(stream, preferred ? { mimeType: preferred } : {});
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
+      recordingStartRef.current = Date.now();
 
       mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) audioChunksRef.current.push(e.data);
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        await handleAudioUpload(audioBlob);
         stream.getTracks().forEach((track) => track.stop());
+        const mimeType = (mediaRecorder.mimeType || preferred || 'audio/webm').split(';')[0];
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        // Measured here: the recordingDuration state captured by this closure is stale (0)
+        const duration = Math.max(1, Math.round((Date.now() - recordingStartRef.current) / 1000));
+        if (audioBlob.size === 0) {
+          showError('Recording Failed', 'No audio was captured. Please try again.');
+          return;
+        }
+        await handleAudioUpload(audioBlob, mimeType, duration);
       };
 
       mediaRecorder.start();
@@ -113,10 +126,11 @@ export function ChatInput({
     }
   };
 
-  const handleAudioUpload = async (blob: Blob) => {
+  const handleAudioUpload = async (blob: Blob, mimeType: string, duration: number) => {
     try {
       setIsUploading(true);
-      const file = new File([blob], `voice_${Date.now()}.webm`, { type: 'audio/webm' });
+      const ext = mimeType.includes('mp4') ? 'm4a' : mimeType.includes('ogg') ? 'ogg' : 'webm';
+      const file = new File([blob], `voice_${Date.now()}.${ext}`, { type: mimeType });
       const mediaUrl = await onUploadMedia(file);
       if (!activeRoomId) return;
       onSendMessage({
@@ -125,7 +139,7 @@ export function ChatInput({
         senderType: isStylist ? SenderType.STYLIST : SenderType.USER,
         messageType: MessageType.VOICE,
         mediaUrl,
-        duration: recordingDuration,
+        duration,
       });
     } catch (err: unknown) {
       showError('Upload Failed', (err as Error).message || 'Voice upload failed');
