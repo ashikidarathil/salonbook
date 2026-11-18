@@ -5,6 +5,7 @@ import AppRoutes from '@/routes/AppRoutes';
 import { NotificationWrapper } from '@/features/notification/components/NotificationWrapper';
 import { ScrollToTop } from '@/components/common/ScrollToTop';
 import { ServerWakeBanner } from '@/components/common/ServerWakeBanner';
+import { Toaster } from 'sonner';
 
 export default function App() {
   const dispatch = useAppDispatch();
@@ -37,6 +38,7 @@ export default function App() {
       <ScrollToTop />
       <AppRoutes />
       <ServerWakeBanner />
+      <Toaster richColors position="top-center" />
     </NotificationWrapper>
   );
 }

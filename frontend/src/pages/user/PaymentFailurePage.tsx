@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ export default function PaymentFailurePage() {
   const navigate = useNavigate();
   const { bookingId } = useParams<{ bookingId: string }>();
   const dispatch = useAppDispatch();
+  const reason = (useLocation().state as { reason?: string } | null)?.reason;
   const { currentBooking: storedBooking } = useAppSelector((state) => state.booking);
   // The store keeps the last viewed item until the new one loads; only use it if it matches the URL
   const currentBooking = storedBooking?.id === bookingId ? storedBooking : null;
@@ -58,6 +59,11 @@ export default function PaymentFailurePage() {
                 We couldn't process your transaction. Please check your payment details and try
                 again.
               </p>
+              {reason && reason !== 'Payment failed' && (
+                <p className="mt-3 rounded-lg bg-red-50 px-4 py-2 text-sm font-medium text-red-700">
+                  {reason.replace(/^Payment failed:\s*/, 'Reason: ')}
+                </p>
+              )}
             </div>
 
             {/* Minimalist Booking ID */}
