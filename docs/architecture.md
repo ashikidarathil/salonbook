@@ -7,7 +7,7 @@ Browser ──► www.salonbook.online (Vercel, static React build)
    │
    │  HTTPS (axios, cookies)  +  WebSocket (socket.io)
    ▼
-Backend API (Render web service, Node/Express)  ──► MongoDB Atlas   (all data)
+Backend API (Render web service, Node/Express) — https://api.salonbook.online  ──► MongoDB Atlas   (all data)
    │                                            ──► Upstash Redis   (OTPs, cache, sessions)
    │                                            ──► Cloudinary      (images)
    │                                            ──► Razorpay        (payments)

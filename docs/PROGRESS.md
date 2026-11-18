@@ -1,7 +1,7 @@
 # Progress
 
 **Current:** Phase 3 — Fresh infrastructure
-**Next step:** 3.2 Upstash Redis, then 3.3–3.4 Cloudinary folder + Render env cleanup
+**Next step:** user tests login (laptop + iPhone Safari); then 3.7 Google/Razorpay check, 3.9 uptime ping, 3.10 smoke test
 
 ## Log
 - 2026-11-17 — Investigated live site. Data fails because the backend CORS check rejects
@@ -40,3 +40,13 @@
 - 2026-11-17 — Added Phase 8 (readable URLs / slugs) to the plan at the user's request. Also done since
   last entry: images seeded (PR #4), service detail crash fix (PR #5), demo reviews + 4 home stylists (PR #6,
   seed:reviews run on prod), detail-page loading fix (PR #7).
+- 2026-11-18 — 3.2 done: kept existing Upstash `saloon-redis` (free, Mumbai). Render `REDIS_URL` set to its
+  `rediss://` URL. Verified live: verify-reset-otp with fake data → 400 "Invalid or expired OTP" in 0.85s.
+- 2026-11-18 — 3.3–3.4 done: Render env has CLOUDINARY_FOLDER=salonbook, NODE_ENV=production, no AWS_*.
+  Verified live after redeploy: health 200, public endpoints 200, Redis OK.
+- 2026-11-18 — 3.5–3.6 done: Namecheap `api` A record (old AWS 13.206.83.223) replaced by CNAME →
+  salon-booking-backend-ra3n.onrender.com; Render custom domain verified + certificate issued (~9 min).
+  Vercel `VITE_API_BASE_URL=https://api.salonbook.online/api` (re-added as non-sensitive; Vercel won't save a
+  Sensitive var with a VITE_ prefix), `VITE_SOCKET_URL` deleted (falls back to API host). Render
+  `COOKIE_DOMAIN=.salonbook.online`. Verified live: bundle only references api.salonbook.online, CORS + preflight
+  OK, socket.io handshake 200, home top stylists + 20/20 service detail pages load in Chrome.
