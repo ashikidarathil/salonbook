@@ -45,3 +45,14 @@ declare global {
     Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
   }
 }
+
+/** Thrown when Razorpay reports a failed payment; the message is shown to the user as-is. */
+export class RazorpayPaymentError extends Error {}
+
+/** Builds a readable message from Razorpay's `payment.failed` response. */
+export const razorpayFailureMessage = (response?: unknown): string => {
+  const error = (response as { error?: { description?: string; reason?: string } } | undefined)
+    ?.error;
+  const detail = error?.description || error?.reason?.replace(/_/g, ' ');
+  return detail ? `Payment failed: ${detail}` : 'Payment failed';
+};

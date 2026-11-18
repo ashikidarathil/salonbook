@@ -1,7 +1,11 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import WalletService from '../../services/wallet.service';
 import { handleThunkError } from '../../common/utils/thunk.utils';
-import { loadRazorpayScript } from '../../common/utils/razorpay.utils';
+import {
+  loadRazorpayScript,
+  RazorpayPaymentError,
+  razorpayFailureMessage,
+} from '../../common/utils/razorpay.utils';
 import type { WalletResponse, WalletTransaction, VerifyTopupPayload } from './wallet.types';
 import { WALLET_MESSAGES, WALLET_CONSTANTS } from './wallet.constants';
 
@@ -53,6 +57,7 @@ export const topUpWallet = createAsyncThunk<
 
     return await new Promise<WalletResponse>((resolve, reject) => {
       let paymentFailed = false;
+      let failureMessage: string = WALLET_MESSAGES.PAYMENT_FAILED;
 
       const options = {
         key: order.keyId,
@@ -81,7 +86,7 @@ export const topUpWallet = createAsyncThunk<
         theme: { color: themeColor || WALLET_CONSTANTS.DEFAULT_THEME_COLOR },
         modal: {
           ondismiss: () => {
-            if (paymentFailed) reject(new Error(WALLET_MESSAGES.PAYMENT_FAILED));
+            if (paymentFailed) reject(new RazorpayPaymentError(failureMessage));
             else reject(new Error('DISMISSED'));
           },
         },
@@ -94,8 +99,10 @@ export const topUpWallet = createAsyncThunk<
       }
 
       const rzp = new WindowRazorpay(options);
-      rzp.on('payment.failed', () => {
+      rzp.on('payment.failed', (response) => {
         paymentFailed = true;
+        failureMessage = razorpayFailureMessage(response);
+        console.error('Razorpay payment failed', response);
       });
       rzp.open();
     });
@@ -103,6 +110,7 @@ export const topUpWallet = createAsyncThunk<
     if (error instanceof Error && error.message === 'DISMISSED') {
       return rejectWithValue('DISMISSED');
     }
+    if (error instanceof RazorpayPaymentError) return rejectWithValue(error.message);
     return handleThunkError(error, rejectWithValue, WALLET_MESSAGES.TOPUP_ERROR);
   }
 });
