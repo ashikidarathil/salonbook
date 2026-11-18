@@ -103,7 +103,8 @@ export default function CheckoutPage() {
         navigate(`/payment/success/${bookingId}`);
       }
     } else {
-      navigate(`/payment/failure/${bookingId}`);
+      // Pass Razorpay's reason so the failure page can show it
+      navigate(`/payment/failure/${bookingId}`, { state: { reason: result.payload } });
     }
   };
 
