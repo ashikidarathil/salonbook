@@ -1,7 +1,7 @@
 # Progress
 
 **Current:** Phase 3 — Fresh infrastructure
-**Next step:** user tests login (laptop + iPhone Safari); then 3.7 Google/Razorpay check, 3.9 uptime ping, 3.10 smoke test
+**Next step:** 3.10 full smoke test (new customer sign-up → book → pay → chat)
 
 ## Log
 - 2026-11-17 — Investigated live site. Data fails because the backend CORS check rejects
@@ -50,3 +50,8 @@
   Sensitive var with a VITE_ prefix), `VITE_SOCKET_URL` deleted (falls back to API host). Render
   `COOKIE_DOMAIN=.salonbook.online`. Verified live: bundle only references api.salonbook.online, CORS + preflight
   OK, socket.io handshake 200, home top stylists + 20/20 service detail pages load in Chrome.
+- 2026-11-18 — 3.7 done. Razorpay: live + local test keys were stale ("Authentication failed" on order
+  creation) → regenerated test keys in Razorpay, updated Render + local `.env.local`. Verified by user: booking
+  #BK-222079 CONFIRMED, advance ₹460 of ₹2,300 paid via Razorpay test UPI. Google login works on live.
+  PRs #10/#11 now surface Razorpay's failure reason in the UI and Render logs.
+- 2026-11-18 — 3.9: keep-awake GitHub Action pings /api/health every 10 min.
