@@ -4,8 +4,9 @@ import { slowRequests } from './slowRequests';
 
 export const BASE_URL =
   (import.meta.env.VITE_API_BASE_URL as string) ?? 'http://localhost:5001/api';
+// Strip only the trailing "/api": the host itself may contain "api" (https://api.salonbook.online/api)
 export const SOCKET_BASE_URL =
-  (import.meta.env.VITE_SOCKET_URL as string) ?? BASE_URL.replace('/api', '');
+  (import.meta.env.VITE_SOCKET_URL as string) || BASE_URL.replace(/\/api\/?$/, '');
 
 export const api = axios.create({
   baseURL: BASE_URL,
