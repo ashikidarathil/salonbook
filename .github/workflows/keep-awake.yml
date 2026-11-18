@@ -1,0 +1,26 @@
+name: Keep API awake
+
+# Render's free tier sleeps after 15 minutes without traffic, so the first visitor
+# waits ~50s. Pinging the health endpoint every 10 minutes keeps it warm.
+# Note: GitHub pauses scheduled workflows after 60 days with no repo activity.
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping /api/health
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Ping
+        run: |
+          for attempt in 1 2 3; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 https://api.salonbook.online/api/health || true)
+            echo "attempt $attempt: HTTP $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 15
+          done
+          echo "::error::API health check failed after 3 attempts"
+          exit 1

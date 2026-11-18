@@ -36,9 +36,9 @@ Tick `[x]` as each item is done. One sub-phase ≈ one PR. Update [PROGRESS.md](
 - [x] 3.4 Render: all env vars from the table, health check `/api/health`
 - [x] 3.5 DNS: remove old `api` A record, add `api` CNAME → Render; add custom domain on Render
 - [x] 3.6 Set `COOKIE_DOMAIN=.salonbook.online`; Vercel `VITE_API_BASE_URL=https://api.salonbook.online/api`; redeploy
-- [ ] 3.7 Google OAuth origins + Razorpay website updated
+- [x] 3.7 Google OAuth origins + Razorpay website updated
 - [x] 3.8 `npm run create-admin` then `npm run seed` against `salonbook_prod` (8 Kerala branches, 8 categories, 20 services, 16 stylists with Mon–Sat schedules) — see setup-guide.md §9
-- [ ] 3.9 Uptime ping (UptimeRobot/cron-job.org) on `/api/health` every 10 min
+- [x] 3.9 Uptime ping on `/api/health` every 10 min — GitHub Action `.github/workflows/keep-awake.yml` (no extra account; paused by GitHub after 60 days without repo activity)
 - [ ] 3.10 Smoke test: sign up, Google login, login on iPhone Safari, book, pay (test), chat
 
 ## Phase 4 — Finish Cloudinary migration
