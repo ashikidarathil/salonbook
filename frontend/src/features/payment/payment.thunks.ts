@@ -1,7 +1,11 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import PaymentService from '../../services/payment.service';
 import { handleThunkError } from '../../common/utils/thunk.utils';
-import { loadRazorpayScript } from '../../common/utils/razorpay.utils';
+import {
+  loadRazorpayScript,
+  RazorpayPaymentError,
+  razorpayFailureMessage,
+} from '../../common/utils/razorpay.utils';
 import { PAYMENT_MESSAGES } from './payment.constants';
 import type { OrderResponse, Payment, PaymentVerificationDto } from './payment.types';
 
@@ -62,6 +66,7 @@ export const processRazorpayPayment = createAsyncThunk<
 
     return await new Promise<{ status: 'success' | 'cancelled' }>((resolve, reject) => {
       let paymentFailed = false;
+      let failureMessage = 'Payment failed';
       const options = {
         key: order.keyId,
         amount: order.amount,
@@ -97,7 +102,7 @@ export const processRazorpayPayment = createAsyncThunk<
         modal: {
           ondismiss: () => {
             if (paymentFailed) {
-              reject(new Error('Payment failed'));
+              reject(new RazorpayPaymentError(failureMessage));
             } else {
               resolve({ status: 'cancelled' });
             }
@@ -106,12 +111,15 @@ export const processRazorpayPayment = createAsyncThunk<
       };
 
       const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', () => {
+      rzp.on('payment.failed', (response) => {
         paymentFailed = true;
+        failureMessage = razorpayFailureMessage(response);
+        console.error('Razorpay payment failed', response);
       });
       rzp.open();
     });
   } catch (error: unknown) {
+    if (error instanceof RazorpayPaymentError) return rejectWithValue(error.message);
     return handleThunkError(error, rejectWithValue, PM.CHECKOUT_ERROR);
   }
 });
@@ -141,6 +149,7 @@ export const processRemainingPayment = createAsyncThunk<
 
     return await new Promise<{ status: 'success' | 'cancelled' }>((resolve, reject) => {
       let paymentFailed = false;
+      let failureMessage = 'Payment failed';
 
       const options = {
         key: order.keyId,
@@ -171,19 +180,22 @@ export const processRemainingPayment = createAsyncThunk<
         theme: { color: '#7c3aed' },
         modal: {
           ondismiss: () => {
-            if (paymentFailed) reject(new Error('Payment failed'));
+            if (paymentFailed) reject(new RazorpayPaymentError(failureMessage));
             else resolve({ status: 'cancelled' });
           },
         },
       };
 
       const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', () => {
+      rzp.on('payment.failed', (response) => {
         paymentFailed = true;
+        failureMessage = razorpayFailureMessage(response);
+        console.error('Razorpay payment failed', response);
       });
       rzp.open();
     });
   } catch (error: unknown) {
+    if (error instanceof RazorpayPaymentError) return rejectWithValue(error.message);
     return handleThunkError(error, rejectWithValue, PM.REMAINING_PAY_FAILED);
   }
 });

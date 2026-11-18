@@ -1,4 +1,5 @@
 import { inject, injectable } from 'tsyringe';
+import { logError } from '../../../logger/log.util';
 import { IPaymentService } from './IPaymentService';
 import { IPaymentRepository } from '../repository/IPaymentRepository';
 import { IRazorpayService, RazorpayOrder } from './IRazorpayService';
@@ -90,7 +91,13 @@ export class PaymentService implements IPaymentService {
         currency: 'INR',
         keyId: env.RAZORPAY_KEY_ID,
       };
-    } catch {
+    } catch (err) {
+      // Razorpay puts the reason in err.error.description (e.g. "Authentication failed")
+      const reason = (err as { error?: { description?: string } })?.error?.description;
+      logError('Razorpay order creation failed', {
+        bookingId: dto.bookingId,
+        reason: reason || (err instanceof Error ? err.message : String(err)),
+      });
       throw new AppError(PAYMENT_MESSAGES.ORDER_CREATE_FAILED, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -338,7 +345,13 @@ export class PaymentService implements IPaymentService {
         currency: 'INR',
         keyId: env.RAZORPAY_KEY_ID,
       };
-    } catch {
+    } catch (err) {
+      // Razorpay puts the reason in err.error.description (e.g. "Authentication failed")
+      const reason = (err as { error?: { description?: string } })?.error?.description;
+      logError('Razorpay order creation failed', {
+        bookingId,
+        reason: reason || (err instanceof Error ? err.message : String(err)),
+      });
       throw new AppError(PAYMENT_MESSAGES.ORDER_CREATE_FAILED, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
