@@ -39,7 +39,7 @@ Tick `[x]` as each item is done. One sub-phase ≈ one PR. Update [PROGRESS.md](
 - [x] 3.7 Google OAuth origins + Razorpay website updated
 - [x] 3.8 `npm run create-admin` then `npm run seed` against `salonbook_prod` (8 Kerala branches, 8 categories, 20 services, 16 stylists with Mon–Sat schedules) — see setup-guide.md §9
 - [x] 3.9 Uptime ping on `/api/health` every 10 min — GitHub Action `.github/workflows/keep-awake.yml` (no extra account; paused by GitHub after 60 days without repo activity)
-- [ ] 3.10 Smoke test: sign up, Google login, login on iPhone Safari, book, pay (test), chat
+- [x] 3.10 Smoke test: sign up, Google login, login on iPhone Safari, book, pay (test), chat
 
 ## Phase 4 — Finish Cloudinary migration
 - [ ] 4.1 Remove `S3Service`, `aws-sdk`, `AWS_*` env vars
@@ -81,6 +81,15 @@ Replace database IDs in public URLs with readable names. Old ID links keep worki
 - [ ] 8.5 Frontend: all links and routes build URLs from slugs / booking numbers; an id URL redirects to the slug URL
 - [ ] 8.6 Admin: slug shown (and editable) on branch, service and stylist forms
 - [ ] 8.7 Seed scripts set slugs; verify every page in the browser (old id links redirect, new links load)
+
+## Phase 9 — WhatsApp-style chat (after Phase 8)
+- [ ] 9.1 Voice messages show a waveform (saved at record time; computed from the audio for old messages), progress fills while playing
+- [ ] 9.2 Live waveform + timer while recording; cancel / send controls
+- [ ] 9.3 Message ticks: ✓ sent, ✓✓ delivered, blue ✓✓ read — `deliveredAt` / `readAt` per message, live updates over socket.io
+- [ ] 9.4 Attach menu: Photo library / Take photo (camera) / Document
+- [ ] 9.5 Preview before sending, with optional caption
+- [ ] 9.6 Send multiple photos at once
+- [ ] 9.7 Full-screen image viewer (zoom, close, download)
 
 ## Phase 7 — New features
 - [ ] 7.1 _(list features here as we decide them)_
