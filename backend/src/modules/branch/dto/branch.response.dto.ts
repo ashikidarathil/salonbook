@@ -1,5 +1,6 @@
 export interface BranchResponseDto {
   id: string;
+  slug?: string;
   name: string;
   address: string;
   phone?: string;

@@ -1,5 +1,6 @@
 export interface ServiceResponseDto {
   id: string;
+  slug?: string;
   name: string;
   description?: string;
   categoryId: string;

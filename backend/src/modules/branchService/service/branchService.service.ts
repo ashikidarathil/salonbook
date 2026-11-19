@@ -218,7 +218,7 @@ export class BranchServiceService implements IBranchServiceService {
 
     const services = await ServiceModel.find({ status: 'ACTIVE', isDeleted: false })
       .select(
-        'name categoryId description imageUrl whatIncluded status rating reviewCount createdAt',
+        'name slug categoryId description imageUrl whatIncluded status rating reviewCount createdAt',
       )
       .populate({
         path: 'categoryId',
@@ -242,6 +242,7 @@ export class BranchServiceService implements IBranchServiceService {
       return BranchServiceMapper.toItem({
         branchId,
         serviceId: String(s._id),
+        serviceSlug: s.slug,
         name: s.name,
         categoryId: s.categoryId ? String(s.categoryId._id) : undefined,
         categoryName: s.categoryId?.name,
@@ -310,7 +311,7 @@ export class BranchServiceService implements IBranchServiceService {
 
     const service = (await ServiceModel.findById(serviceId)
       .select(
-        'name categoryId description imageUrl whatIncluded status isDeleted rating reviewCount',
+        'name slug categoryId description imageUrl whatIncluded status isDeleted rating reviewCount',
       )
       .populate({ path: 'categoryId', select: 'name status isDeleted' })
       .lean()) as ServiceLean | null;
@@ -344,6 +345,7 @@ export class BranchServiceService implements IBranchServiceService {
     return BranchServiceMapper.toItem({
       branchId,
       serviceId: String(service._id),
+      serviceSlug: service.slug,
       name: service.name ?? 'Service',
       categoryId: service.categoryId ? String(service.categoryId._id) : undefined,
       categoryName: service.categoryId?.name,

@@ -9,6 +9,7 @@ import { AppError } from '../../../common/errors/appError';
 import { HttpStatus } from '../../../common/enums/httpStatus.enum';
 import { BOOKING_MESSAGES } from '../constants/booking.messages';
 import { resolveStylistId } from './booking.helpers';
+import { looksLikeObjectId } from '../../../common/utils/slug.util';
 import { StylistBookingPaginationQueryDto } from '../dto/booking.request.dto';
 import { PaginatedResponse } from '../../../common/dto/pagination.response.dto';
 import { IUserRepository } from '../../auth/repository/IUserRepository';
@@ -28,12 +29,23 @@ export class BookingQueryService implements IBookingQueryService {
     private readonly userRepo: IUserRepository,
   ) {}
 
-  async getBookingDetails(bookingId: string): Promise<BookingResponseDto> {
-    const booking = await this.bookingRepo.findById(bookingId);
+  /** Accepts the booking id or its booking number ("BK-7F3A21"). */
+  async getBookingDetails(
+    idOrNumber: string,
+    viewer?: { userId: string; role?: string },
+  ): Promise<BookingResponseDto> {
+    const booking = looksLikeObjectId(idOrNumber)
+      ? await this.bookingRepo.findById(idOrNumber)
+      : await this.bookingRepo.findOne({ bookingNumber: idOrNumber.trim().toUpperCase() });
     if (!booking) {
       throw new AppError(BOOKING_MESSAGES.NOT_FOUND, HttpStatus.NOT_FOUND);
     }
-    return BookingMapper.toResponse(booking);
+    const dto = BookingMapper.toResponse(booking);
+    // Customers may only open their own bookings (booking numbers are easy to guess)
+    if (viewer?.role === 'USER' && String(dto.userId) !== String(viewer.userId)) {
+      throw new AppError(BOOKING_MESSAGES.NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    return dto;
   }
 
   async listUserBookings(userId: string): Promise<BookingResponseDto[]> {

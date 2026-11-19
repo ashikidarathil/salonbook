@@ -5,6 +5,7 @@ export class ServiceMapper {
   static toDto(doc: ServiceDocument): ServiceResponseDto {
     return {
       id: doc._id.toString(),
+      slug: doc.slug,
       name: doc.name,
       description: doc.description,
       categoryId: doc.categoryId?._id ? doc.categoryId._id.toString() : doc.categoryId?.toString(),

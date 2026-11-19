@@ -1,7 +1,7 @@
 # Progress
 
-**Current:** Phase 4 done → next Phase 8 (readable URLs), then Phase 9 (WhatsApp-style chat)
-**Next step:** Phase 8.1 slugs on branch/service/stylist
+**Current:** Phase 8 — readable URLs (backend done, frontend next)
+**Next step:** merge backend PR → run migrate:slugs on prod → 8.5 frontend
 
 ## Log
 - 2026-11-17 — Investigated live site. Data fails because the backend CORS check rejects
@@ -62,3 +62,6 @@
   EXIF rotation; chat photos capped at 1600px; old-image deletion handles transformed URLs and never fails an
   upload. Verified against Cloudinary dev folder: 4000x3000 rotated phone photo → 1200x1600 upright WebP;
   profile/service/chat/voice upload + delete all confirmed.
+- 2026-11-19 — Phase 8 backend: slugs + /api/resolve + booking-by-number with owner check, migrate:slugs
+  script. 16/16 API checks on a temp DB (slugs, resolve by slug/id/case, 404/400, kochi-2 on duplicate,
+  booking by number, other customer blocked, admin allowed); top stylists/services carry slugs.

@@ -74,10 +74,10 @@ Replace database IDs in public URLs with readable names. Old ID links keep worki
 | Branch pages | `/branches/6afc87…cb0/...` | `/branches/kochi/...` |
 | Booking / checkout / payment | `/bookings/6afc87…` | `/bookings/BK-7F3A21` |
 
-- [ ] 8.1 Backend: `slug` field (unique, indexed) on Branch, Service, Stylist; auto-generated from the name on create/rename (`Men's Haircut` → `mens-haircut`, duplicates get `-2`)
-- [ ] 8.2 Backend: migration script to add slugs to existing records (`npm run migrate:slugs`), run on prod
-- [ ] 8.3 Backend: public endpoints accept a slug **or** an id (old links and bookmarks keep working)
-- [ ] 8.4 Backend: booking endpoints accept the booking number (`BK-XXXXXX`) as well as the id
+- [x] 8.1 Backend: `slug` field (unique, sparse) on Branch, Service, Stylist; set from the name on create (`Men's Haircut` → `mens-haircut`, duplicates get `-2`), then kept stable
+- [ ] 8.2 Backend: `npm run migrate:slugs` (ready, tested) — run on prod after deploy
+- [x] 8.3 Backend: `GET /api/resolve?branch=&service=&stylist=` turns slugs **or** old ids into ids + canonical slugs; responses include `slug` / `serviceSlug`
+- [x] 8.4 Backend: booking detail accepts the booking number (`BK-XXXXXX`) or id; customers can only open their own bookings
 - [ ] 8.5 Frontend: all links and routes build URLs from slugs / booking numbers; an id URL redirects to the slug URL
 - [ ] 8.6 Admin: slug shown (and editable) on branch, service and stylist forms
 - [ ] 8.7 Seed scripts set slugs; verify every page in the browser (old id links redirect, new links load)

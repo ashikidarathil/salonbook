@@ -8,6 +8,7 @@ export class BranchMapper {
   ): BranchResponseDto & { distance?: number } {
     return {
       id: branch._id.toString(),
+      slug: branch.slug,
       name: branch.name,
       address: branch.address,
       phone: branch.phone,

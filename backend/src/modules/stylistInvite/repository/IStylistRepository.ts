@@ -13,6 +13,7 @@ export interface IWeeklyScheduleItem {
 
 export interface StylistListItem {
   id: string;
+  slug?: string;
   userId: string;
   name: string;
   email?: string;
