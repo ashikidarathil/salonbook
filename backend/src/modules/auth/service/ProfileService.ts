@@ -51,8 +51,13 @@ export class ProfileService implements IProfileService {
       role: user.role,
     });
 
+    // The new picture is already uploaded; failing to remove the old one must not fail the request
     if (user.profilePicture) {
-      await this.imageService.deleteProfilePicture(user.profilePicture);
+      try {
+        await this.imageService.deleteProfilePicture(user.profilePicture);
+      } catch (error) {
+        console.error('Failed to delete old profile picture:', error);
+      }
     }
 
     await this.userRepository.updateProfilePicture(userId, uploadedUrl);

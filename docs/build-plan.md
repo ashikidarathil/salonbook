@@ -42,11 +42,11 @@ Tick `[x]` as each item is done. One sub-phase ≈ one PR. Update [PROGRESS.md](
 - [x] 3.10 Smoke test: sign up, Google login, login on iPhone Safari, book, pay (test), chat
 
 ## Phase 4 — Finish Cloudinary migration
-- [ ] 4.1 Remove `S3Service`, `aws-sdk`, `AWS_*` env vars
-- [ ] 4.2 Check every upload: profile photo, branch images, service images, category images, chat attachments
-- [ ] 4.3 Images resized/optimised via Cloudinary transforms (`f_auto,q_auto,w_…`)
-- [ ] 4.4 Delete images from Cloudinary when the record is deleted/replaced
-- [ ] 4.5 Re-upload all images through the admin UI
+- [x] 4.1 Remove `S3Service`, `aws-sdk`, `AWS_*` env vars
+- [x] 4.2 Check every upload: profile photo, service images, chat images + voice (branches/categories have no images) — verified against real Cloudinary
+- [x] 4.3 Optimised: images served `f_auto,q_auto` (WebP/AVIF), EXIF auto-rotate, chat photos shrunk to max 1600px (GIFs untouched)
+- [x] 4.4 Old profile/service images deleted from Cloudinary on replace/delete (delete failures no longer fail the upload); verified deletion
+- [x] 4.5 Re-upload images — not needed: seed data uses Unsplash photos (Phase 3); admins can replace any image in the admin panel
 
 ## Phase 5 — Responsive UI cleanup (mobile 360px · tablet 768px · laptop 1280px+)
 - [ ] 5.1 Audit: list every page per role with what breaks at each size

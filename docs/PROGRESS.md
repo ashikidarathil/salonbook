@@ -1,7 +1,7 @@
 # Progress
 
-**Current:** Phase 3 done → next Phase 4 (Cloudinary cleanup) / Phase 8 (readable URLs); Phase 9 after 8
-**Next step:** pick Phase 4 or Phase 8
+**Current:** Phase 4 done → next Phase 8 (readable URLs), then Phase 9 (WhatsApp-style chat)
+**Next step:** Phase 8.1 slugs on branch/service/stylist
 
 ## Log
 - 2026-11-17 — Investigated live site. Data fails because the backend CORS check rejects
@@ -58,3 +58,7 @@
 - 2026-11-19 — 3.10 done: full flow verified by user on live (login, book, Razorpay pay, chat text/image/voice).
   Fixes on the way: chat socket URL broke on api.* domain (#13), voice format + real duration (#14).
   Phase 3 complete. Added Phase 9 (WhatsApp-style chat: waveforms, ticks, image attach/preview/viewer) — to do after Phase 8.
+- 2026-11-19 — Phase 4 done: removed S3Service + aws-sdk + AWS_* env; images delivered f_auto,q_auto with
+  EXIF rotation; chat photos capped at 1600px; old-image deletion handles transformed URLs and never fails an
+  upload. Verified against Cloudinary dev folder: 4000x3000 rotated phone photo → 1200x1600 upright WebP;
+  profile/service/chat/voice upload + delete all confirmed.
