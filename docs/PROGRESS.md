@@ -1,7 +1,7 @@
 # Progress
 
-**Current:** Phase 3 — Fresh infrastructure
-**Next step:** 3.10 full smoke test (new customer sign-up → book → pay → chat)
+**Current:** Phase 3 done → next Phase 4 (Cloudinary cleanup) / Phase 8 (readable URLs); Phase 9 after 8
+**Next step:** pick Phase 4 or Phase 8
 
 ## Log
 - 2026-11-17 — Investigated live site. Data fails because the backend CORS check rejects
@@ -55,3 +55,6 @@
   #BK-222079 CONFIRMED, advance ₹460 of ₹2,300 paid via Razorpay test UPI. Google login works on live.
   PRs #10/#11 now surface Razorpay's failure reason in the UI and Render logs.
 - 2026-11-18 — 3.9: keep-awake GitHub Action pings /api/health every 10 min.
+- 2026-11-19 — 3.10 done: full flow verified by user on live (login, book, Razorpay pay, chat text/image/voice).
+  Fixes on the way: chat socket URL broke on api.* domain (#13), voice format + real duration (#14).
+  Phase 3 complete. Added Phase 9 (WhatsApp-style chat: waveforms, ticks, image attach/preview/viewer) — to do after Phase 8.
