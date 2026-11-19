@@ -7,6 +7,11 @@ import { IImageService, UploadImageParams, UploadAudioParams } from './IImageSer
 
 type ResourceType = 'image' | 'video' | 'raw';
 
+// Served images get the best format (WebP/AVIF) and quality for each browser automatically
+const IMAGE_DELIVERY = 'f_auto,q_auto';
+// A Cloudinary transformation path segment, e.g. "f_auto,q_auto" or "w_400,c_fill"
+const TRANSFORMATION_SEGMENT = /^[a-z]{1,3}_[^/,]+(,[a-z]{1,3}_[^/,]+)*$/;
+
 @injectable()
 export class CloudinaryService implements IImageService {
   private rootFolder: string;
@@ -40,23 +45,32 @@ export class CloudinaryService implements IImageService {
           if (error || !result) {
             return reject(error ?? new Error('Cloudinary upload failed'));
           }
-          resolve(result.secure_url);
+          resolve(
+            resourceType === 'image'
+              ? result.secure_url.replace('/upload/', `/upload/${IMAGE_DELIVERY}/`)
+              : result.secure_url,
+          );
         },
       );
       stream.end(buffer);
     });
   }
 
-  // URLs look like https://res.cloudinary.com/<cloud>/<type>/upload/v123/<folder>/<id>.<ext>
+  // URLs look like https://res.cloudinary.com/<cloud>/<type>/upload/[<transformations>/][v123/]<folder>/<id>.<ext>
   private async deleteByUrl(url: string): Promise<void> {
     const match = url.match(
-      /^https?:\/\/res\.cloudinary\.com\/[^/]+\/(image|video|raw)\/upload\/(?:v\d+\/)?(.+?)(?:\.[^./]+)?$/,
+      /^https?:\/\/res\.cloudinary\.com\/[^/]+\/(image|video|raw)\/upload\/(.+)$/,
     );
 
-    // Skip anything not hosted on Cloudinary (old S3 links, Google avatars, etc.)
+    // Skip anything not hosted on Cloudinary (seed/Unsplash links, Google avatars, etc.)
     if (!match) return;
 
-    const [, resourceType, publicId] = match;
+    const [, resourceType, rest] = match;
+    const segments = rest.split('/');
+    while (segments.length > 1 && TRANSFORMATION_SEGMENT.test(segments[0])) segments.shift();
+    if (segments.length > 1 && /^v\d+$/.test(segments[0])) segments.shift();
+    const publicId = segments.join('/').replace(/\.[^./]+$/, '');
+
     await cloudinary.uploader.destroy(publicId, { resource_type: resourceType as ResourceType });
   }
 
@@ -64,6 +78,7 @@ export class CloudinaryService implements IImageService {
     const { file, userId, role } = params;
 
     const optimizedBuffer = await sharp(file.buffer)
+      .rotate() // apply the phone's EXIF orientation so photos aren't sideways
       .resize(400, 400, { fit: 'cover', position: 'center' })
       .jpeg({ quality: 80 })
       .toBuffer();
@@ -79,6 +94,7 @@ export class CloudinaryService implements IImageService {
     const { file, serviceId } = params;
 
     const optimizedBuffer = await sharp(file.buffer)
+      .rotate()
       .resize(800, 600, { fit: 'cover', position: 'center' })
       .jpeg({ quality: 85 })
       .toBuffer();
@@ -101,7 +117,16 @@ export class CloudinaryService implements IImageService {
 
   async uploadChatImage(params: UploadAudioParams): Promise<string> {
     const { file, roomId, senderId } = params;
-    return this.upload(file.buffer, `chat/images/${roomId}/${senderId}`, 'image', {
+    // Phone photos can be 5-10 MB: fix orientation and shrink to max 1600px. GIFs keep their animation.
+    const buffer =
+      file.mimetype === 'image/gif'
+        ? file.buffer
+        : await sharp(file.buffer)
+            .rotate()
+            .resize(1600, 1600, { fit: 'inside', withoutEnlargement: true })
+            .jpeg({ quality: 80 })
+            .toBuffer();
+    return this.upload(buffer, `chat/images/${roomId}/${senderId}`, 'image', {
       roomId,
       senderId,
     });

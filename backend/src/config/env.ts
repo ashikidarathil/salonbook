@@ -40,11 +40,6 @@ export const env = {
   CLOUDINARY_API_KEY: requireEnv('CLOUDINARY_API_KEY'),
   CLOUDINARY_API_SECRET: requireEnv('CLOUDINARY_API_SECRET'),
   CLOUDINARY_FOLDER: process.env.CLOUDINARY_FOLDER || 'saloon-booking',
-  // Legacy S3 settings, only used by S3Service
-  AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
-  AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
-  AWS_REGION: process.env.AWS_REGION,
-  AWS_S3_BUCKET_NAME: process.env.AWS_S3_BUCKET_NAME,
   RAZORPAY_KEY_ID: requireEnv('RAZORPAY_KEY_ID'),
   RAZORPAY_KEY_SECRET: requireEnv('RAZORPAY_KEY_SECRET'),
 };
