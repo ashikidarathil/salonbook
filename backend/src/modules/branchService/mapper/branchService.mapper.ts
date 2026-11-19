@@ -1,6 +1,7 @@
 export type BranchServiceItemResponse = {
   branchId: string;
   serviceId: string;
+  serviceSlug?: string;
   name: string;
   categoryId?: string;
   categoryName?: string;

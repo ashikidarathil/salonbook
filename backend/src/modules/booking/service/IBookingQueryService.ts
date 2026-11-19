@@ -3,7 +3,10 @@ import { StylistBookingPaginationQueryDto } from '../dto/booking.request.dto';
 import { PaginatedResponse } from '../../../common/dto/pagination.response.dto';
 
 export interface IBookingQueryService {
-  getBookingDetails(bookingId: string): Promise<BookingResponseDto>;
+  getBookingDetails(
+    idOrNumber: string,
+    viewer?: { userId: string; role?: string },
+  ): Promise<BookingResponseDto>;
   listUserBookings(userId: string): Promise<BookingResponseDto[]>;
   listAllBookings(branchId?: string, date?: string): Promise<BookingResponseDto[]>;
   listStylistBookings(

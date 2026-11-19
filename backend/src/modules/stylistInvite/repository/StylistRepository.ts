@@ -75,6 +75,7 @@ export class StylistRepository implements IStylistRepository {
   ): StylistListItem {
     return {
       id: stylist._id.toString(),
+      slug: stylist.slug,
       userId: stylist.userId.toString(),
       name: user?.name ?? 'Pending Registration',
       email: user?.email,

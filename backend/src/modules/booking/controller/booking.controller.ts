@@ -58,7 +58,11 @@ export class BookingController implements IBookingController {
 
   getDetails = async (req: Request, res: Response): Promise<Response> => {
     const { id } = req.params;
-    const booking = await this.bookingService.getBookingDetails(id);
+    const auth = this.extractAuth(req);
+    const booking = await this.bookingService.getBookingDetails(id, {
+      userId: auth.userId,
+      role: auth.role,
+    });
     return ApiResponse.success(res, booking, BOOKING_MESSAGES.FETCHED);
   };
 

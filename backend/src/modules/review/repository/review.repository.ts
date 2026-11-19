@@ -187,6 +187,7 @@ export class ReviewRepository
         $project: {
           _id: 0,
           stylistId: '$_id',
+          slug: '$stylistInfo.slug',
           averageRating: 1,
           totalReviews: 1,
           stylistName: '$userInfo.name',
@@ -237,6 +238,7 @@ export class ReviewRepository
         $project: {
           _id: 0,
           serviceId: '$_id',
+          slug: '$serviceInfo.slug',
           averageRating: 1,
           totalReviews: 1,
           serviceName: '$serviceInfo.name',

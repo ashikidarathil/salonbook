@@ -55,6 +55,7 @@ export type ReviewResponseDto = z.infer<typeof ReviewResponseSchema>;
 
 export const TopStylistSchema = z.object({
   stylistId: z.string(),
+  slug: z.string().optional(),
   stylistName: z.string(),
   avatar: z.string().optional(),
   specialization: z.string().optional(),
@@ -67,6 +68,7 @@ export type TopStylistDto = z.infer<typeof TopStylistSchema>;
 
 export const TopServiceSchema = z.object({
   serviceId: z.string(),
+  slug: z.string().optional(),
   serviceName: z.string(),
   imageUrl: z.string().optional(),
   description: z.string().optional(),

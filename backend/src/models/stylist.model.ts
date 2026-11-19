@@ -1,7 +1,9 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, type Model } from 'mongoose';
+import { uniqueSlug } from '../common/utils/slug.util';
 
 export interface StylistDocument extends Document {
   userId: mongoose.Types.ObjectId;
+  slug?: string;
   specialization: string;
   experience: number;
   rating: number;
@@ -21,6 +23,7 @@ export type IStylist = StylistDocument;
 const StylistSchema = new Schema<StylistDocument>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+    slug: { type: String, trim: true, lowercase: true, unique: true, sparse: true },
     specialization: { type: String, required: true, trim: true },
     experience: { type: Number, required: true, min: 0 },
     rating: { type: Number, default: 0 },
@@ -39,6 +42,22 @@ const StylistSchema = new Schema<StylistDocument>(
   },
   { timestamps: true },
 );
+
+// Readable URL id from the stylist's name ("arjun-menon"). Set once, kept stable.
+StylistSchema.pre('validate', async function () {
+  if (this.slug || !this.userId) return;
+  const user = await mongoose
+    .model('User')
+    .findById(this.userId)
+    .select('name')
+    .lean<{ name?: string }>();
+  if (!user?.name) return;
+  this.slug = await uniqueSlug(
+    this.constructor as Model<StylistDocument>,
+    user.name,
+    this._id as never,
+  );
+});
 
 export const StylistModel =
   mongoose.models.Stylist || mongoose.model<StylistDocument>('Stylist', StylistSchema);

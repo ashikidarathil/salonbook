@@ -1,10 +1,12 @@
-import mongoose, { Schema, Types } from 'mongoose';
+import mongoose, { Schema, Types, type Model } from 'mongoose';
+import { uniqueSlug } from '../common/utils/slug.util';
 import { CategoryStatus } from './category.model';
 
 export type ServiceStatus = 'ACTIVE' | 'INACTIVE';
 
 export interface ServiceDocument extends mongoose.Document {
   name: string;
+  slug?: string;
   description?: string;
   categoryId: mongoose.Types.ObjectId;
   imageUrl?: string;
@@ -22,6 +24,7 @@ export interface ServiceDocument extends mongoose.Document {
 export type ServiceLean = {
   _id: Types.ObjectId;
   name: string;
+  slug?: string;
   categoryId?: {
     _id: Types.ObjectId;
     name: string;
@@ -41,6 +44,7 @@ export type ServiceLean = {
 const ServiceSchema = new Schema<ServiceDocument>(
   {
     name: { type: String, required: true, trim: true, unique: true },
+    slug: { type: String, trim: true, lowercase: true, unique: true, sparse: true },
     description: { type: String, trim: true },
     categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
     imageUrl: { type: String, default: null },
@@ -65,5 +69,16 @@ ServiceSchema.index(
   },
 );
 ServiceSchema.index({ name: 'text', description: 'text' });
+
+// Readable URL id ("kochi", "mens-haircut"). Set once from the name and kept stable
+// so links don't break on rename; admins can change it explicitly.
+ServiceSchema.pre('validate', async function () {
+  if (this.slug) return;
+  this.slug = await uniqueSlug(
+    this.constructor as Model<ServiceDocument>,
+    this.name,
+    this._id as never,
+  );
+});
 
 export const ServiceModel = mongoose.model<ServiceDocument>('Service', ServiceSchema);

@@ -32,6 +32,7 @@ import paymentRoutes from './modules/payment/routes/payment.routes';
 import chatRoutes from './modules/chat/routes/chat.routes';
 import notificationRoutes from './modules/notification/routes/notification.routes';
 import reviewRoutes from './modules/review/routes/review.routes';
+import lookupRoutes from './modules/lookup/lookup.routes';
 
 import { globalErrorHandler } from './common/errors/errorHandler';
 import { loggerMiddleware } from './common/middleware/logger.middleware';
@@ -99,6 +100,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api', chatRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api', lookupRoutes);
 app.use('/api', authMiddleware, blockMiddleware);
 
 app.use(globalErrorHandler);

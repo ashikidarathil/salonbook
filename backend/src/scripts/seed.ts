@@ -38,6 +38,7 @@ import {
   WORKING_DAYS,
 } from './seedData';
 import { serviceImages, stylistImages } from './seedImages';
+import { ensureSlugs } from './ensureSlugs';
 
 const upsert = { upsert: true, new: true, setDefaultsOnInsert: true } as const;
 // Only (re)place images that are empty or still a seed image, never ones uploaded in the admin panel
@@ -228,6 +229,9 @@ async function main(): Promise<void> {
       );
     }
   }
+
+  // Upserts skip model hooks, so give new records their readable URL slugs here
+  await ensureSlugs();
 
   console.log(
     `Done: ${categories.length} categories, ${services.length} services, ` +

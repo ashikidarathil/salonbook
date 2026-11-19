@@ -327,8 +327,11 @@ export class BookingService implements IBookingService {
     return BookingMapper.toResponse(updated);
   }
 
-  async getBookingDetails(bookingId: string): Promise<BookingResponseDto> {
-    return this.bookingQueryService.getBookingDetails(bookingId);
+  async getBookingDetails(
+    idOrNumber: string,
+    viewer?: { userId: string; role?: string },
+  ): Promise<BookingResponseDto> {
+    return this.bookingQueryService.getBookingDetails(idOrNumber, viewer);
   }
 
   async listUserBookings(userId: string): Promise<BookingResponseDto[]> {
