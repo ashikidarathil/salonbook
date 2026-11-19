@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { matchesBookingRef } from '@/common/utils/bookingRef';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchBookingDetails, updateBookingStatus } from '@/features/booking/booking.thunks';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,7 +32,9 @@ const getStatusColor = (status: BookingStatus) => {
 };
 
 export default function AdminBookingDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  // URL holds the booking number (or the id, for old links)
+  const { id: ref } = useParams<{ id: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const {
@@ -40,11 +43,18 @@ export default function AdminBookingDetailPage() {
     error,
   } = useAppSelector((state) => state.booking);
   // The store keeps the last viewed item until the new one loads; only use it if it matches the URL
-  const currentBooking = storedBooking?.id === id ? storedBooking : null;
+  const currentBooking = matchesBookingRef(storedBooking, ref) ? storedBooking : null;
+
+  // Old links use the id: switch the URL to the readable booking number once loaded
+  useEffect(() => {
+    if (currentBooking?.bookingNumber && ref && ref !== currentBooking.bookingNumber) {
+      navigate(location.pathname.replace(ref, currentBooking.bookingNumber), { replace: true });
+    }
+  }, [currentBooking?.bookingNumber, ref, location.pathname, navigate]);
 
   useEffect(() => {
-    if (id) dispatch(fetchBookingDetails(id));
-  }, [id, dispatch]);
+    if (ref) dispatch(fetchBookingDetails(ref));
+  }, [ref, dispatch]);
 
   const handleStatusUpdate = async (status: BookingStatus, label: string) => {
     if (!currentBooking) return;
@@ -87,7 +97,7 @@ export default function AdminBookingDetailPage() {
       loading={loading || (!currentBooking && !error)}
       error={error}
       data={currentBooking}
-      resetError={() => id && dispatch(fetchBookingDetails(id))}
+      resetError={() => ref && dispatch(fetchBookingDetails(ref))}
       backPath="/admin/bookings"
     >
       <div className="p-6 mx-auto space-y-6 max-w-8xl rounded-lg bg-muted/40 border border-border/40 transition-all hover:shadow-md text-foreground">

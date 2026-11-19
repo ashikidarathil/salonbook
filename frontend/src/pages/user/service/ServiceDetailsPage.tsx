@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useResolveRefs } from '@/hooks/useResolveRefs';
 import {
   fetchBranchServicePublicDetails,
   fetchBranchServicesPublicPaginated,
@@ -32,10 +33,24 @@ import { cn } from '@/lib/utils';
 export default function ServiceDetailsPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { branchId, serviceId } = useParams<{
+  // URL parts are readable slugs (/branches/kochi/services/mens-haircut) or old ids
+  const { branchId: branchRef, serviceId: serviceRef } = useParams<{
     branchId: string;
     serviceId: string;
   }>();
+  const resolved = useResolveRefs({ branch: branchRef, service: serviceRef });
+  const branchId = resolved.data?.branch?.id;
+  const serviceId = resolved.data?.service?.id;
+  const branchSlug = resolved.data?.branch?.slug || branchId;
+
+  // Old id links (or other casing) move to the canonical slug URL
+  useEffect(() => {
+    const b = resolved.data?.branch;
+    const s = resolved.data?.service;
+    if (b?.slug && s?.slug && (branchRef !== b.slug || serviceRef !== s.slug)) {
+      navigate(`/branches/${b.slug}/services/${s.slug}`, { replace: true });
+    }
+  }, [resolved.data, branchRef, serviceRef, navigate]);
 
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const {
@@ -64,10 +79,10 @@ export default function ServiceDetailsPage() {
     const savedBranch = localStorage.getItem('selectedBranch');
 
     if (!savedBranch) {
-      localStorage.setItem('returnPath', `/branches/${branchId}/services/${serviceId}`);
+      localStorage.setItem('returnPath', `/branches/${branchRef}/services/${serviceRef}`);
       navigate('/branches');
     }
-  }, [navigate, branchId, serviceId]);
+  }, [navigate, branchRef, serviceRef]);
 
   useEffect(() => {
     if (branchId && serviceId) {
@@ -163,8 +178,8 @@ export default function ServiceDetailsPage() {
       <Header />
       <main className="flex-1">
         <LoadingGate
-          loading={loading || (!currentService && !error)}
-          error={error}
+          loading={!resolved.error && (loading || (!currentService && !error))}
+          error={resolved.error || error}
           data={currentService}
           resetError={() => dispatch(clearError())}
           backPath="/services"
@@ -484,7 +499,9 @@ export default function ServiceDetailsPage() {
                               <Button
                                 variant="outline"
                                 onClick={() => {
-                                  navigate(`/branches/${branchId}/services/${service.serviceId}`);
+                                  navigate(
+                                    `/branches/${branchSlug}/services/${service.serviceSlug || service.serviceId}`,
+                                  );
                                   window.scrollTo(0, 0);
                                 }}
                                 className="border-border hover:bg-primary hover:text-white"

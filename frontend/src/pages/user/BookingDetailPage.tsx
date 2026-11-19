@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { matchesBookingRef } from '@/common/utils/bookingRef';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchBookingDetails, cancelBooking } from '@/features/booking/booking.thunks';
 import { fetchBranchById } from '@/features/branch/branch.thunks';
@@ -56,7 +57,9 @@ const StatusIcon: Record<string, string> = {
 };
 
 export default function BookingDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  // URL holds the booking number (or the id, for old links)
+  const { id: ref } = useParams<{ id: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const {
@@ -65,7 +68,15 @@ export default function BookingDetailPage() {
     error,
   } = useAppSelector((state) => state.booking);
   // The store keeps the last viewed item until the new one loads; only use it if it matches the URL
-  const currentBooking = storedBooking?.id === id ? storedBooking : null;
+  const currentBooking = matchesBookingRef(storedBooking, ref) ? storedBooking : null;
+
+  // Old links use the id: switch the URL to the readable booking number once loaded
+  useEffect(() => {
+    if (currentBooking?.bookingNumber && ref && ref !== currentBooking.bookingNumber) {
+      navigate(location.pathname.replace(ref, currentBooking.bookingNumber), { replace: true });
+    }
+  }, [currentBooking?.bookingNumber, ref, location.pathname, navigate]);
+
   const { selectedBranch, loading: branchLoading } = useAppSelector((state) => state.branch);
   const { loading: paymentLoading } = useAppSelector((state) => state.payment);
   const { wallet } = useAppSelector((state) => state.wallet);
@@ -73,8 +84,8 @@ export default function BookingDetailPage() {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   useEffect(() => {
-    if (id) dispatch(fetchBookingDetails(id));
-  }, [id, dispatch]);
+    if (ref) dispatch(fetchBookingDetails(ref));
+  }, [ref, dispatch]);
 
   useEffect(() => {
     dispatch(fetchMyWallet());

@@ -2,6 +2,7 @@ import type { PaginationMetadata } from '@/common/types/pagination.metadata';
 
 export interface Branch {
   id: string;
+  slug?: string;
   name: string;
   address: string;
   phone?: string;

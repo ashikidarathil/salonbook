@@ -1,3 +1,4 @@
+import { bookingRef } from '@/common/utils/bookingRef';
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
@@ -293,7 +294,7 @@ export default function StylistAppointmentsPage() {
                   <Button
                     variant="outline"
                     className="w-full justify-start gap-2 h-10"
-                    onClick={() => navigate(`/stylist/appointments/${booking.id}`)}
+                    onClick={() => navigate(`/stylist/appointments/${bookingRef(booking)}`)}
                   >
                     <Icon icon="solar:document-text-linear" className="size-4" />
                     View Details

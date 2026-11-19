@@ -40,6 +40,7 @@ export interface ReviewPaginationParams {
 
 export interface TopStylist {
   stylistId: string;
+  slug?: string;
   stylistName: string;
   avatar?: string;
   averageRating: number;
