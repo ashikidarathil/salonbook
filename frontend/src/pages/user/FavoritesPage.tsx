@@ -108,7 +108,12 @@ export default function FavoritesPage() {
                   <Button
                     className="w-full"
                     onClick={() =>
-                      navigate(APP_ROUTES.USER.STYLIST_DETAILS.replace(':stylistId', stylist.id))
+                      navigate(
+                        APP_ROUTES.USER.STYLIST_DETAILS.replace(
+                          ':stylistId',
+                          (stylist as { slug?: string }).slug || stylist.id,
+                        ),
+                      )
                     }
                   >
                     View & Book

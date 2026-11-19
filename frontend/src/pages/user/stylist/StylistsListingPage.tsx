@@ -321,7 +321,12 @@ export default function StylistsListingPage() {
                       variant="outline"
                       className="flex-1 border-border/60"
                       onClick={() =>
-                        navigate(APP_ROUTES.USER.STYLIST_DETAILS.replace(':stylistId', stylist.id))
+                        navigate(
+                          APP_ROUTES.USER.STYLIST_DETAILS.replace(
+                            ':stylistId',
+                            stylist.slug || stylist.id,
+                          ),
+                        )
                       }
                     >
                       View Profile
@@ -329,7 +334,12 @@ export default function StylistsListingPage() {
                     <Button
                       className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
                       onClick={() =>
-                        navigate(APP_ROUTES.USER.STYLIST_DETAILS.replace(':stylistId', stylist.id))
+                        navigate(
+                          APP_ROUTES.USER.STYLIST_DETAILS.replace(
+                            ':stylistId',
+                            stylist.slug || stylist.id,
+                          ),
+                        )
                       }
                     >
                       Book Now

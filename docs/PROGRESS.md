@@ -1,7 +1,7 @@
 # Progress
 
 **Current:** Phase 8 — readable URLs (backend done, frontend next)
-**Next step:** merge backend PR → run migrate:slugs on prod → 8.5 frontend
+**Next step:** merge frontend PR; 8.6 (edit slug in admin forms) optional
 
 ## Log
 - 2026-11-17 — Investigated live site. Data fails because the backend CORS check rejects
@@ -65,3 +65,6 @@
 - 2026-11-19 — Phase 8 backend: slugs + /api/resolve + booking-by-number with owner check, migrate:slugs
   script. 16/16 API checks on a temp DB (slugs, resolve by slug/id/case, 404/400, kochi-2 on duplicate,
   booking by number, other customer blocked, admin allowed); top stylists/services carry slugs.
+- 2026-11-19 — 8.2 run on prod. 8.5 frontend: /branches/kochi/services/mens-haircut, /stylists/arjun-menon,
+  /profile/bookings/BK-XXXXXX; old id links redirect. Verified in Chrome: 9/9 public checks against the live API,
+  8/8 booking checks (detail, checkout, payment success, My Bookings) on a local stack.

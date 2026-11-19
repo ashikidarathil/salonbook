@@ -3,6 +3,7 @@ import type { PaginationMetadata } from '@/common/types/pagination.metadata';
 export interface BranchServiceItem {
   branchId: string;
   serviceId: string;
+  serviceSlug?: string;
   name: string;
   categoryId?: string;
   categoryName?: string;

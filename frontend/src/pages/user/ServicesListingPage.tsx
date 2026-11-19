@@ -85,8 +85,11 @@ export default function ServicesListingPage() {
     setCurrentPage(1);
   };
 
-  const handleViewDetails = (serviceId: string) => {
-    navigate(`/branches/${selectedBranch!.id}/services/${serviceId}`);
+  const handleViewDetails = (service: { serviceId: string; serviceSlug?: string }) => {
+    const branch = selectedBranch!;
+    navigate(
+      `/branches/${branch.slug || branch.id}/services/${service.serviceSlug || service.serviceId}`,
+    );
   };
 
   const branchServiceError = useAppSelector((state) => state.branchService.error);
@@ -350,7 +353,7 @@ export default function ServicesListingPage() {
                         </Button>
                         <Button
                           className="shadow-md bg-primary hover:bg-primary/90 shadow-primary/20"
-                          onClick={() => handleViewDetails(service.serviceId)}
+                          onClick={() => handleViewDetails(service)}
                         >
                           Details
                         </Button>

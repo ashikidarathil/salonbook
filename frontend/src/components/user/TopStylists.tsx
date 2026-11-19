@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 
 interface TopStylist {
   stylistId: string;
+  slug?: string;
   stylistName: string;
   avatar?: string;
   specialization?: string;
@@ -113,7 +114,7 @@ export function TopStylists() {
                   size="sm"
                   variant="outline"
                   className="flex-1"
-                  onClick={() => navigate(`/stylists/${stylist.stylistId}`)}
+                  onClick={() => navigate(`/stylists/${stylist.slug || stylist.stylistId}`)}
                 >
                   View Profile
                 </Button>

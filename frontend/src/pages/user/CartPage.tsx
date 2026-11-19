@@ -1,3 +1,4 @@
+import { bookingRef } from '@/common/utils/bookingRef';
 import { useEffect, useState, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { useNavigate } from 'react-router-dom';
@@ -54,7 +55,7 @@ export default function CartPage() {
     if (bookingSuccess && currentBooking) {
       dispatch(clearCart());
       dispatch(resetBookingSuccess());
-      navigate(`/checkout/${currentBooking.id}`);
+      navigate(`/checkout/${bookingRef(currentBooking)}`);
     }
   }, [bookingSuccess, currentBooking, dispatch, navigate]);
 

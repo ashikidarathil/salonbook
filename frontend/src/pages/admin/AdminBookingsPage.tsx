@@ -1,4 +1,5 @@
 'use client';
+import { bookingRef } from '@/common/utils/bookingRef';
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -311,7 +312,7 @@ export default function AdminBookingsPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => navigate(`/admin/bookings/${booking.id}`)}
+                      onClick={() => navigate(`/admin/bookings/${bookingRef(booking)}`)}
                     >
                       <Icon icon="solar:document-text-bold" className="mr-2 size-4" />
                       Full Details

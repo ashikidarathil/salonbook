@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { bookingRef, matchesBookingRef } from '@/common/utils/bookingRef';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { Header } from '@/components/user/Header';
 import { Footer } from '@/components/user/Footer';
@@ -17,7 +18,8 @@ import { toast } from 'sonner';
 import { PAYMENT_MESSAGES as PM } from '@/features/payment/payment.constants';
 
 export default function CheckoutPage() {
-  const { bookingId } = useParams<{ bookingId: string }>();
+  // URL holds the booking number (or the id, for old links); API calls use the real id
+  const { bookingId: urlRef } = useParams<{ bookingId: string }>();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -25,7 +27,9 @@ export default function CheckoutPage() {
     (state) => state.booking,
   );
   // The store keeps the last viewed item until the new one loads; only use it if it matches the URL
-  const currentBooking = storedBooking?.id === bookingId ? storedBooking : null;
+  const currentBooking = matchesBookingRef(storedBooking, urlRef) ? storedBooking : null;
+  const bookingId = currentBooking?.id;
+  const ref = currentBooking ? bookingRef(currentBooking) : urlRef;
   const { loading: paymentLoading } = useAppSelector((state) => state.payment);
   const { wallet } = useAppSelector((state) => state.wallet);
   const { availableCoupons } = useAppSelector((state) => state.coupon);
@@ -35,10 +39,10 @@ export default function CheckoutPage() {
   const [isExpired, setIsExpired] = useState(false);
 
   useEffect(() => {
-    if (bookingId) {
-      dispatch(fetchBookingDetails(bookingId));
+    if (urlRef) {
+      dispatch(fetchBookingDetails(urlRef));
     }
-  }, [bookingId, dispatch]);
+  }, [urlRef, dispatch]);
 
   useEffect(() => {
     dispatch(fetchMyWallet());
@@ -52,9 +56,9 @@ export default function CheckoutPage() {
       currentBooking.paymentStatus === 'ADVANCE_PAID' ||
       currentBooking.paymentStatus === 'PAID'
     ) {
-      navigate(`/payment/success/${bookingId}`, { replace: true });
+      navigate(`/payment/success/${ref}`, { replace: true });
     }
-  }, [currentBooking, bookingId, navigate]);
+  }, [currentBooking, bookingId, ref, navigate]);
 
   useEffect(() => {
     if (!currentBooking?.paymentWindowExpiresAt || currentBooking.status !== 'PENDING_PAYMENT')
@@ -63,13 +67,13 @@ export default function CheckoutPage() {
     const tick = () => {
       if (Date.now() >= expiry) {
         setIsExpired(true);
-        navigate(`/payment/failure/${bookingId}`);
+        navigate(`/payment/failure/${ref}`);
       }
     };
     tick();
     const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
-  }, [currentBooking?.paymentWindowExpiresAt, currentBooking?.status, bookingId, navigate]);
+  }, [currentBooking?.paymentWindowExpiresAt, currentBooking?.status, bookingId, ref, navigate]);
 
   const handleApplyCoupon = async () => {
     if (!couponCode || !bookingId) return;
@@ -100,11 +104,11 @@ export default function CheckoutPage() {
     if (processRazorpayPayment.fulfilled.match(result)) {
       if (result.payload.status === 'success') {
         toast.success(PM.SUCCESS);
-        navigate(`/payment/success/${bookingId}`);
+        navigate(`/payment/success/${ref}`);
       }
     } else {
       // Pass Razorpay's reason so the failure page can show it
-      navigate(`/payment/failure/${bookingId}`, { state: { reason: result.payload } });
+      navigate(`/payment/failure/${ref}`, { state: { reason: result.payload } });
     }
   };
 
@@ -119,7 +123,7 @@ export default function CheckoutPage() {
     const result = await dispatch(payWithWallet({ bookingId }));
     if (payWithWallet.fulfilled.match(result)) {
       toast.success(PM.SUCCESS);
-      navigate(`/payment/success/${bookingId}`);
+      navigate(`/payment/success/${ref}`);
     } else {
       showError('Payment Failed', (result.payload as string) || PM.WALLET_PAY_FAILED);
     }

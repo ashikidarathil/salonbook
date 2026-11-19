@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useResolveRefs } from '@/hooks/useResolveRefs';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchPublicStylistById } from '@/features/stylistInvite/stylistInviteThunks';
 import { fetchMyFavorites } from '@/features/wishlist/wishlistSlice';
@@ -28,8 +29,17 @@ import {
 } from '@/components/ui/dialog';
 
 export default function StylistDetailsPage() {
-  const { stylistId } = useParams<{ stylistId: string }>();
+  // URL part is a readable slug (/stylists/arjun-menon) or an old id
+  const { stylistId: stylistRef } = useParams<{ stylistId: string }>();
   const navigate = useNavigate();
+  const resolved = useResolveRefs({ stylist: stylistRef });
+  const stylistId = resolved.data?.stylist?.id;
+
+  // Old id links move to the canonical slug URL
+  useEffect(() => {
+    const slug = resolved.data?.stylist?.slug;
+    if (slug && stylistRef !== slug) navigate(`/stylists/${slug}`, { replace: true });
+  }, [resolved.data, stylistRef, navigate]);
   const dispatch = useAppDispatch();
   const {
     selectedStylist: storedStylist,
@@ -167,8 +177,8 @@ export default function StylistDetailsPage() {
       <Header />
       <main className="flex-1">
         <LoadingGate
-          loading={(loading || !error) && !selectedStylist}
-          error={error}
+          loading={!resolved.error && (loading || !error) && !selectedStylist}
+          error={resolved.error || error}
           data={selectedStylist}
           emptyMessage="Stylist not found."
         >

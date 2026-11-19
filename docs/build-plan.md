@@ -75,12 +75,12 @@ Replace database IDs in public URLs with readable names. Old ID links keep worki
 | Booking / checkout / payment | `/bookings/6afc87…` | `/bookings/BK-7F3A21` |
 
 - [x] 8.1 Backend: `slug` field (unique, sparse) on Branch, Service, Stylist; set from the name on create (`Men's Haircut` → `mens-haircut`, duplicates get `-2`), then kept stable
-- [ ] 8.2 Backend: `npm run migrate:slugs` (ready, tested) — run on prod after deploy
+- [x] 8.2 Backend: `npm run migrate:slugs` — run on prod 2026-11-19 (8 branches, 20 services, 16 stylists)
 - [x] 8.3 Backend: `GET /api/resolve?branch=&service=&stylist=` turns slugs **or** old ids into ids + canonical slugs; responses include `slug` / `serviceSlug`
 - [x] 8.4 Backend: booking detail accepts the booking number (`BK-XXXXXX`) or id; customers can only open their own bookings
-- [ ] 8.5 Frontend: all links and routes build URLs from slugs / booking numbers; an id URL redirects to the slug URL
+- [x] 8.5 Frontend: links use slugs / booking numbers; old id URLs (and odd casing) redirect to the canonical URL; unknown slugs show "Not found"
 - [ ] 8.6 Admin: slug shown (and editable) on branch, service and stylist forms
-- [ ] 8.7 Seed scripts set slugs; verify every page in the browser (old id links redirect, new links load)
+- [x] 8.7 Seed sets slugs (`ensureSlugs`); verified in the browser — 9 public-page + 8 booking-page checks
 
 ## Phase 9 — WhatsApp-style chat (after Phase 8)
 - [ ] 9.1 Voice messages show a waveform (saved at record time; computed from the audio for old messages), progress fills while playing

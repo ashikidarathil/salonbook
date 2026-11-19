@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { matchesBookingRef } from '@/common/utils/bookingRef';
 import { motion } from 'framer-motion';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
@@ -14,11 +15,12 @@ import { fetchBookingDetails } from '@/features/booking/booking.thunks';
 
 export default function PaymentSuccessPage() {
   const navigate = useNavigate();
+  // URL holds the booking number (or the id, for old links)
   const { bookingId } = useParams<{ bookingId: string }>();
   const dispatch = useAppDispatch();
   const { currentBooking: storedBooking } = useAppSelector((state) => state.booking);
   // The store keeps the last viewed item until the new one loads; only use it if it matches the URL
-  const currentBooking = storedBooking?.id === bookingId ? storedBooking : null;
+  const currentBooking = matchesBookingRef(storedBooking, bookingId) ? storedBooking : null;
 
   useEffect(() => {
     if (bookingId) dispatch(fetchBookingDetails(bookingId));

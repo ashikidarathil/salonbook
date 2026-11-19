@@ -1,3 +1,4 @@
+import { bookingRef } from '@/common/utils/bookingRef';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
@@ -399,7 +400,7 @@ export default function BookingsPage() {
                       new Date(booking.paymentWindowExpiresAt) > new Date() ? (
                         <Button
                           className="w-full justify-start gap-2 h-10 bg-primary hover:bg-primary/90 text-white"
-                          onClick={() => navigate(`/checkout/${booking.id}`)}
+                          onClick={() => navigate(`/checkout/${bookingRef(booking)}`)}
                         >
                           <Icon icon="solar:card-2-bold" className="size-4" />
                           Pay Advance Now
@@ -421,7 +422,7 @@ export default function BookingsPage() {
                     booking.paymentStatus === PaymentStatus.ADVANCE_PAID && (
                       <Button
                         className="w-full justify-start gap-2 h-10 bg-primary hover:bg-primary/90 text-white shadow-sm"
-                        onClick={() => navigate(`/profile/bookings/${booking.id}`)}
+                        onClick={() => navigate(`/profile/bookings/${bookingRef(booking)}`)}
                       >
                         <Icon icon="solar:wallet-money-bold" className="size-4" />
                         Pay Remaining
@@ -431,7 +432,7 @@ export default function BookingsPage() {
                   <Button
                     variant="outline"
                     className="w-full justify-start gap-2 h-10"
-                    onClick={() => navigate(`/profile/bookings/${booking.id}`)}
+                    onClick={() => navigate(`/profile/bookings/${bookingRef(booking)}`)}
                   >
                     <Icon icon="solar:document-text-linear" className="size-4" />
                     View Details

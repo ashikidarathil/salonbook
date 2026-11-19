@@ -14,6 +14,7 @@ export type StylistPosition = 'JUNIOR' | 'SENIOR' | 'TRAINEE';
 
 export interface StylistListItem {
   id: string;
+  slug?: string;
   userId: string;
   name: string;
   email?: string;
