@@ -25,6 +25,7 @@ export class ServiceController {
       categoryId: req.body.categoryId,
       imageUrl: req.body.imageUrl,
       whatIncluded: req.body.whatIncluded,
+      slug: req.body.slug,
     };
 
     const data = await this._service.create(dto);
@@ -39,6 +40,7 @@ export class ServiceController {
       imageUrl: req.body.imageUrl,
       categoryId: req.body.categoryId,
       whatIncluded: req.body.whatIncluded,
+      slug: req.body.slug,
     };
 
     const data = await this._service.update(req.params.id, dto);

@@ -4,6 +4,7 @@ export type ServiceStatus = 'ACTIVE' | 'INACTIVE';
 
 export interface Service {
   id: string;
+  slug?: string;
   name: string;
   description?: string;
   categoryId: string;

@@ -16,6 +16,7 @@ export type CreateServiceInput = {
   imageUrl?: string;
   status?: ServiceStatus;
   whatIncluded?: string[];
+  slug?: string;
 };
 
 export const serviceService = {

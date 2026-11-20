@@ -18,7 +18,14 @@ export const fetchBranches = createAsyncThunk<Branch[], undefined, { rejectValue
 
 export const createBranch = createAsyncThunk<
   Branch,
-  { name: string; address: string; phone?: string; latitude: number; longitude: number },
+  {
+    name: string;
+    address: string;
+    phone?: string;
+    latitude: number;
+    longitude: number;
+    slug?: string;
+  },
   { rejectValue: string }
 >('branch/createBranch', async (data, { rejectWithValue }) => {
   try {
@@ -40,6 +47,7 @@ export const updateBranch = createAsyncThunk<
       latitude: number;
       longitude: number;
       defaultBreaks?: Array<{ startTime: string; endTime: string; description: string }>;
+      slug?: string;
     }>;
   },
   { rejectValue: string }

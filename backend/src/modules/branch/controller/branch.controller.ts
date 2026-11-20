@@ -24,6 +24,7 @@ export class BranchController {
       latitude: req.body.latitude,
       longitude: req.body.longitude,
       defaultBreaks: req.body.globalBreaks || req.body.defaultBreaks,
+      slug: req.body.slug,
     };
 
     const data = await this.service.create(dto);
@@ -44,6 +45,7 @@ export class BranchController {
       latitude: req.body.latitude,
       longitude: req.body.longitude,
       defaultBreaks: req.body.globalBreaks || req.body.defaultBreaks,
+      slug: req.body.slug,
     };
 
     const data = await this.service.update(req.params.id, dto);

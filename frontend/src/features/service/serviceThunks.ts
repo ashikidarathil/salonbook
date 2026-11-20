@@ -49,6 +49,7 @@ export const createService = createAsyncThunk<
     categoryId: string;
     status?: ServiceStatus;
     whatIncluded?: string[];
+    slug?: string;
   },
   { rejectValue: string }
 >('service/createService', async (data, { rejectWithValue }) => {
@@ -74,6 +75,7 @@ export const updateService = createAsyncThunk<
       imageUrl: string;
       categoryId: string;
       whatIncluded: string[];
+      slug: string;
     }>;
   },
   { rejectValue: string }

@@ -79,7 +79,7 @@ Replace database IDs in public URLs with readable names. Old ID links keep worki
 - [x] 8.3 Backend: `GET /api/resolve?branch=&service=&stylist=` turns slugs **or** old ids into ids + canonical slugs; responses include `slug` / `serviceSlug`
 - [x] 8.4 Backend: booking detail accepts the booking number (`BK-XXXXXX`) or id; customers can only open their own bookings
 - [x] 8.5 Frontend: links use slugs / booking numbers; old id URLs (and odd casing) redirect to the canonical URL; unknown slugs show "Not found"
-- [ ] 8.6 Admin: slug shown (and editable) on branch, service and stylist forms
+- [x] 8.6 Admin: "URL name" field with live preview on branch + service forms; stylist "Public profile" bar with inline edit. Unique (409 "already in use"), validated, old slug stops resolving
 - [x] 8.7 Seed sets slugs (`ensureSlugs`); verified in the browser — 9 public-page + 8 booking-page checks
 
 ## Phase 9 — WhatsApp-style chat (after Phase 8)

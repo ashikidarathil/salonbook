@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SlugSchema } from '../../../common/dto/slug.schema';
 
 export const CreateServiceSchema = z
   .object({
@@ -7,6 +8,7 @@ export const CreateServiceSchema = z
     categoryId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid category ID'),
     imageUrl: z.string().url('Invalid image URL').optional(),
     whatIncluded: z.array(z.string()).optional(),
+    slug: SlugSchema.optional(),
   })
   .strict();
 
@@ -21,6 +23,7 @@ export const UpdateServiceSchema = z
       .regex(/^[0-9a-fA-F]{24}$/, 'Invalid category ID')
       .optional(),
     whatIncluded: z.array(z.string()).optional(),
+    slug: SlugSchema.optional(),
   })
   .strict();
 

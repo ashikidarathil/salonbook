@@ -1,4 +1,5 @@
 export interface CreateBranchDto {
+  slug?: string;
   name: string;
   address: string;
   phone?: string;
@@ -12,6 +13,7 @@ export interface CreateBranchDto {
 }
 
 export interface UpdateBranchDto {
+  slug?: string;
   name?: string;
   address?: string;
   phone?: string;

@@ -78,6 +78,13 @@ export const stylistInviteService = {
     );
   },
 
+  updateSlug(stylistId: string, slug: string) {
+    return api.patch<ApiResponse<{ id: string; slug: string }>>(
+      API_ROUTES.STYLIST_INVITE.UPDATE_SLUG.replace(':stylistId', stylistId),
+      { slug },
+    );
+  },
+
   updatePosition(stylistId: string, position: 'JUNIOR' | 'SENIOR' | 'TRAINEE') {
     return api.patch<ApiResponse<StylistListItem>>(
       API_ROUTES.STYLIST_INVITE.UPDATE_POSITION.replace(':stylistId', stylistId),

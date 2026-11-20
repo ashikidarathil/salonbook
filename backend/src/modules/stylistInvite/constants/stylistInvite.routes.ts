@@ -9,6 +9,7 @@ export const STYLIST_INVITE_ROUTES = {
   ADMIN_BLOCK: '/admin/stylists/:userId/block',
   ADMIN_BLOCK_NEW: '/admin/stylists/:stylistId/block',
   ADMIN_UPDATE_POSITION: '/admin/stylists/:stylistId/position',
+  ADMIN_UPDATE_SLUG: '/admin/stylists/:stylistId/slug',
 
   // Public routes
   PUBLIC_VALIDATE_INVITE: '/stylists/invite/:token',

@@ -37,6 +37,7 @@ export const API_ROUTES = {
     TOGGLE_BLOCK: '/admin/stylists/:userId/block',
     TOGGLE_BLOCK_NEW: '/admin/stylists/:stylistId/block',
     UPDATE_POSITION: '/admin/stylists/:stylistId/position',
+    UPDATE_SLUG: '/admin/stylists/:stylistId/slug',
     APPLY_STYLIST: '/apply-stylist',
     PUBLIC_LIST: '/stylists',
     PUBLIC_BY_ID: (id: string) => `/stylists/${id}`,
