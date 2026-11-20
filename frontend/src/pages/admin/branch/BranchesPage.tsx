@@ -33,6 +33,8 @@ import {
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Users, Tags, Scissors, Ban, RotateCcw, Clock } from 'lucide-react';
+import { SlugField } from '@/components/admin/SlugField';
+import { slugFormField, slugForSubmit } from '@/common/utils/slug';
 import { Label } from '@/components/ui/label';
 import Pagination from '@/components/pagination/Pagination';
 import { ERROR_MESSAGES } from '@/common/constants/error.messages';
@@ -43,7 +45,7 @@ import {
   showLoading,
   closeLoading,
 } from '@/common/utils/swal.utils';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { Branch, MapLocation } from '@/features/branch/branch.types';
@@ -63,6 +65,7 @@ const branchSchema = z.object({
   phone: z.string().optional(),
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
+  slug: slugFormField,
 });
 
 type BranchFormData = z.infer<typeof branchSchema>;
@@ -86,10 +89,14 @@ export default function BranchesPage() {
     handleSubmit,
     reset,
     setValue,
+    control,
     formState: { errors },
   } = useForm<BranchFormData>({
     resolver: zodResolver(branchSchema),
   });
+
+  const slugValue = useWatch({ control: control, name: 'slug' });
+  const nameValue = useWatch({ control: control, name: 'name' });
 
   const loadBranches = useCallback(() => {
     dispatch(
@@ -132,9 +139,10 @@ export default function BranchesPage() {
     }
     showLoading(editingBranch ? 'Updating branch...' : 'Creating branch...');
 
+    const payload = { ...data, slug: slugForSubmit(data.slug) };
     const result = editingBranch
-      ? await dispatch(updateBranch({ id: editingBranch.id, data }))
-      : await dispatch(createBranch(data));
+      ? await dispatch(updateBranch({ id: editingBranch.id, data: payload }))
+      : await dispatch(createBranch(payload));
 
     closeLoading();
 
@@ -167,6 +175,7 @@ export default function BranchesPage() {
       phone: branch.phone || '',
       latitude: branch.latitude,
       longitude: branch.longitude,
+      slug: branch.slug || '',
     });
     setIsAddDialogOpen(true);
   };
@@ -201,6 +210,7 @@ export default function BranchesPage() {
       phone: '',
       latitude: 0,
       longitude: 0,
+      slug: '',
     });
     setEditingBranch(null);
     setSelectedLocation(undefined);
@@ -261,6 +271,14 @@ export default function BranchesPage() {
                 <Input {...register('name')} placeholder="Main Salon Branch" />
                 {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
               </div>
+              <SlugField
+                pathPrefix="/branches/"
+                value={slugValue}
+                sourceName={nameValue}
+                savedSlug={editingBranch?.slug}
+                error={errors.slug?.message}
+                inputProps={register('slug')}
+              />
               <div>
                 <Label>Address *</Label>
                 <Input {...register('address')} placeholder="123 Main Street, City" />

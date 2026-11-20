@@ -45,6 +45,8 @@ import {
   closeLoading,
 } from '@/common/utils/swal.utils';
 import { useForm, useWatch } from 'react-hook-form';
+import { SlugField } from '@/components/admin/SlugField';
+import { slugFormField, slugForSubmit } from '@/common/utils/slug';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import type { Service } from '@/features/service/service.types';
@@ -84,6 +86,7 @@ const serviceSchema = z.object({
   description: z.string().optional(),
   categoryId: z.string().min(1, 'Category is required'),
   whatIncluded: z.array(z.string()).optional(),
+  slug: slugFormField,
 });
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
@@ -120,6 +123,7 @@ export default function ServicesPage() {
       description: '',
       categoryId: '',
       whatIncluded: [],
+      slug: '',
     },
   });
 
@@ -130,6 +134,9 @@ export default function ServicesPage() {
     setValue,
     formState: { errors },
   } = form;
+
+  const slugValue = useWatch({ control: form.control, name: 'slug' });
+  const nameValue = useWatch({ control: form.control, name: 'name' });
 
   const whatIncluded =
     useWatch({
@@ -161,9 +168,10 @@ export default function ServicesPage() {
   const onSubmit = async (data: ServiceFormData) => {
     showLoading(editingService ? 'Updating service...' : 'Creating service...');
 
+    const payload = { ...data, slug: slugForSubmit(data.slug) };
     const result = editingService
-      ? await dispatch(updateService({ id: editingService.id, data }))
-      : await dispatch(createService(data));
+      ? await dispatch(updateService({ id: editingService.id, data: payload }))
+      : await dispatch(createService(payload));
 
     closeLoading();
 
@@ -190,6 +198,7 @@ export default function ServicesPage() {
       description: svc.description || '',
       categoryId: svc.categoryId,
       whatIncluded: svc.whatIncluded || [],
+      slug: svc.slug || '',
     });
     setWhatIncludedInput('');
     setIsAddDialogOpen(true);
@@ -406,6 +415,7 @@ export default function ServicesPage() {
                 description: '',
                 categoryId: '',
                 whatIncluded: [],
+                slug: '',
               });
             }
           }}
@@ -435,6 +445,15 @@ export default function ServicesPage() {
                 <Input id="name" {...register('name')} placeholder="Hair Cut & Style" />
                 {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
               </div>
+
+              <SlugField
+                pathPrefix="/branches/<branch>/services/"
+                value={slugValue}
+                sourceName={nameValue}
+                savedSlug={editingService?.slug}
+                error={errors.slug?.message}
+                inputProps={register('slug')}
+              />
 
               <div>
                 <Label htmlFor="description">Description (optional)</Label>

@@ -12,6 +12,7 @@ import OffDayManagement from './OffDayManagementPage';
 import type { StylistListItem } from '@/features/stylistInvite/stylistInvite.types';
 import type { Branch } from '@/features/branch/branch.types';
 import StylistWalletManagement from './StylistWalletManagement';
+import { StylistSlugEditor } from '@/components/admin/StylistSlugEditor';
 
 interface StylistDetailsViewProps {
   stylist: StylistListItem;
@@ -95,6 +96,14 @@ export default function StylistDetailsView({ stylist, onClose }: StylistDetailsV
           </div>
         </div>
       </div> */}
+
+      {/* Public profile address (readable URL name) */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border bg-white px-4 py-3">
+        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          Public profile
+        </span>
+        <StylistSlugEditor stylistId={stylist.id} slug={stylist.slug} />
+      </div>
 
       {/* Unified Management Tabs */}
       <Tabs defaultValue="schedule" className="space-y-6">

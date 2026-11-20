@@ -1,7 +1,7 @@
 # Progress
 
-**Current:** Phase 8 — readable URLs (backend done, frontend next)
-**Next step:** merge frontend PR; 8.6 (edit slug in admin forms) optional
+**Current:** Phase 8 done → next Phase 9 (WhatsApp-style chat)
+**Next step:** Phase 9.3 message ticks (✓ / ✓✓ / blue)
 
 ## Log
 - 2026-11-17 — Investigated live site. Data fails because the backend CORS check rejects
@@ -68,3 +68,6 @@
 - 2026-11-19 — 8.2 run on prod. 8.5 frontend: /branches/kochi/services/mens-haircut, /stylists/arjun-menon,
   /profile/bookings/BK-XXXXXX; old id links redirect. Verified in Chrome: 9/9 public checks against the live API,
   8/8 booking checks (detail, checkout, payment success, My Bookings) on a local stack.
+- 2026-11-20 — 8.6 done: admins can set/edit URL names (branch + service forms, stylist Public profile bar).
+  Verified: 14/14 API checks (change, old slug 404, duplicate 409, invalid/id-like 400, auto on create) and
+  11/11 admin UI checks in Chrome. Phase 8 complete.

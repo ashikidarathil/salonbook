@@ -5,4 +5,5 @@ export type ServiceUpdatePayload = {
   imageUrl?: string;
   categoryId?: string;
   whatIncluded?: string[];
+  slug?: string;
 };

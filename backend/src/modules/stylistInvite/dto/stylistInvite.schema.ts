@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SlugSchema } from '../../../common/dto/slug.schema';
 
 export const CreateStylistInviteSchema = z
   .object({
@@ -26,6 +27,8 @@ export const ValidateStylistInviteSchema = z.object({
 export const StylistBlockSchema = z.object({
   isBlocked: z.boolean(),
 });
+
+export const StylistSlugSchema = z.object({ slug: SlugSchema }).strict();
 
 export const StylistPositionSchema = z.object({
   position: z.enum(['JUNIOR', 'SENIOR', 'TRAINEE']),

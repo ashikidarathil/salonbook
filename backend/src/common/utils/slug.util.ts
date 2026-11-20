@@ -1,4 +1,6 @@
 import type { Model, Types } from 'mongoose';
+import { AppError } from '../errors/appError';
+import { HttpStatus } from '../enums/httpStatus.enum';
 
 /** "Men's Haircut & Beard" → "mens-haircut-and-beard" */
 export const slugify = (text: string): string =>
@@ -31,3 +33,18 @@ export async function uniqueSlug<T>(
 
 /** A value is an ObjectId string (24 hex chars) rather than a slug. */
 export const looksLikeObjectId = (value: string): boolean => /^[0-9a-fA-F]{24}$/.test(value);
+
+/** Throws 409 when another document of the model already uses this slug. */
+export async function assertSlugAvailable<T>(
+  model: Model<T>,
+  slug: string,
+  excludeId?: Types.ObjectId | string,
+): Promise<void> {
+  const taken = await model.exists({
+    slug,
+    ...(excludeId ? { _id: { $ne: excludeId } } : {}),
+  } as never);
+  if (taken) {
+    throw new AppError(`The URL name "${slug}" is already in use`, HttpStatus.CONFLICT);
+  }
+}

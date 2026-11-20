@@ -1,3 +1,4 @@
+import { SlugSchema } from '../../../common/dto/slug.schema';
 import { z } from 'zod';
 
 const BreakSchema = z
@@ -16,6 +17,7 @@ export const CreateBranchSchema = z
     latitude: z.number().min(-90).max(90),
     longitude: z.number().min(-180).max(180),
     defaultBreaks: z.array(BreakSchema).optional(),
+    slug: SlugSchema.optional(),
   })
   .strict();
 

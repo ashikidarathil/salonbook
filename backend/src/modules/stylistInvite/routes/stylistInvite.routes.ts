@@ -14,6 +14,7 @@ import {
   StylistPaginationSchema,
   StylistBlockSchema,
   StylistPositionSchema,
+  StylistSlugSchema,
 } from '../dto/stylistInvite.schema';
 
 const router = Router();
@@ -40,6 +41,12 @@ router.patch(
   STYLIST_INVITE_ROUTES.ADMIN_BLOCK_NEW,
   validate({ body: StylistBlockSchema }),
   stylistController.toggleBlock.bind(stylistController),
+);
+
+router.patch(
+  STYLIST_INVITE_ROUTES.ADMIN_UPDATE_SLUG,
+  validate({ body: StylistSlugSchema }),
+  stylistController.updateSlug.bind(stylistController),
 );
 
 router.patch(

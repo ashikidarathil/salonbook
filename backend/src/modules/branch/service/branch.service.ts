@@ -1,3 +1,5 @@
+import { BranchModel } from '../../../models/branch.model';
+import { assertSlugAvailable } from '../../../common/utils/slug.util';
 import { injectable, inject } from 'tsyringe';
 import { TOKENS } from '../../../common/di/tokens';
 import { BranchMapper } from '../mapper/branch.mapper';
@@ -20,6 +22,7 @@ export class BranchService implements IBranchService {
   ) {}
 
   async create(dto: CreateBranchDto) {
+    if (dto.slug) await assertSlugAvailable(BranchModel, dto.slug);
     const branch = await this.repo.create(dto);
     return BranchMapper.toResponse(branch);
   }
@@ -30,6 +33,7 @@ export class BranchService implements IBranchService {
   }
 
   async update(id: string, dto: UpdateBranchDto) {
+    if (dto.slug) await assertSlugAvailable(BranchModel, dto.slug, id);
     const branch = await this.repo.update(id, dto);
     if (!branch) throw new AppError(BRANCH_MESSAGES.NOT_FOUND, HttpStatus.NOT_FOUND);
     return BranchMapper.toResponse(branch);

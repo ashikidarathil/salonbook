@@ -1,6 +1,7 @@
 import type { PaginationQueryDto } from '../../../common/dto/pagination.query.dto';
 
 export interface CreateServiceDto {
+  slug?: string;
   name: string;
   description?: string;
   categoryId: string;
@@ -9,6 +10,7 @@ export interface CreateServiceDto {
 }
 
 export interface UpdateServiceDto {
+  slug?: string;
   name?: string;
   description?: string;
   status?: 'ACTIVE' | 'INACTIVE';

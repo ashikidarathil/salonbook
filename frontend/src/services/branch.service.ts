@@ -15,6 +15,7 @@ export const branchService = {
     phone?: string;
     latitude: number;
     longitude: number;
+    slug?: string;
   }) {
     return api.post<ApiResponse<Branch>>(API_ROUTES.BRANCH.BASE, data);
   },
@@ -34,6 +35,7 @@ export const branchService = {
       latitude: number;
       longitude: number;
       defaultBreaks?: Array<{ startTime: string; endTime: string; description: string }>;
+      slug?: string;
     }>,
   ) {
     const url = API_ROUTES.BRANCH.BY_ID(id);

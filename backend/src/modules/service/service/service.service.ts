@@ -1,3 +1,5 @@
+import { assertSlugAvailable } from '../../../common/utils/slug.util';
+import { ServiceModel } from '../../../models/service.model';
 import { injectable, inject } from 'tsyringe';
 import { TOKENS } from '../../../common/di/tokens';
 import { AppError } from '../../../common/errors/appError';
@@ -42,6 +44,7 @@ export class ServiceService implements IServiceService {
       throw new AppError(MESSAGES.SERVICE.ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
     }
 
+    if (dto.slug) await assertSlugAvailable(ServiceModel, dto.slug);
     const doc = await this._repo.create(dto);
     return ServiceMapper.toDto(doc);
   }
@@ -55,6 +58,10 @@ export class ServiceService implements IServiceService {
     if (dto.imageUrl) update.imageUrl = dto.imageUrl;
     if (dto.categoryId) update.categoryId = dto.categoryId;
     if (dto.whatIncluded) update.whatIncluded = dto.whatIncluded;
+    if (dto.slug) {
+      await assertSlugAvailable(ServiceModel, dto.slug, id);
+      update.slug = dto.slug;
+    }
 
     const doc = await this._repo.updateById(id, update);
     if (!doc) throw new AppError(MESSAGES.SERVICE.NOT_FOUND, HttpStatus.NOT_FOUND);

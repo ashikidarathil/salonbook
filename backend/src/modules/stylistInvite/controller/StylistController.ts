@@ -55,6 +55,18 @@ export class StylistController {
     return ApiResponse.success(res, { success: true }, message);
   }
 
+  async updateSlug(req: Request, res: Response): Promise<Response> {
+    const result = await this._service.updateStylistSlug(req.params.stylistId, req.body.slug);
+    if (!result) {
+      return ApiResponse.error(
+        res,
+        STYLIST_INVITE_MESSAGES.STYLIST_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return ApiResponse.success(res, result, 'URL name updated');
+  }
+
   async updatePosition(req: Request, res: Response): Promise<Response> {
     const stylistId = req.params.stylistId;
     const { position } = req.body;

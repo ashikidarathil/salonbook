@@ -1,3 +1,5 @@
+import { StylistModel } from '../../../models/stylist.model';
+import { assertSlugAvailable } from '../../../common/utils/slug.util';
 import { injectable, inject } from 'tsyringe';
 import { TOKENS } from '../../../common/di/tokens';
 import type { IStylistService } from './IStylistService';
@@ -57,6 +59,21 @@ export class StylistService implements IStylistService {
     }
 
     return stylist;
+  }
+
+  async updateStylistSlug(
+    stylistId: string,
+    slug: string,
+  ): Promise<{ id: string; slug: string } | null> {
+    await assertSlugAvailable(StylistModel, slug, stylistId);
+    const stylist = await StylistModel.findByIdAndUpdate(
+      stylistId,
+      { $set: { slug } },
+      { new: true },
+    )
+      .select('_id slug')
+      .lean<{ _id: unknown; slug: string }>();
+    return stylist ? { id: String(stylist._id), slug: stylist.slug } : null;
   }
 
   async updateStylistPosition(

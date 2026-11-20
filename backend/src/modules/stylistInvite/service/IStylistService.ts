@@ -11,6 +11,7 @@ export interface IStylistService {
     stylistId: string,
     position: 'JUNIOR' | 'SENIOR' | 'TRAINEE',
   ): Promise<StylistListItem | null>;
+  updateStylistSlug(stylistId: string, slug: string): Promise<{ id: string; slug: string } | null>;
   getPublicStylists(
     query: PaginationQueryDto,
     userId?: string,
