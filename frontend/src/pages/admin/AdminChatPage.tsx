@@ -10,6 +10,7 @@ import { MessageType, SenderType } from '@/features/chat/chat.types';
 import type { ChatRoom, ChatMessage } from '@/features/chat/chat.types';
 import { format } from 'date-fns';
 import { showApiError } from '@/common/utils/swal.utils';
+import { ImageViewer } from '@/features/chat/components/ImageViewer';
 
 export default function AdminChatPage() {
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
@@ -18,6 +19,11 @@ export default function AdminChatPage() {
   const [isLoadingRooms, setIsLoadingRooms] = useState(true);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const photos = messages
+    .filter((msg) => msg.messageType === MessageType.IMAGE && msg.mediaUrl)
+    .map((msg) => ({ url: msg.mediaUrl as string, caption: msg.content }));
+  const viewerIndex = photos.findIndex((photo) => photo.url === viewerUrl);
 
   useEffect(() => {
     fetchRooms();
@@ -237,13 +243,25 @@ export default function AdminChatPage() {
                         {msg.messageType === MessageType.TEXT && <p>{msg.content}</p>}
                         {msg.messageType === MessageType.SYSTEM && <p>{msg.content}</p>}
                         {msg.messageType === MessageType.IMAGE && (
-                          <div className="rounded-lg overflow-hidden border border-black/5">
-                            <img
-                              src={msg.mediaUrl}
-                              alt="Shared image"
-                              className="max-w-full h-auto"
-                            />
-                          </div>
+                          <button
+                            type="button"
+                            aria-label="Open photo"
+                            className="block cursor-zoom-in text-left"
+                            onClick={() => setViewerUrl(msg.mediaUrl ?? null)}
+                          >
+                            <span className="block rounded-lg overflow-hidden border border-black/5">
+                              <img
+                                src={msg.mediaUrl}
+                                alt={msg.content || 'Shared image'}
+                                className="max-w-full h-auto"
+                              />
+                            </span>
+                            {msg.content && (
+                              <span className="mt-2 block break-words whitespace-pre-wrap">
+                                {msg.content}
+                              </span>
+                            )}
+                          </button>
                         )}
                         {msg.messageType === MessageType.VOICE && (
                           <div
@@ -296,6 +314,9 @@ export default function AdminChatPage() {
           </div>
         )}
       </Card>
+      {viewerIndex >= 0 && (
+        <ImageViewer images={photos} startIndex={viewerIndex} onClose={() => setViewerUrl(null)} />
+      )}
     </div>
   );
 }

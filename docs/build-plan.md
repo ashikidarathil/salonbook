@@ -87,10 +87,10 @@ Replace database IDs in public URLs with readable names. Old ID links keep worki
 - [x] 9.1 Voice messages show a waveform (saved at record time; computed from the audio for old messages), progress fills while playing
 - [x] 9.2 Live waveform + timer while recording; cancel / send controls
 - [x] 9.3 Message ticks: ✓ sent, ✓✓ delivered (recipient online anywhere on the site), blue ✓✓ read (chat open and tab visible); `deliveredAt` / `readAt`, live over socket.io; admins never trigger read
-- [ ] 9.4 Attach menu: Photo library / Take photo (camera) / Document
-- [ ] 9.5 Preview before sending, with optional caption
-- [ ] 9.6 Send multiple photos at once
-- [ ] 9.7 Full-screen image viewer (zoom, close, download)
+- [x] 9.4 Attach menu: Photos / Camera / Files (photos only; PDFs not included)
+- [x] 9.5 Preview before sending, with optional caption
+- [x] 9.6 Send multiple photos at once
+- [x] 9.7 Full-screen image viewer (zoom, close, download)
 
 ## Phase 7 — New features
 - [ ] 7.1 _(list features here as we decide them)_
