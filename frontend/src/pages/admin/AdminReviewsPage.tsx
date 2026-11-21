@@ -130,7 +130,7 @@ export default function AdminReviewsPage() {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto rounded-lg bg-muted/40 border border-border/40 transition-all hover:shadow-md">
+    <div className="space-y-6 rounded-lg bg-muted/40 border border-border/40 transition-all hover:shadow-md">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Review Management</h1>

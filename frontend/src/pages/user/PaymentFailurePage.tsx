@@ -1,5 +1,6 @@
 'use client';
 
+import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
 import { useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { matchesBookingRef } from '@/common/utils/bookingRef';
@@ -30,6 +31,7 @@ export default function PaymentFailurePage() {
   return (
     <div className="min-h-screen flex flex-col bg-[#F9FAFB]">
       <Header />
+      <RouteBreadcrumbs className="w-full px-4 pt-4 sm:px-6 lg:px-8" />
       <main className="flex-grow flex items-center justify-center p-6 sm:p-12">
         <motion.div
           className="w-full max-w-lg"

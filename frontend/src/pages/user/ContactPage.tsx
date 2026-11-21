@@ -1,5 +1,6 @@
 'use client';
 
+import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <RouteBreadcrumbs className="w-full px-4 pt-4 sm:px-6 lg:px-8" />
 
       <main className="w-full px-4 py-10 sm:px-6 md:py-16 lg:px-8">
         <div className="mb-12 text-center">

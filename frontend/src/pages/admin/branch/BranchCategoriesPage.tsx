@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { BranchPageHeader } from '@/components/branch/BranchPageHeader';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import {
   toggleBranchCategory,
@@ -37,18 +38,14 @@ import {
   showLoading,
   closeLoading,
 } from '@/common/utils/swal.utils';
-import { ArrowLeft, Tags } from 'lucide-react';
+import { Tags } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 const ITEMS_PER_PAGE = 5;
 
 export default function BranchCategoriesPage() {
   const { branchId } = useParams<{ branchId: string }>();
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
-
-  const { branches } = useAppSelector((state) => state.branch);
-  const branchName = branches.find((b) => b.id === branchId)?.name || 'Branch';
 
   const { categories, loading, error, pagination } = useAppSelector(
     (state) => state.branchCategory,
@@ -125,16 +122,8 @@ export default function BranchCategoriesPage() {
   };
 
   return (
-    <div className="p-8 space-y-8 theme-admin mx-auto rounded-lg bg-muted/40 border border-border/40 transition-all hover:shadow-md">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/branches')}>
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold">Manage Categories</h1>
-          <p className="text-muted-foreground">{branchName}</p>
-        </div>
-      </div>
+    <div className="w-full space-y-6 theme-admin">
+      <BranchPageHeader branchId={branchId} title="Manage Categories" />
 
       <Card className="shadow-none border-border/60">
         <CardHeader>

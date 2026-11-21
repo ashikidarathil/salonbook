@@ -1,5 +1,6 @@
 'use client';
 
+import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
@@ -115,6 +116,7 @@ export default function StylistsListingPage() {
   return (
     <div className="min-h-screen bg-background font-sans text-foreground flex flex-col w-full">
       <Header />
+      <RouteBreadcrumbs className="w-full px-4 pt-4 sm:px-6 lg:px-8" />
 
       <main className="flex-1">
         {/* Hero Section */}

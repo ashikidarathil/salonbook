@@ -1,5 +1,6 @@
 'use client';
 
+import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
 import { Outlet, useNavigate } from 'react-router-dom';
 import {
   SidebarProvider,
@@ -177,6 +178,7 @@ export function SalonAdminLayout() {
           </header>
 
           <main className="min-w-0 flex-1 overflow-auto bg-muted/40 p-4 lg:p-6">
+            <RouteBreadcrumbs className="mb-4" />
             <Outlet /> {/* Child pages render here */}
           </main>
         </SidebarInset>

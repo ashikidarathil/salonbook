@@ -1,5 +1,6 @@
 'use client';
 
+import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
 import { Loader } from '@/components/common/Loader';
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
@@ -177,6 +178,7 @@ export default function ServiceDetailsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
+      <RouteBreadcrumbs className="w-full px-4 pt-4 sm:px-6 lg:px-8" />
       <main className="flex-1">
         <LoadingGate
           loading={!resolved.error && (loading || (!currentService && !error))}

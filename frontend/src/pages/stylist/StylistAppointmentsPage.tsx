@@ -138,7 +138,7 @@ export default function StylistAppointmentsPage() {
   }, [searchParams, rooms, bookingsList, dispatch, setSearchParams, navigate]);
 
   return (
-    <div className="p-6 space-y-6 rounded-lg bg-muted/40 border border-border/40 transition-all hover:shadow-md text-foreground">
+    <div className="space-y-6 rounded-lg bg-muted/40 border border-border/40 transition-all hover:shadow-md text-foreground">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold font-heading">Appointments</h1>

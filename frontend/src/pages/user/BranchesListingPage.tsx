@@ -1,5 +1,6 @@
 'use client';
 
+import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
 import { useEffect, useState, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { useNavigate } from 'react-router-dom';
@@ -112,6 +113,7 @@ export default function BranchesListingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
+      <RouteBreadcrumbs className="w-full px-4 pt-4 sm:px-6 lg:px-8" />
 
       <main className="flex-1">
         <div className="container px-4 py-8 mx-auto">

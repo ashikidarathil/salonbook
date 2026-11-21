@@ -1,5 +1,6 @@
 'use client';
 
+import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
 import { Loader } from '@/components/common/Loader';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -123,6 +124,7 @@ export default function StylistDetailsPage() {
   return (
     <div className="min-h-screen bg-background font-sans text-foreground w-full flex flex-col">
       <Header />
+      <RouteBreadcrumbs className="w-full px-4 pt-4 sm:px-6 lg:px-8" />
       <main className="flex-1">
         <LoadingGate
           loading={!resolved.error && (loading || !error) && !selectedStylist}

@@ -80,7 +80,7 @@ export default function UserManagementPage() {
   };
 
   return (
-    <div className="p-8 space-y-10">
+    <div className="space-y-10">
       <div>
         <h1 className="text-4xl font-bold">User Management</h1>
         <p className="mt-2 text-muted-foreground">Manage all registered customers</p>

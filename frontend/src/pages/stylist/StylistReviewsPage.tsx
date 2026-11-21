@@ -96,7 +96,7 @@ export default function StylistReviewsPage() {
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto font-sans">
+    <div className="space-y-6 font-sans">
       <div className="flex flex-col md:flex-row gap-6 items-stretch">
         {/* Stats Summary */}
         <Card className="flex-1 shadow-none border-border/60">
