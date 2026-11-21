@@ -79,7 +79,7 @@ export function SidebarMenuButton({
 /* ---------------- Inset ---------------- */
 
 export function SidebarInset({ children, className }: UIProps) {
-  return <div className={cn('flex flex-col flex-1', className)}>{children}</div>;
+  return <div className={cn('flex min-w-0 flex-1 flex-col', className)}>{children}</div>;
 }
 
 /* ---------------- Trigger ---------------- */

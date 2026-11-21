@@ -30,6 +30,7 @@ import StylistManagementPage from '@/pages/admin/stylist/StylistManagementPage';
 import SlotManagementPage from '@/pages/admin/SlotManagementPage';
 import UserManagementPage from '@/pages/admin/user/UserManagementPage';
 import CategoriesPage from '@/pages/admin/CategoriesPage';
+import CategoryFormPage from '@/pages/admin/CategoryFormPage';
 import ServicesPage from '@/pages/admin/ServicesPage';
 import BranchesPage from '@/pages/admin/branch/BranchesPage';
 import OffDayManagementPage from '@/pages/admin/stylist/OffDayManagementPage';
@@ -128,6 +129,8 @@ export default function AppRoutes() {
           <Route path="stylists" element={<StylistManagementPage />} />
           <Route path="users" element={<UserManagementPage />} />
           <Route path="categories" element={<CategoriesPage />} />
+          <Route path="categories/new" element={<CategoryFormPage />} />
+          <Route path="categories/:id/edit" element={<CategoryFormPage />} />
           <Route path="services" element={<ServicesPage />} />
           <Route path="branches" element={<BranchesPage />} />
           <Route path="branches/:branchId/stylists" element={<BranchStylistsPage />} />
