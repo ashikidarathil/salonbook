@@ -1,13 +1,11 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import {
   fetchPaginatedServices,
-  createService,
-  updateService,
   toggleServiceStatus,
-  uploadServiceImage,
   deleteServiceImage,
   softDeleteService,
   restoreService,
@@ -24,17 +22,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-  DialogClose,
-} from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import Pagination from '@/components/pagination/Pagination';
 import { ERROR_MESSAGES } from '@/common/constants/error.messages';
 import {
@@ -44,32 +32,15 @@ import {
   showLoading,
   closeLoading,
 } from '@/common/utils/swal.utils';
-import { useForm, useWatch } from 'react-hook-form';
-import { SlugField } from '@/components/admin/SlugField';
-import { slugFormField, slugForSubmit } from '@/common/utils/slug';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import type { Service } from '@/features/service/service.types';
 import { fetchCategories } from '@/features/category/categoryThunks';
-import { ImageCropper } from '@/components/cropper/ImageCropper';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import {
-  Upload,
-  Trash2,
-  X,
-  Edit,
-  Power,
-  Ban,
-  RotateCcw,
-  ImagePlus,
-  Plus,
-  Check,
-  Eye,
-} from 'lucide-react';
+import { Trash2, Edit, Power, Ban, RotateCcw, ImagePlus, Eye } from 'lucide-react';
 
 import { LoadingGate } from '@/components/common/LoadingGate';
 import { clearError } from '@/features/service/service.slice';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useListParams } from '@/hooks/useListParams';
+import { PageHeader } from '@/components/common/PageHeader';
 
 import {
   Select,
@@ -81,69 +52,21 @@ import {
 
 const ITEMS_PER_PAGE = 5;
 
-const serviceSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  description: z.string().optional(),
-  categoryId: z.string().min(1, 'Category is required'),
-  whatIncluded: z.array(z.string()).optional(),
-  slug: slugFormField,
-});
-
-type ServiceFormData = z.infer<typeof serviceSchema>;
-
 export default function ServicesPage() {
   const dispatch = useAppDispatch();
-  const { services, loading, error, imageLoading, pagination } = useAppSelector(
-    (state) => state.service,
-  );
+  const { services, loading, error, pagination } = useAppSelector((state) => state.service);
   const { categories } = useAppSelector((state) => state.category);
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const location = useLocation();
+  const list = useListParams();
+  const searchTerm = list.search;
   const debouncedSearch = useDebounce(searchTerm, 500);
-  const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
-  const [statusFilter, setStatusFilter] = useState<'ACTIVE' | 'INACTIVE' | 'ALL'>('ALL');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
-  const [isCropperOpen, setIsCropperOpen] = useState(false);
-  const [editingService, setEditingService] = useState<Service | null>(null);
-  const [selectedServiceForImage, setSelectedServiceForImage] = useState<Service | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
-  const [whatIncludedInput, setWhatIncludedInput] = useState<string>('');
-  const [isEditingImage, setIsEditingImage] = useState(false);
-  const [isWhatIncludedModalOpen, setIsWhatIncludedModalOpen] = useState(false);
-  const [selectedServiceForWhatIncluded, setSelectedServiceForWhatIncluded] =
-    useState<Service | null>(null);
-
-  const form = useForm<ServiceFormData>({
-    resolver: zodResolver(serviceSchema),
-    defaultValues: {
-      name: '',
-      description: '',
-      categoryId: '',
-      whatIncluded: [],
-      slug: '',
-    },
-  });
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors },
-  } = form;
-
-  const slugValue = useWatch({ control: form.control, name: 'slug' });
-  const nameValue = useWatch({ control: form.control, name: 'name' });
-
-  const whatIncluded =
-    useWatch({
-      control: form.control,
-      name: 'whatIncluded',
-      defaultValue: [],
-    }) || [];
+  const categoryFilter = list.value('category');
+  const statusParam = list.value('status');
+  const statusFilter = (
+    statusParam === 'ACTIVE' || statusParam === 'INACTIVE' ? statusParam : 'ALL'
+  ) as 'ACTIVE' | 'INACTIVE' | 'ALL';
+  const currentPage = list.page;
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -164,130 +87,6 @@ export default function ServicesPage() {
   useEffect(() => {
     loadServices();
   }, [loadServices]);
-
-  const onSubmit = async (data: ServiceFormData) => {
-    showLoading(editingService ? 'Updating service...' : 'Creating service...');
-
-    const payload = { ...data, slug: slugForSubmit(data.slug) };
-    const result = editingService
-      ? await dispatch(updateService({ id: editingService.id, data: payload }))
-      : await dispatch(createService(payload));
-
-    closeLoading();
-
-    if (createService.fulfilled.match(result) || updateService.fulfilled.match(result)) {
-      showSuccess(
-        editingService ? 'Service Updated' : 'Service Created',
-        editingService ? 'Changes saved successfully' : 'New service added',
-      );
-      reset();
-      setEditingService(null);
-      setIsAddDialogOpen(false);
-      setWhatIncludedInput('');
-      setCurrentPage(1);
-      loadServices();
-    } else {
-      showError('Failed', (result.payload as string) || ERROR_MESSAGES.OPERATION_FAILED);
-    }
-  };
-
-  const handleEdit = (svc: Service) => {
-    setEditingService(svc);
-    reset({
-      name: svc.name,
-      description: svc.description || '',
-      categoryId: svc.categoryId,
-      whatIncluded: svc.whatIncluded || [],
-      slug: svc.slug || '',
-    });
-    setWhatIncludedInput('');
-    setIsAddDialogOpen(true);
-  };
-
-  const handleAddWhatIncluded = () => {
-    if (whatIncludedInput.trim() && whatIncluded.length < 10) {
-      const currentItems = whatIncluded || [];
-      setValue('whatIncluded', [...currentItems, whatIncludedInput.trim()]);
-      setWhatIncludedInput('');
-    }
-  };
-
-  const handleRemoveWhatIncluded = (index: number) => {
-    const currentItems = whatIncluded || [];
-    setValue(
-      'whatIncluded',
-      currentItems.filter((_, i) => i !== index),
-    );
-  };
-
-  const handleImageDialogOpen = (svc: Service) => {
-    setSelectedServiceForImage(svc);
-    setImagePreview(svc.imageUrl || null);
-    setSelectedImageFile(null);
-    setIsEditingImage(false);
-    setIsImageDialogOpen(true);
-  };
-
-  const handleEditImageDialogOpen = (svc: Service) => {
-    setSelectedServiceForImage(svc);
-    setImagePreview(svc.imageUrl || null);
-    setSelectedImageFile(null);
-    setIsEditingImage(true);
-    setIsImageDialogOpen(true);
-  };
-
-  const handleOpenWhatIncludedModal = (svc: Service) => {
-    setSelectedServiceForWhatIncluded(svc);
-    setIsWhatIncludedModalOpen(true);
-  };
-
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-        setIsCropperOpen(true);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleCropComplete = (croppedFile: File) => {
-    setSelectedImageFile(croppedFile);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result as string);
-    };
-    reader.readAsDataURL(croppedFile);
-  };
-
-  const handleUploadImage = async () => {
-    if (!selectedServiceForImage || !selectedImageFile) {
-      showError('Failed', 'Please select an image file');
-      return;
-    }
-
-    showLoading('Uploading image...');
-    const result = await dispatch(
-      uploadServiceImage({
-        serviceId: selectedServiceForImage.id,
-        file: selectedImageFile,
-      }),
-    );
-    closeLoading();
-
-    if (uploadServiceImage.fulfilled.match(result)) {
-      showSuccess('Success', 'Image uploaded successfully');
-      loadServices();
-      setIsImageDialogOpen(false);
-      setSelectedServiceForImage(null);
-      setImagePreview(null);
-      setSelectedImageFile(null);
-    } else {
-      showError('Failed', (result.payload as string) || ERROR_MESSAGES.UPLOAD_PICTURE_FAILED);
-    }
-  };
 
   const handleDeleteImage = async (serviceId: string) => {
     const confirmed = await showConfirm(
@@ -392,177 +191,23 @@ export default function ServicesPage() {
   };
 
   return (
-    <div className="p-8 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold">Service Management</h1>
-          <p className="mt-2 text-muted-foreground">
-            Manage services with search, filters, and detailed information
-          </p>
-        </div>
-
-        <Dialog
-          open={isAddDialogOpen}
-          onOpenChange={(open) => {
-            setIsAddDialogOpen(open);
-
-            if (!open) {
-              setEditingService(null);
-              setWhatIncludedInput('');
-              reset({
-                name: '',
-                description: '',
-                categoryId: '',
-                whatIncluded: [],
-                slug: '',
-              });
-            }
-          }}
-        >
-          {' '}
-          <DialogTrigger asChild>
-            <Button
-              onClick={() => {
-                setEditingService(null);
-              }}
-            >
-              Add New Service
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto theme-admin">
-            <DialogHeader>
-              <DialogTitle>{editingService ? 'Edit Service' : 'Add New Service'}</DialogTitle>
-              <DialogDescription>
-                {editingService
-                  ? 'Update the details of the selected service.'
-                  : 'Fill the form below to create a new service.'}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit(onSubmit)} className="pt-4 space-y-6">
-              <div>
-                <Label htmlFor="name">Service Name *</Label>
-                <Input id="name" {...register('name')} placeholder="Hair Cut & Style" />
-                {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
-              </div>
-
-              <SlugField
-                pathPrefix="/branches/<branch>/services/"
-                value={slugValue}
-                sourceName={nameValue}
-                savedSlug={editingService?.slug}
-                error={errors.slug?.message}
-                inputProps={register('slug')}
-              />
-
-              <div>
-                <Label htmlFor="description">Description (optional)</Label>
-                <Textarea
-                  id="description"
-                  {...register('description')}
-                  placeholder="Detailed description of the service..."
-                  className="h-20"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="categoryId">Category *</Label>
-                <select
-                  id="categoryId"
-                  /* FIXED: Use useWatch for categoryId to avoid React Compiler warning */
-                  value={useWatch({ control: form.control, name: 'categoryId' }) || ''}
-                  onChange={(e) => setValue('categoryId', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="">Select category</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {capitalizeFirst(cat.name)}
-                    </option>
-                  ))}
-                </select>
-                {errors.categoryId && (
-                  <p className="mt-1 text-sm text-red-600">{errors.categoryId.message}</p>
-                )}
-              </div>
-
-              {/* What's Included Section */}
-              <div className="pt-6 border-t">
-                <Label className="text-base font-semibold">What's Included (optional)</Label>
-                <p className="mt-1 mb-4 text-sm text-gray-500">
-                  Add bullet points of what's included in this service (1-10 items)
-                </p>
-
-                <div className="flex gap-2 mb-4">
-                  <Input
-                    type="text"
-                    placeholder="Add an item (e.g., Free hair consultation)"
-                    value={whatIncludedInput}
-                    onChange={(e) => setWhatIncludedInput(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleAddWhatIncluded();
-                      }
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    onClick={handleAddWhatIncluded}
-                    variant="outline"
-                    className="gap-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add
-                  </Button>
-                </div>
-
-                {whatIncluded && whatIncluded.length > 0 && (
-                  <div className="space-y-2">
-                    {whatIncluded.map((item, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-3 border border-gray-200 rounded bg-gray-50"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Check className="w-4 h-4 text-green-600" />
-                          <span className="text-sm">{item}</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveWhatIncluded(index)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {whatIncluded && whatIncluded.length >= 10 && (
-                  <p className="mt-2 text-xs text-yellow-600">Maximum 10 items reached</p>
-                )}
-              </div>
-
-              <div className="flex justify-end gap-3 pt-6 border-t">
-                <DialogClose asChild>
-                  <Button type="button" variant="outline">
-                    Cancel
-                  </Button>
-                </DialogClose>
-                <Button type="submit">{editingService ? 'Update' : 'Create'}</Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Service Management"
+        description="Manage services with search, filters, and detailed information"
+        breadcrumbs={[{ label: 'Services' }]}
+        actions={
+          <Button asChild className="w-full sm:w-auto">
+            <Link to="new">Add New Service</Link>
+          </Button>
+        }
+      />
 
       {/* Search & Filters - UPDATED WITH DROPDOWNS */}
       <div className="space-y-4">
         <div className="flex flex-wrap items-end gap-4">
           {/* Search Input */}
-          <div className="flex-1 min-w-[200px]">
+          <div className="w-full flex-1 sm:min-w-[200px]">
             <Label htmlFor="search" className="block mb-2 text-sm font-medium">
               Search
             </Label>
@@ -570,25 +215,19 @@ export default function ServicesPage() {
               id="search"
               placeholder="Search by name or description..."
               value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => list.update({ q: e.target.value })}
             />
           </div>
 
           {/* Category Filter Dropdown */}
-          <div className="min-w-[180px]">
+          <div className="w-full sm:w-auto sm:min-w-[180px]">
             <Label htmlFor="category-filter" className="block mb-2 text-sm font-medium">
               Category
             </Label>
             <div className="relative">
               <Select
                 value={categoryFilter}
-                onValueChange={(value) => {
-                  setCategoryFilter(value);
-                  setCurrentPage(1);
-                }}
+                onValueChange={(value) => list.update({ category: value })}
               >
                 <SelectTrigger id="category-filter">
                   <SelectValue placeholder="Select category" />
@@ -606,17 +245,14 @@ export default function ServicesPage() {
           </div>
 
           {/* Status Filter Dropdown */}
-          <div className="min-w-[150px]">
+          <div className="w-full sm:w-auto sm:min-w-[150px]">
             <Label htmlFor="status-filter" className="block mb-2 text-sm font-medium">
               Status
             </Label>
             <div className="relative">
               <Select
                 value={statusFilter}
-                onValueChange={(value) => {
-                  setStatusFilter(value as 'ACTIVE' | 'INACTIVE' | 'ALL');
-                  setCurrentPage(1);
-                }}
+                onValueChange={(value) => list.update({ status: value })}
               >
                 <SelectTrigger id="status-filter">
                   <SelectValue placeholder="Select status" />
@@ -631,123 +267,6 @@ export default function ServicesPage() {
           </div>
         </div>
       </div>
-
-      <Dialog open={isWhatIncludedModalOpen} onOpenChange={setIsWhatIncludedModalOpen}>
-        <DialogContent className="sm:max-w-lg theme-admin">
-          <DialogHeader>
-            <DialogTitle>What's Included - {selectedServiceForWhatIncluded?.name}</DialogTitle>
-            <DialogDescription>All items included in this service</DialogDescription>
-          </DialogHeader>
-          <div className="pt-4 space-y-3 max-h-[60vh] overflow-y-auto">
-            {selectedServiceForWhatIncluded?.whatIncluded &&
-            selectedServiceForWhatIncluded.whatIncluded.length > 0 ? (
-              <div className="space-y-2">
-                {selectedServiceForWhatIncluded.whatIncluded.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-start gap-3 p-3 border border-gray-200 rounded bg-gray-50"
-                  >
-                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-gray-700">{item}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="py-8 text-center text-gray-500">No items included in this service</p>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Image Upload Dialog */}
-      <Dialog open={isImageDialogOpen} onOpenChange={setIsImageDialogOpen}>
-        <DialogContent className="sm:max-w-lg theme-admin">
-          <DialogHeader>
-            <DialogTitle>
-              {isEditingImage && selectedServiceForImage?.imageUrl
-                ? `Edit Image - ${selectedServiceForImage?.name}`
-                : `Upload Image - ${selectedServiceForImage?.name}`}
-            </DialogTitle>
-            <DialogDescription>
-              {isEditingImage && selectedServiceForImage?.imageUrl
-                ? 'Update the image for this service'
-                : 'Upload a new image for this service'}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="pt-4 space-y-6">
-            {/* Image Preview */}
-            <div className="relative w-full h-64 overflow-hidden border-2 border-gray-300 border-dashed rounded-lg">
-              {imagePreview ? (
-                <>
-                  <img
-                    src={imagePreview}
-                    alt="Service preview"
-                    className="object-cover w-full h-full"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setImagePreview(null);
-                      setSelectedImageFile(null);
-                    }}
-                    className="absolute p-1 text-white bg-red-500 rounded-full top-2 right-2"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </>
-              ) : (
-                <div className="flex items-center justify-center w-full h-full bg-gray-50">
-                  <Upload className="w-8 h-8 text-gray-400" />
-                </div>
-              )}
-            </div>
-
-            {/* File Input */}
-            <div>
-              <Label htmlFor="image-input">
-                {isEditingImage ? 'Select New Image File' : 'Select Image File'}
-              </Label>
-              <Input
-                id="image-input"
-                type="file"
-                accept="image/*"
-                onChange={handleImageSelect}
-                className="mt-2"
-              />
-            </div>
-
-            {/* Buttons */}
-            <div className="flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={() => setIsImageDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                onClick={handleUploadImage}
-                disabled={!selectedImageFile || imageLoading}
-                className="gap-2"
-              >
-                {imageLoading
-                  ? isEditingImage
-                    ? 'Updating...'
-                    : 'Uploading...'
-                  : isEditingImage
-                    ? 'Update Image'
-                    : 'Upload Image'}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Image Cropper */}
-      {imagePreview && (
-        <ImageCropper
-          open={isCropperOpen}
-          onClose={() => setIsCropperOpen(false)}
-          imageSrc={imagePreview}
-          onCropComplete={handleCropComplete}
-        />
-      )}
 
       <LoadingGate
         loading={loading}
@@ -766,7 +285,69 @@ export default function ServicesPage() {
             <CardTitle>All Services ({pagination.totalItems})</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
+            <ul className="divide-y lg:hidden">
+              {services.map((svc) => (
+                <li key={svc.id} className={`space-y-3 p-4 ${svc.isDeleted ? 'bg-red-50/40' : ''}`}>
+                  <div className="flex items-start gap-3">
+                    {svc.imageUrl ? (
+                      <img
+                        src={svc.imageUrl}
+                        alt=""
+                        className="size-14 shrink-0 rounded-md object-cover"
+                      />
+                    ) : (
+                      <div className="flex size-14 shrink-0 items-center justify-center rounded-md bg-muted">
+                        <ImagePlus className="size-5 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="break-words font-medium">{capitalizeFirst(svc.name)}</p>
+                      <p className="mt-0.5 text-sm text-muted-foreground">
+                        {capitalizeFirst(getCategoryName(svc.categoryId))}
+                        {' · '}
+                        {svc.whatIncluded?.length ?? 0} included
+                      </p>
+                    </div>
+                    <div className="shrink-0">{getStatusBadge(svc.status, svc.isDeleted)}</div>
+                  </div>
+                  {svc.isDeleted ? (
+                    <Button
+                      size="sm"
+                      className="w-full bg-green-600 text-white hover:bg-green-700"
+                      onClick={() => handleRestore(svc.id)}
+                    >
+                      <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+                      Restore
+                    </Button>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-2">
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to={`${svc.id}/edit`} state={{ from: location.search }}>
+                          <Edit className="mr-1 h-3.5 w-3.5" />
+                          Edit
+                        </Link>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleToggleStatus(svc.id, svc.status)}
+                      >
+                        {svc.status === 'ACTIVE' ? 'Disable' : 'Enable'}
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="bg-red-600 text-white hover:bg-red-700"
+                        onClick={() => handleSoftDelete(svc.id)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+
+            <div className="hidden overflow-x-auto lg:block">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -797,13 +378,15 @@ export default function ServicesPage() {
                               {/* Edit Image Button */}
                               {!svc.isDeleted && (
                                 <>
-                                  <button
-                                    onClick={() => handleEditImageDialogOpen(svc)}
+                                  <Link
+                                    to={`${svc.id}/edit#photo`}
+                                    state={{ from: location.search }}
+                                    aria-label={`Change photo of ${svc.name}`}
                                     className="bg-blue-500 text-white rounded-full p-0.5 hover:bg-blue-600"
                                     title="Edit Image"
                                   >
                                     <Edit className="w-3 h-3" />
-                                  </button>
+                                  </Link>
                                   {/* Delete Image Button */}
                                   <button
                                     onClick={() => handleDeleteImage(svc.id)}
@@ -821,13 +404,14 @@ export default function ServicesPage() {
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="w-8 h-8"
-                                    onClick={() => handleImageDialogOpen(svc)}
-                                  >
-                                    <ImagePlus className="w-4 h-4" />
+                                  <Button variant="ghost" size="icon" className="w-8 h-8" asChild>
+                                    <Link
+                                      to={`${svc.id}/edit#photo`}
+                                      state={{ from: location.search }}
+                                      aria-label={`Add photo to ${svc.name}`}
+                                    >
+                                      <ImagePlus className="w-4 h-4" />
+                                    </Link>
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" className="theme-admin">
@@ -860,10 +444,12 @@ export default function ServicesPage() {
                                 variant="ghost"
                                 size="sm"
                                 className="h-6 p-0 text-xs text-blue-600 hover:text-blue-700"
-                                onClick={() => handleOpenWhatIncludedModal(svc)}
+                                asChild
                               >
-                                <Eye className="w-3 h-3 mr-1" />
-                                Show All ({svc.whatIncluded.length})
+                                <Link to={`${svc.id}/edit`} state={{ from: location.search }}>
+                                  <Eye className="w-3 h-3 mr-1" />
+                                  Show All ({svc.whatIncluded.length})
+                                </Link>
                               </Button>
                             )}
                           </div>
@@ -880,18 +466,19 @@ export default function ServicesPage() {
                         )}
                       </TableCell>
                       <TableCell className="text-right whitespace-nowrap">
-                        <div className="hidden md:flex items-center justify-end gap-1.5">
+                        <div className="flex items-center justify-end gap-1.5">
                           {!svc.isDeleted && (
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="w-8 h-8"
-                                    onClick={() => handleEdit(svc)}
-                                  >
-                                    <Edit className="w-4 h-4" />
+                                  <Button variant="ghost" size="icon" className="w-8 h-8" asChild>
+                                    <Link
+                                      to={`${svc.id}/edit`}
+                                      state={{ from: location.search }}
+                                      aria-label={`Edit ${svc.name}`}
+                                    >
+                                      <Edit className="w-4 h-4" />
+                                    </Link>
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" className="theme-admin">
@@ -901,13 +488,14 @@ export default function ServicesPage() {
 
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="w-8 h-8"
-                                    onClick={() => handleImageDialogOpen(svc)}
-                                  >
-                                    <ImagePlus className="w-4 h-4" />
+                                  <Button variant="ghost" size="icon" className="w-8 h-8" asChild>
+                                    <Link
+                                      to={`${svc.id}/edit#photo`}
+                                      state={{ from: location.search }}
+                                      aria-label={`Upload photo for ${svc.name}`}
+                                    >
+                                      <ImagePlus className="w-4 h-4" />
+                                    </Link>
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" className="theme-admin">
@@ -970,7 +558,7 @@ export default function ServicesPage() {
               <Pagination
                 currentPage={pagination.currentPage}
                 totalPages={pagination.totalPages}
-                onPageChange={setCurrentPage}
+                onPageChange={(page) => list.update({}, page)}
               />
             </div>
           </CardContent>

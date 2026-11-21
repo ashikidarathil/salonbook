@@ -52,7 +52,7 @@ Tick `[x]` as each item is done. One sub-phase ≈ one PR. Update [PROGRESS.md](
 Forms and large popups become inner pages with breadcrumbs. Popups stay only for small confirmations,
 the image cropper, full-screen photo viewer, chat camera and photo preview, and mobile menus.
 - [x] 5.1 Shared foundation: breadcrumbs, page header, form page, mobile cards (pattern: admin Categories)
-- [ ] 5.2 Admin catalog: Services (including What's Included and image), Coupons, Holidays
+- [x] 5.2 Admin catalog: Services (including What's Included and image), Coupons, Holidays
 - [ ] 5.3 Admin branches and stylists: branch form, map picker, branch breaks, stylist invite and invite details
 - [ ] 5.4 Schedules and slots (admin + stylist): special slots, breaks, daily adjustments
 - [ ] 5.5 Customer booking flow: choose service, slot picker (from stylist, cart, bookings and admin reschedule)

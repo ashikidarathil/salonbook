@@ -32,15 +32,18 @@ import UserManagementPage from '@/pages/admin/user/UserManagementPage';
 import CategoriesPage from '@/pages/admin/CategoriesPage';
 import CategoryFormPage from '@/pages/admin/CategoryFormPage';
 import ServicesPage from '@/pages/admin/ServicesPage';
+import ServiceFormPage from '@/pages/admin/ServiceFormPage';
 import BranchesPage from '@/pages/admin/branch/BranchesPage';
 import OffDayManagementPage from '@/pages/admin/stylist/OffDayManagementPage';
 import DashboardContent from '@/pages/admin/DashboardContent';
 import AdminBookingsPage from '@/pages/admin/AdminBookingsPage';
 import AdminBookingDetailPage from '@/pages/admin/AdminBookingDetailPage';
 import CouponManagementPage from '@/pages/admin/CouponManagementPage';
+import CouponFormPage from '@/pages/admin/CouponFormPage';
 import AdminChatPage from '@/pages/admin/AdminChatPage';
 
 import HolidayManagementPage from '@/pages/admin/holiday/HolidayManagementPage';
+import HolidayFormPage from '@/pages/admin/holiday/HolidayFormPage';
 import BranchStylistsPage from '@/pages/admin/branch/BranchStylistsPage';
 import BranchCategoriesPage from '@/pages/admin/branch/BranchCategoriesPage';
 import BranchServicesPage from '@/pages/admin/branch/BranchServicesPage';
@@ -132,6 +135,8 @@ export default function AppRoutes() {
           <Route path="categories/new" element={<CategoryFormPage />} />
           <Route path="categories/:id/edit" element={<CategoryFormPage />} />
           <Route path="services" element={<ServicesPage />} />
+          <Route path="services/new" element={<ServiceFormPage />} />
+          <Route path="services/:id/edit" element={<ServiceFormPage />} />
           <Route path="branches" element={<BranchesPage />} />
           <Route path="branches/:branchId/stylists" element={<BranchStylistsPage />} />
           <Route path="branches/:branchId/categories" element={<BranchCategoriesPage />} />
@@ -141,7 +146,10 @@ export default function AppRoutes() {
           <Route path="bookings/:id" element={<AdminBookingDetailPage />} />
           <Route path="off-days" element={<OffDayManagementPage />} />
           <Route path="holidays" element={<HolidayManagementPage />} />
+          <Route path="holidays/new" element={<HolidayFormPage />} />
           <Route path="coupons" element={<CouponManagementPage />} />
+          <Route path="coupons/new" element={<CouponFormPage />} />
+          <Route path="coupons/:id/edit" element={<CouponFormPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="chat" element={<AdminChatPage />} />
           <Route path="wallet" element={<AdminWalletPage />} />

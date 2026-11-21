@@ -4,7 +4,6 @@ import { buildUrl } from '@/common/utils/api.utils';
 import type { ApiResponse } from '@/common/types/api.types';
 import type {
   Service,
-  ServiceStatus,
   ServiceQuery,
   PaginatedServiceResponse,
 } from '@/features/service/service.types';
@@ -14,7 +13,6 @@ export type CreateServiceInput = {
   description?: string;
   categoryId: string;
   imageUrl?: string;
-  status?: ServiceStatus;
   whatIncluded?: string[];
   slug?: string;
 };
@@ -37,12 +35,7 @@ export const serviceService = {
   },
 
   create(data: CreateServiceInput) {
-    const payload = {
-      ...data,
-      status: data.status ?? 'ACTIVE',
-    };
-
-    return api.post<ApiResponse<Service>>(API_ROUTES.SERVICE.CREATE, payload);
+    return api.post<ApiResponse<Service>>(API_ROUTES.SERVICE.CREATE, data);
   },
 
   update(id: string, data: Partial<Service>) {
