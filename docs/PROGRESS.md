@@ -92,3 +92,5 @@
 - 2026-11-21 — 9.10 delete for everyone: senders can remove their text, photo or voice message for both people, live,
   leaving a "deleted" placeholder. Content and the stored file are erased. Verified in two real Chrome sessions (20/20).
   Not tested on a physical phone.
+- 2026-11-21 — 5.1 inner-page foundation: shared breadcrumbs, page header and form page. Admin Categories now uses
+  add and edit pages, keeps its list position, and has working action cards on phones.
