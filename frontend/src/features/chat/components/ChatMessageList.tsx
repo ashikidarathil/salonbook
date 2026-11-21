@@ -1,3 +1,4 @@
+import { Loader } from '@/components/common/Loader';
 import { useMemo, useState } from 'react';
 import { Icon } from '@iconify/react';
 import { format } from 'date-fns';
@@ -15,6 +16,7 @@ interface ChatMessageListProps {
   isClosed: boolean;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   onImageLoad?: () => void;
+  onRetry?: (clientId: string) => void;
 }
 
 export function ChatMessageList({
@@ -25,12 +27,13 @@ export function ChatMessageList({
   isClosed,
   messagesEndRef,
   onImageLoad,
+  onRetry,
 }: ChatMessageListProps) {
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const photos = useMemo(
     () =>
       messages
-        .filter((msg) => msg.messageType === MessageType.IMAGE && msg.mediaUrl)
+        .filter((msg) => msg.messageType === MessageType.IMAGE && msg.mediaUrl && !msg.sendState)
         .map((msg) => ({ url: msg.mediaUrl as string, caption: msg.content })),
     [messages],
   );
@@ -39,10 +42,7 @@ export function ChatMessageList({
   if (isLoading) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center h-full gap-2">
-        <Icon
-          icon="solar:spinner-bold-duotone"
-          className="size-8 animate-spin text-primary opacity-50"
-        />
+        <Loader label="Loading chat history" />
         <span className="text-sm text-muted-foreground">Loading chat history...</span>
       </div>
     );
@@ -77,7 +77,7 @@ export function ChatMessageList({
             format(new Date(messages[index - 1].createdAt), 'MMM d');
 
         return (
-          <div key={msg.id || index} className="flex flex-col gap-4">
+          <div key={msg.clientId || msg.id || index} className="flex flex-col gap-4">
             {showDateStamp && (
               <div className="flex justify-center my-4 sticky top-2 z-10">
                 <span className="bg-background/80 backdrop-blur shadow-sm border border-border/50 text-xs px-3 py-1 rounded-full text-muted-foreground font-medium">
@@ -118,9 +118,18 @@ export function ChatMessageList({
                       <button
                         type="button"
                         aria-label="Open photo"
-                        className="block cursor-zoom-in text-left"
+                        disabled={!!msg.sendState}
+                        className="relative block cursor-zoom-in text-left disabled:cursor-default"
                         onClick={() => setViewerUrl(msg.mediaUrl as string)}
                       >
+                        {msg.sendState === 'sending' && (
+                          <span
+                            data-photo-sending
+                            className="absolute left-1/2 top-1/2 z-10 flex h-9 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/55"
+                          >
+                            <Loader size="xs" inverse label="Sending photo" />
+                          </span>
+                        )}
                         <img
                           src={msg.mediaUrl}
                           alt={msg.content || 'Chat attachment'}
@@ -155,8 +164,18 @@ export function ChatMessageList({
                     <span className="text-[10px] text-muted-foreground opacity-60">
                       {format(new Date(msg.createdAt), 'h:mm a')}
                     </span>
-                    {isMine && <MessageTicks message={msg} />}
+                    {isMine && msg.sendState !== 'failed' && <MessageTicks message={msg} />}
                   </span>
+                  {msg.sendState === 'failed' && msg.clientId && (
+                    <button
+                      type="button"
+                      onClick={() => onRetry?.(msg.clientId as string)}
+                      className="mx-1 mt-0.5 inline-flex min-h-6 items-center gap-1 text-xs font-medium text-red-600 hover:underline"
+                    >
+                      <Icon icon="solar:danger-circle-bold" className="size-3.5" />
+                      Not sent · Retry
+                    </button>
+                  )}
                 </div>
               </div>
             )}

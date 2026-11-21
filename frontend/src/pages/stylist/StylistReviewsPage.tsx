@@ -1,3 +1,4 @@
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useState, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchReviews, fetchStylistRating } from '@/features/review/state/review.thunks';
@@ -8,7 +9,6 @@ import Pagination from '@/components/pagination/Pagination';
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -87,13 +87,8 @@ export default function StylistReviewsPage() {
 
   if (initialLoading && isLoading) {
     return (
-      <div className="p-6 space-y-6">
-        <Skeleton className="h-32 w-full" />
-        <div className="grid gap-4">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-40 w-full" />
-          ))}
-        </div>
+      <div className="flex min-h-[400px] items-center justify-center p-6">
+        <Loader size="lg" label="Loading reviews" />
       </div>
     );
   }
@@ -199,7 +194,9 @@ export default function StylistReviewsPage() {
 
       <div className="grid gap-4">
         {isLoading && reviews.length === 0 ? (
-          Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-40 w-full" />)
+          <div className="flex justify-center py-16">
+            <Loader label="Loading reviews" />
+          </div>
         ) : reviews.length === 0 ? (
           <Card className="p-16 text-center text-muted-foreground border-dashed">
             <MessageSquare className="h-10 w-10 mx-auto opacity-10 mb-4" />

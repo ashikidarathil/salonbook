@@ -1,5 +1,6 @@
 'use client';
 
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useState, useCallback } from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { branchService } from '@/services/branch.service';
@@ -378,7 +379,11 @@ export default function SlotManagementPage() {
               onClick={slotView === 'special' ? fetchSpecialSlots : fetchSlots}
               disabled={loading}
             >
-              <Icon icon="solar:restart-bold" className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
+              {loading ? (
+                <Loader size="xs" className="mr-2" />
+              ) : (
+                <Icon icon="solar:restart-bold" className="mr-2" />
+              )}
               Refresh
             </Button>
           </div>
@@ -456,10 +461,7 @@ export default function SlotManagementPage() {
                     ) : loading ? (
                       <TableRow>
                         <TableCell colSpan={4} className="py-12 text-center text-muted-foreground">
-                          <Icon
-                            icon="eos-icons:loading"
-                            className="size-6 animate-spin mx-auto mb-2"
-                          />
+                          <Loader size="sm" className="mx-auto mb-2" />
                           Loading slots...
                         </TableCell>
                       </TableRow>
@@ -532,7 +534,7 @@ export default function SlotManagementPage() {
             <div className="p-4">
               {loading ? (
                 <div className="flex items-center justify-center gap-2 py-10 text-muted-foreground">
-                  <Icon icon="eos-icons:loading" className="size-5 animate-spin" />
+                  <Loader size="xs" />
                   <span>Loading special slots...</span>
                 </div>
               ) : specialSlots.length === 0 ? (

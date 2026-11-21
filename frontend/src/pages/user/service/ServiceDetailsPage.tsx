@@ -1,5 +1,6 @@
 'use client';
 
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -428,10 +429,7 @@ export default function ServiceDetailsPage() {
                         ))
                       ) : isLoadingReviews ? (
                         <div className="py-8 text-center text-muted-foreground">
-                          <Icon
-                            icon="solar:restart-bold"
-                            className="mx-auto mb-3 size-12 text-muted-foreground/30 animate-spin"
-                          />
+                          <Loader size="md" className="mx-auto mb-3" />
                           <p className="text-sm">Loading reviews...</p>
                         </div>
                       ) : (

@@ -1,11 +1,11 @@
 'use client';
 
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
 import { Card, CardContent } from '@/components/ui/card';
 import { reviewService } from '@/features/review/review.service';
 import type { Review } from '@/features/review/review.types';
-import { Skeleton } from '../ui/skeleton';
 
 export function Testimonials() {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -31,13 +31,8 @@ export function Testimonials() {
 
   if (loading) {
     return (
-      <section className="container px-4 py-16 mx-auto md:py-24 text-center">
-        <Skeleton className="h-10 w-64 mx-auto mb-12" />
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-48 w-full" />
-          ))}
-        </div>
+      <section className="container flex min-h-[320px] items-center justify-center px-4 py-16 mx-auto">
+        <Loader size="lg" label="Loading reviews" />
       </section>
     );
   }

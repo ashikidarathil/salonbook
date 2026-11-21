@@ -1,12 +1,12 @@
 'use client';
 
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { reviewService } from '../../features/review/review.service';
-import { Skeleton } from '../ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import type { TopService } from '@/features/review/review.types';
@@ -32,13 +32,8 @@ export function PopularServices() {
 
   if (loading) {
     return (
-      <section className="container px-4 py-16 mx-auto md:py-24 text-center">
-        <Skeleton className="h-10 w-64 mx-auto mb-12" />
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Skeleton key={i} className="h-96 w-full" />
-          ))}
-        </div>
+      <section className="container flex min-h-[420px] items-center justify-center px-4 py-16 mx-auto">
+        <Loader size="lg" label="Loading services" />
       </section>
     );
   }

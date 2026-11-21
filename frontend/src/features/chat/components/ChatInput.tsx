@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { showError } from '@/common/utils/swal.utils';
 import { MessageType, SenderType } from '../chat.types';
-import type { SendMessagePayload } from '../chat.types';
+import type { MediaSendItem, SendMessagePayload } from '../chat.types';
 import { RecordingWave } from './RecordingWave';
 import { PhotoComposer } from './PhotoComposer';
 import type { PhotoDraft } from './PhotoComposer';
@@ -19,8 +19,9 @@ import { waveformFromBlob } from '../waveform';
 
 const MAX_PHOTOS = 10;
 const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
-const PHOTO_SEND_GAP_MS = 1300;
 const ALLOWED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+const currentTimeMs = () => Date.now();
 
 interface ChatInputProps {
   isConnected: boolean;
@@ -29,7 +30,7 @@ interface ChatInputProps {
   isStylist: boolean;
   isClosed: boolean;
   onSendMessage: (payload: SendMessagePayload) => void;
-  onUploadMedia: (file: File) => Promise<string>;
+  onSendMedia: (items: MediaSendItem[]) => void;
 }
 
 export function ChatInput({
@@ -39,20 +40,16 @@ export function ChatInput({
   isStylist,
   isClosed,
   onSendMessage,
-  onUploadMedia,
+  onSendMedia,
 }: ChatInputProps) {
   const [inputText, setInputText] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
 
   const [drafts, setDrafts] = useState<PhotoDraft[]>([]);
   const [photoError, setPhotoError] = useState<string | null>(null);
-  const [sendingNumber, setSendingNumber] = useState<number | null>(null);
-  const [sendingTotal, setSendingTotal] = useState(0);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const draftsRef = useRef<PhotoDraft[]>([]);
-  const isConnectedRef = useRef(isConnected);
 
   const libraryInputRef = useRef<HTMLInputElement>(null);
   const filesInputRef = useRef<HTMLInputElement>(null);
@@ -68,10 +65,6 @@ export function ChatInput({
     draftsRef.current = next;
     setDrafts(next);
   };
-
-  useEffect(() => {
-    isConnectedRef.current = isConnected;
-  }, [isConnected]);
 
   useEffect(
     () => () => draftsRef.current.forEach((draft) => URL.revokeObjectURL(draft.previewUrl)),
@@ -157,41 +150,21 @@ export function ChatInput({
     setPhotoError(null);
   };
 
-  const sendPhotos = async () => {
-    if (!activeRoomId || sendingNumber !== null) return;
-    const queue = [...draftsRef.current];
-    setPhotoError(null);
-    setSendingTotal(queue.length);
-    try {
-      for (let i = 0; i < queue.length; i++) {
-        if (!isConnectedRef.current) {
-          setPhotoError('You are offline. Reconnect, then press send again.');
-          return;
-        }
-        const startedAt = Date.now();
-        setSendingNumber(i + 1);
-        const draft = queue[i];
-        const mediaUrl = await onUploadMedia(draft.file);
-        onSendMessage({
+  const sendPhotos = () => {
+    if (!activeRoomId) return;
+    onSendMedia(
+      draftsRef.current.map((draft) => ({
+        file: draft.file,
+        payload: {
           chatRoomId: activeRoomId,
           senderId: userId,
           senderType: isStylist ? SenderType.STYLIST : SenderType.USER,
           messageType: MessageType.IMAGE,
-          mediaUrl,
           content: draft.caption.trim() || undefined,
-        });
-        removeDraft(draft.id);
-        // The server allows 5 messages per 5 seconds and drops the rest
-        if (i < queue.length - 1) {
-          const wait = PHOTO_SEND_GAP_MS - (Date.now() - startedAt);
-          if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
-        }
-      }
-    } catch (err: unknown) {
-      setPhotoError((err as Error).message || 'Photo upload failed. Press send to try again.');
-    } finally {
-      setSendingNumber(null);
-    }
+        },
+      })),
+    );
+    discardDrafts();
   };
 
   const startRecording = async () => {
@@ -204,7 +177,7 @@ export function ChatInput({
       const mediaRecorder = new MediaRecorder(stream, preferred ? { mimeType: preferred } : {});
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
-      recordingStartRef.current = Date.now();
+      recordingStartRef.current = currentTimeMs();
       cancelledRef.current = false;
 
       mediaRecorder.ondataavailable = (e) => {
@@ -217,13 +190,16 @@ export function ChatInput({
         const mimeType = (mediaRecorder.mimeType || preferred || 'audio/webm').split(';')[0];
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         // Measured here: the recordingDuration state captured by this closure is stale (0)
-        const duration = Math.max(1, Math.round((Date.now() - recordingStartRef.current) / 1000));
+        const duration = Math.max(
+          1,
+          Math.round((currentTimeMs() - recordingStartRef.current) / 1000),
+        );
         if (audioBlob.size === 0) {
           showError('Recording Failed', 'No audio was captured. Please try again.');
           return;
         }
         const waveform = await waveformFromBlob(audioBlob);
-        await handleAudioUpload(audioBlob, mimeType, duration, waveform);
+        sendVoice(audioBlob, mimeType, duration, waveform);
       };
 
       mediaRecorder.start();
@@ -252,32 +228,22 @@ export function ChatInput({
     stopRecording();
   };
 
-  const handleAudioUpload = async (
-    blob: Blob,
-    mimeType: string,
-    duration: number,
-    waveform?: number[],
-  ) => {
-    try {
-      setIsUploading(true);
-      const ext = mimeType.includes('mp4') ? 'm4a' : mimeType.includes('ogg') ? 'ogg' : 'webm';
-      const file = new File([blob], `voice_${Date.now()}.${ext}`, { type: mimeType });
-      const mediaUrl = await onUploadMedia(file);
-      if (!activeRoomId) return;
-      onSendMessage({
-        chatRoomId: activeRoomId,
-        senderId: userId,
-        senderType: isStylist ? SenderType.STYLIST : SenderType.USER,
-        messageType: MessageType.VOICE,
-        mediaUrl,
-        duration,
-        waveform,
-      });
-    } catch (err: unknown) {
-      showError('Upload Failed', (err as Error).message || 'Voice upload failed');
-    } finally {
-      setIsUploading(false);
-    }
+  const sendVoice = (blob: Blob, mimeType: string, duration: number, waveform?: number[]) => {
+    if (!activeRoomId) return;
+    const ext = mimeType.includes('mp4') ? 'm4a' : mimeType.includes('ogg') ? 'ogg' : 'webm';
+    onSendMedia([
+      {
+        file: new File([blob], `voice_${Date.now()}.${ext}`, { type: mimeType }),
+        payload: {
+          chatRoomId: activeRoomId,
+          senderId: userId,
+          senderType: isStylist ? SenderType.STYLIST : SenderType.USER,
+          messageType: MessageType.VOICE,
+          duration,
+          waveform,
+        },
+      },
+    ]);
   };
 
   if (isClosed) {
@@ -338,12 +304,9 @@ export function ChatInput({
                 size="icon"
                 aria-label="Attach"
                 className="shrink-0 h-11 w-11 rounded-full text-muted-foreground hover:bg-muted/50 hover:text-foreground active:scale-95 transition-all"
-                disabled={isUploading || !isConnected}
+                disabled={!isConnected}
               >
-                <Icon
-                  icon={isUploading ? 'solar:spinner-bold-duotone' : 'solar:paperclip-linear'}
-                  className={`size-5 ${isUploading ? 'animate-spin opacity-50' : ''}`}
-                />
+                <Icon icon="solar:paperclip-linear" className="size-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent side="top" align="start" className="w-44">
@@ -411,7 +374,7 @@ export function ChatInput({
             aria-label="Record a voice message"
             className="shrink-0 h-11 w-11 rounded-full text-muted-foreground hover:bg-muted/50 hover:text-primary active:scale-95 transition-all"
             onClick={startRecording}
-            disabled={isUploading || !isConnected}
+            disabled={!isConnected}
           >
             <Icon icon="solar:microphone-bold" className="size-5" />
           </Button>
@@ -423,8 +386,6 @@ export function ChatInput({
           drafts={drafts}
           maxPhotos={MAX_PHOTOS}
           error={photoError}
-          sendingNumber={sendingNumber}
-          sendingTotal={sendingTotal}
           onCaptionChange={(id, caption) =>
             updateDrafts(
               draftsRef.current.map((draft) => (draft.id === id ? { ...draft, caption } : draft)),

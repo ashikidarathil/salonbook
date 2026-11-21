@@ -1,11 +1,11 @@
 'use client';
 
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { reviewService } from '../../features/review/review.service';
-import { Skeleton } from '../ui/skeleton';
 import { useNavigate } from 'react-router-dom';
 
 interface TopStylist {
@@ -42,16 +42,8 @@ export function TopStylists() {
 
   if (loading) {
     return (
-      <section className="container px-4 py-16 mx-auto md:py-24">
-        <div className="flex items-center justify-between mb-12">
-          <Skeleton className="h-10 w-64" />
-          <Skeleton className="h-6 w-24" />
-        </div>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: HOME_STYLIST_COUNT }, (_, i) => (
-            <Skeleton key={i} className="h-72 w-full" />
-          ))}
-        </div>
+      <section className="container flex min-h-[420px] items-center justify-center px-4 py-16 mx-auto">
+        <Loader size="lg" label="Loading stylists" />
       </section>
     );
   }

@@ -1,5 +1,6 @@
 'use client';
 
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useState, useCallback } from 'react';
 import { useAppSelector } from '@/app/hooks';
 import { slotService } from '@/services/slot.service';
@@ -252,7 +253,11 @@ export default function StylistSlotManagementPage() {
               onClick={slotView === 'normal' ? fetchSlots : fetchSpecialSlots}
               disabled={loading}
             >
-              <Icon icon="solar:restart-bold" className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
+              {loading ? (
+                <Loader size="xs" className="mr-2" />
+              ) : (
+                <Icon icon="solar:restart-bold" className="mr-2" />
+              )}
               Refresh
             </Button>
           </div>
@@ -426,7 +431,7 @@ export default function StylistSlotManagementPage() {
             <div className="p-4">
               {loading ? (
                 <div className="flex items-center justify-center py-10 text-muted-foreground gap-2">
-                  <Icon icon="eos-icons:loading" className="size-5 animate-spin" />
+                  <Loader size="xs" />
                   <span>Loading special slots...</span>
                 </div>
               ) : specialSlots.length === 0 ? (

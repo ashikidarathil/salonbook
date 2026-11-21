@@ -1,3 +1,4 @@
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useState, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { fetchAdminEscrows } from '@/features/escrow/escrow.thunks';
@@ -182,7 +183,7 @@ export default function AdminWalletPage() {
             className="h-[40px] rounded-xl gap-2 shadow-sm border-border/30 bg-muted/40"
             onClick={handleRefresh}
           >
-            <RefreshCw className={`size-4 ${loading ? 'animate-spin' : ''}`} />
+            {loading ? <Loader size="xs" /> : <RefreshCw className="size-4" />}
             Refresh
           </Button>
         </div>
@@ -278,7 +279,7 @@ export default function AdminWalletPage() {
             <TabsContent value="escrowed" className="mt-4 border-t">
               {loading && escrows.length === 0 ? (
                 <div className="py-12 text-center text-muted-foreground italic">
-                  <RefreshCw className="size-8 mx-auto mb-3 animate-spin opacity-30" />
+                  <Loader size="sm" className="mx-auto mb-3" />
                   <p>Loading escrowed funds...</p>
                 </div>
               ) : escrows.length === 0 ? (
@@ -349,7 +350,7 @@ export default function AdminWalletPage() {
             <TabsContent value="released" className="mt-4 border-t">
               {loading && escrows.length === 0 ? (
                 <div className="py-12 text-center text-muted-foreground italic">
-                  <RefreshCw className="size-8 mx-auto mb-3 animate-spin opacity-30" />
+                  <Loader size="sm" className="mx-auto mb-3" />
                   <p>Loading history...</p>
                 </div>
               ) : escrows.length === 0 ? (

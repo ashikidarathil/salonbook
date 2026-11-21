@@ -1,3 +1,4 @@
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent, WheelEvent } from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
@@ -174,10 +175,11 @@ export function ImageViewer({ images, startIndex, onClose }: ImageViewerProps) {
                 disabled={isDownloading}
                 onClick={download}
               >
-                <Icon
-                  icon={isDownloading ? 'solar:spinner-bold-duotone' : 'solar:download-linear'}
-                  className={`size-5 ${isDownloading ? 'animate-spin' : ''}`}
-                />
+                {isDownloading ? (
+                  <Loader size="xs" inverse label="Downloading" />
+                ) : (
+                  <Icon icon="solar:download-linear" className="size-5" />
+                )}
               </button>
             </div>
           </div>

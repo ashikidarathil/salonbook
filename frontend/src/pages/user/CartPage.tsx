@@ -1,3 +1,4 @@
+import { Loader } from '@/components/common/Loader';
 import { bookingRef } from '@/common/utils/bookingRef';
 import { useEffect, useState, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
@@ -327,7 +328,7 @@ export default function CartPage() {
               >
                 {bookingLoading ? (
                   <>
-                    <Icon icon="eos-icons:loading" className="mr-2 size-5 animate-spin" />
+                    <Loader size="xs" className="mr-2" />
                     Booking...
                   </>
                 ) : (

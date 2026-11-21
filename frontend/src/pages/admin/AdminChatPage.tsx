@@ -1,3 +1,4 @@
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useState, useRef } from 'react';
 import { Icon } from '@iconify/react';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -100,10 +101,7 @@ export default function AdminChatPage() {
           <ScrollArea className="h-full">
             {isLoadingRooms ? (
               <div className="p-8 text-center">
-                <Icon
-                  icon="solar:restart-bold"
-                  className="size-8 animate-spin mx-auto text-muted-foreground"
-                />
+                <Loader size="sm" className="mx-auto" />
                 <p className="mt-2 text-sm text-muted-foreground">Loading rooms...</p>
               </div>
             ) : rooms.length === 0 ? (
@@ -200,10 +198,11 @@ export default function AdminChatPage() {
                 onClick={() => fetchMessages(activeRoom.id)}
                 disabled={isLoadingMessages}
               >
-                <Icon
-                  icon="solar:restart-bold"
-                  className={`size-4 mr-2 ${isLoadingMessages ? 'animate-spin' : ''}`}
-                />
+                {isLoadingMessages ? (
+                  <Loader size="xs" className="mr-2" />
+                ) : (
+                  <Icon icon="solar:restart-bold" className="size-4 mr-2" />
+                )}
                 Refresh
               </Button>
             </CardHeader>
@@ -297,7 +296,7 @@ export default function AdminChatPage() {
 
               {isLoadingMessages && (
                 <div className="absolute inset-0 bg-background/50 flex items-center justify-center backdrop-blur-[1px]">
-                  <Icon icon="solar:restart-bold" className="size-10 animate-spin text-primary" />
+                  <Loader size="md" />
                 </div>
               )}
             </CardContent>

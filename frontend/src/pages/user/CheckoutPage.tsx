@@ -1,3 +1,4 @@
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { bookingRef, matchesBookingRef } from '@/common/utils/bookingRef';
@@ -144,7 +145,7 @@ export default function CheckoutPage() {
   if (bookingLoading || !currentBooking) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Icon icon="eos-icons:loading" className="size-12 text-primary animate-spin" />
+        <Loader size="md" />
       </div>
     );
   }
@@ -388,7 +389,7 @@ export default function CheckoutPage() {
                   disabled={paymentLoading || isExpired}
                 >
                   {paymentLoading ? (
-                    <Icon icon="eos-icons:loading" className="mr-2 animate-spin" />
+                    <Loader size="xs" className="mr-2" />
                   ) : isExpired ? (
                     'Expired'
                   ) : (

@@ -1,3 +1,4 @@
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -76,7 +77,7 @@ export default function StylistScheduleManagement({
 
         {isBranchLoading ? (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
-            <Icon icon="eos-icons:loading" className="size-10 animate-spin text-primary/40" />
+            <Loader size="md" />
             <p className="text-xs font-semibold uppercase tracking-widest text-primary/40">
               Fetching Stylist Branch...
             </p>

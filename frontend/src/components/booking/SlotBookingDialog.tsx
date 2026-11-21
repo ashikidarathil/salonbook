@@ -1,5 +1,6 @@
 'use client';
 
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useState } from 'react';
 import {
   Dialog,
@@ -217,7 +218,7 @@ export function SlotBookingDialog({
             <div className="flex-1 min-h-[200px] mb-6">
               {loading ? (
                 <div className="flex flex-col items-center justify-center h-full gap-2 text-muted-foreground italic">
-                  <Icon icon="eos-icons:loading" className="size-8 animate-spin" />
+                  <Loader size="sm" />
                   <p className="text-sm">Finding slots...</p>
                 </div>
               ) : slots.length > 0 ? (

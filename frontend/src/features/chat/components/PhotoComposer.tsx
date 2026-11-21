@@ -13,8 +13,6 @@ interface PhotoComposerProps {
   drafts: PhotoDraft[];
   maxPhotos: number;
   error: string | null;
-  sendingNumber: number | null;
-  sendingTotal: number;
   onCaptionChange: (id: string, caption: string) => void;
   onRemove: (id: string) => void;
   onAddMore: () => void;
@@ -27,8 +25,6 @@ export function PhotoComposer({
   drafts,
   maxPhotos,
   error,
-  sendingNumber,
-  sendingTotal,
   onCaptionChange,
   onRemove,
   onAddMore,
@@ -37,12 +33,11 @@ export function PhotoComposer({
 }: PhotoComposerProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const active = drafts.find((draft) => draft.id === activeId) ?? drafts[0];
-  const isSending = sendingNumber !== null;
 
   if (!active) return null;
 
   return (
-    <DialogPrimitive.Root open onOpenChange={(open) => !open && !isSending && onClose()}>
+    <DialogPrimitive.Root open onOpenChange={(open) => !open && onClose()}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Content
           data-photo-composer
@@ -54,7 +49,6 @@ export function PhotoComposer({
             <button
               type="button"
               aria-label="Discard photos"
-              disabled={isSending}
               onClick={onClose}
               className="flex size-10 items-center justify-center rounded-full hover:bg-white/15 disabled:opacity-40"
             >
@@ -66,7 +60,6 @@ export function PhotoComposer({
             <button
               type="button"
               aria-label="Remove this photo"
-              disabled={isSending}
               onClick={() => onRemove(active.id)}
               className="ml-auto flex size-10 items-center justify-center rounded-full hover:bg-white/15 disabled:opacity-40"
             >
@@ -108,7 +101,6 @@ export function PhotoComposer({
                 <button
                   type="button"
                   aria-label="Add more photos"
-                  disabled={isSending}
                   onClick={onAddMore}
                   className="flex size-14 shrink-0 items-center justify-center rounded-md border border-dashed border-white/50 hover:bg-white/10 disabled:opacity-40"
                 >
@@ -121,33 +113,23 @@ export function PhotoComposer({
               <input
                 value={active.caption}
                 maxLength={1000}
-                disabled={isSending}
                 placeholder="Add a caption..."
                 aria-label="Photo caption"
                 onChange={(e) => onCaptionChange(active.id, e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !isSending) onSend();
+                  if (e.key === 'Enter') onSend();
                 }}
                 className="h-11 min-w-0 flex-1 rounded-full bg-white/10 px-4 text-base outline-none placeholder:text-white/50 focus:ring-2 focus:ring-white/40 md:text-sm"
               />
               <button
                 type="button"
                 aria-label={`Send ${drafts.length} ${drafts.length === 1 ? 'photo' : 'photos'}`}
-                disabled={isSending}
                 onClick={onSend}
                 className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
               >
-                <Icon
-                  icon={isSending ? 'solar:spinner-bold-duotone' : 'solar:plain-bold'}
-                  className={`size-5 ${isSending ? 'animate-spin' : 'rotate-45'}`}
-                />
+                <Icon icon="solar:plain-bold" className="size-5 rotate-45" />
               </button>
             </div>
-            {isSending && (
-              <p aria-live="polite" className="text-center text-xs opacity-80">
-                Sending {sendingNumber} of {sendingTotal}...
-              </p>
-            )}
           </div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
