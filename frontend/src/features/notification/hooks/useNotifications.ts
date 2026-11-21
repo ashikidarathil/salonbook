@@ -6,6 +6,7 @@ import { fetchNotifications } from '@/features/notification/state/notification.t
 import { fetchTotalUnreadCount } from '@/features/chat/chat.thunks';
 import type { INotification } from '@/features/notification/types/notification.types';
 import { SOCKET_BASE_URL } from '@/services/api/api';
+import { reconnectAfterTokenRefresh } from '@/common/utils/socketAuth';
 
 export const useNotifications = () => {
   const dispatch = useAppDispatch();
@@ -25,6 +26,7 @@ export const useNotifications = () => {
     });
 
     socketRef.current = s;
+    reconnectAfterTokenRefresh(s);
 
     s.on('new_notification', (notification: INotification) => {
       dispatch(addNotification(notification));

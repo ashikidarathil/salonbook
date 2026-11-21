@@ -5,12 +5,40 @@ import { TOKENS } from '../common/di/tokens';
 import { IChatService } from '../modules/chat/service/IChatService';
 import { logInfo, logError } from '../logger/log.util';
 import { env } from '../config/env';
+import jwt from 'jsonwebtoken';
+import type { AuthPayload } from '../common/types/authPayload';
+import { SenderType } from '../modules/chat/constants/chat.types';
 
 const messageRateLimits = new Map<string, { count: number; windowStart: number }>();
 const RATE_LIMIT_MS = 5000;
 const RATE_LIMIT_MAX_MESSAGES = 5;
 
 type SendMessageData = Parameters<IChatService['sendMessage']>[0];
+
+const parseCookies = (header = ''): Record<string, string> =>
+  Object.fromEntries(
+    header
+      .split(';')
+      .map((part) => part.trim().split('='))
+      .filter(([key, value]) => key && value)
+      .map(([key, value]) => [key, decodeURIComponent(value)]),
+  );
+
+/** Finds the login (customer, stylist or admin cookie) belonging to the requested user. */
+function authenticate(cookieHeader: string | undefined, userId: string): AuthPayload | null {
+  const cookies = parseCookies(cookieHeader);
+  for (const prefix of ['user', 'stylist', 'admin']) {
+    const token = cookies[`${prefix}_access_token`];
+    if (!token) continue;
+    try {
+      const decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET) as AuthPayload;
+      if (decoded.userId === userId) return decoded;
+    } catch {
+      // Expired or invalid: try the next role's cookie
+    }
+  }
+  return null;
+}
 
 export class SocketService {
   private static io: Server;
@@ -28,10 +56,13 @@ export class SocketService {
 
     this.io.use((socket, next) => {
       const userId = socket.handshake.query.userId || socket.handshake.auth.userId;
-      if (!userId) {
+      const auth =
+        typeof userId === 'string' ? authenticate(socket.handshake.headers.cookie, userId) : null;
+      if (!auth) {
         return next(new Error('Authentication error'));
       }
-      socket.data.userId = userId;
+      socket.data.userId = auth.userId;
+      socket.data.role = auth.role;
       next();
     });
 
@@ -41,9 +72,15 @@ export class SocketService {
       // User connection room
       socket.join(`user_${socket.data.userId}`);
 
-      socket.on('joinChat', (roomId: string) => {
-        socket.join(roomId);
-        logInfo(`User ${socket.data.userId} joined room ${roomId}`);
+      socket.on('joinChat', async (roomId: string) => {
+        try {
+          const chatService = container.resolve<IChatService>(TOKENS.ChatService);
+          await chatService.assertRoomAccess(roomId, socket.data.userId, socket.data.role);
+          socket.join(roomId);
+          logInfo(`User ${socket.data.userId} joined room ${roomId}`);
+        } catch {
+          socket.emit('error', { message: 'You do not have access to this chat' });
+        }
       });
 
       socket.on('leaveChat', (roomId: string) => {
@@ -51,8 +88,15 @@ export class SocketService {
         logInfo(`User ${socket.data.userId} left room ${roomId}`);
       });
 
-      socket.on('sendMessage', async (data: SendMessageData) => {
+      socket.on('sendMessage', async (payload: SendMessageData) => {
         try {
+          // The sender is always the logged-in user, never what the browser claims
+          if (payload.senderType === SenderType.SYSTEM) {
+            socket.emit('error', { message: 'Not allowed' });
+            return;
+          }
+          const data: SendMessageData = { ...payload, senderId: socket.data.userId };
+
           // Rate limiting
           const now = Date.now();
           let userRate = messageRateLimits.get(data.senderId);

@@ -1,7 +1,7 @@
 # Progress
 
-**Current:** Phase 8 done → next Phase 9 (WhatsApp-style chat)
-**Next step:** Phase 9.3 message ticks (✓ / ✓✓ / blue)
+**Current:** Phase 9 — WhatsApp-style chat
+**Next step:** merge chat security PR, then 9.3 message ticks
 
 ## Log
 - 2026-11-17 — Investigated live site. Data fails because the backend CORS check rejects
@@ -71,3 +71,6 @@
 - 2026-11-20 — 8.6 done: admins can set/edit URL names (branch + service forms, stylist Public profile bar).
   Verified: 14/14 API checks (change, old slug 404, duplicate 409, invalid/id-like 400, auto on create) and
   11/11 admin UI checks in Chrome. Phase 8 complete.
+- 2026-11-21 — 9.0 chat security: the socket trusted the browser's userId and any connection could join any
+  room; REST messages/read/upload had no room check. Fixed. Verified: 17/17 attack checks; chat reconnects by
+  itself after token expiry + server restart (4s test token).

@@ -68,6 +68,7 @@ export class ChatController {
       throw new AppError(CHAT_MESSAGES.ROOM_REQUIRED, HttpStatus.BAD_REQUEST);
     }
 
+    await this.chatService.assertRoomAccess(roomId, req.auth!.userId, req.auth!.role);
     const messages = await this.chatService.getRoomMessages(roomId, limit, skip);
     return ApiResponse.success(
       res,
@@ -84,6 +85,7 @@ export class ChatController {
       throw new AppError(CHAT_MESSAGES.ROOM_REQUIRED, HttpStatus.BAD_REQUEST);
     }
 
+    await this.chatService.assertRoomAccess(roomId, userId);
     await this.chatService.markMessagesAsRead(roomId, userId);
 
     return ApiResponse.success(res, null, CHAT_MESSAGES.MESSAGES_READ);
@@ -123,6 +125,7 @@ export class ChatController {
       throw new AppError(CHAT_MESSAGES.UPLOAD_FAILED, HttpStatus.BAD_REQUEST);
     }
 
+    await this.chatService.assertRoomAccess(roomId, senderId);
     await this.chatService.verifyRoomExpiry(roomId);
 
     let mediaUrl: string;
