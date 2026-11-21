@@ -1,6 +1,6 @@
 import { Loader } from '@/components/common/Loader';
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { useSearchParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Icon } from '@iconify/react';
@@ -12,15 +12,15 @@ import StylistBranchService from '@/services/stylistBranch.service';
 interface StylistScheduleManagementProps {
   stylistId: string;
   stylistName: string;
-  onClose: () => void;
 }
 
 export default function StylistScheduleManagement({
   stylistId,
   stylistName,
-  onClose,
 }: StylistScheduleManagementProps) {
-  const [activeTab, setActiveTab] = useState('weekly');
+  const [params, setParams] = useSearchParams();
+  const activeTab = params.get('tab') || 'weekly';
+  const setActiveTab = (tab: string) => setParams({ tab }, { replace: true });
   const [branchId, setBranchId] = useState<string | null>(null);
   const [isBranchLoading, setIsBranchLoading] = useState(true);
 
@@ -47,20 +47,12 @@ export default function StylistScheduleManagement({
 
   return (
     <div className="space-y-4">
-      <div className="space-y-6 bg-white p-8 border rounded-2xl shadow-sm">
+      <div className="space-y-6 rounded-2xl border bg-white p-3 shadow-sm sm:p-6 lg:p-8">
         {/* Component Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="rounded-full hover:bg-slate-100"
-            >
-              <Icon icon="solar:arrow-left-linear" className="size-8 text-slate-500" />
-            </Button>
             <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-slate-800 flex items-center gap-2">
+              <h2 className="flex items-center gap-2 text-xl font-semibold tracking-tight text-slate-800 sm:text-2xl">
                 <Icon icon="solar:calendar-bold" className="size-6 text-primary/80" />
                 Schedule Management
               </h2>
@@ -99,8 +91,8 @@ export default function StylistScheduleManagement({
         ) : (
           /* Schedule Tabs */
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-2">
-            <div className="flex items-center justify-center sm:justify-start">
-              <TabsList className="bg-slate-50/50 border p-1 rounded-lg">
+            <div className="flex max-w-full overflow-x-auto">
+              <TabsList className="w-max shrink-0 !justify-start rounded-lg border bg-slate-50/50 p-1">
                 <TabsTrigger
                   value="weekly"
                   className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-1.5 transition-all text-sm font-medium"
@@ -133,13 +125,21 @@ export default function StylistScheduleManagement({
 
             <TabsContent value="daily" className="mt-6 border-none p-0 focus-visible:ring-0">
               <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-                <DailyAdjustments stylistId={stylistId} branchId={branchId} />
+                <DailyAdjustments
+                  stylistId={stylistId}
+                  branchId={branchId}
+                  stylistName={stylistName}
+                />
               </div>
             </TabsContent>
 
             <TabsContent value="breaks" className="mt-6 border-none p-0 focus-visible:ring-0">
               <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-                <BreakManagement stylistId={stylistId} branchId={branchId} />
+                <BreakManagement
+                  stylistId={stylistId}
+                  branchId={branchId}
+                  stylistName={stylistName}
+                />
               </div>
             </TabsContent>
           </Tabs>
