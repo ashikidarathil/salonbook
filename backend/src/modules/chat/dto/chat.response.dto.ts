@@ -22,6 +22,14 @@ export interface ChatRoomResponseDto {
   booking?: { bookingNumber?: string; status: string; completedAt?: string; cancelledAt?: string };
 }
 
+/** Tells a sender that their messages in a room were delivered or read. */
+export interface MessageStatusUpdate {
+  chatRoomId: string;
+  status: 'delivered' | 'read';
+  at: Date;
+  notifyUserId: string;
+}
+
 export interface MessageResponseDto {
   id: string;
   chatRoomId: string;
@@ -32,6 +40,8 @@ export interface MessageResponseDto {
   mediaUrl?: string;
   duration?: number;
   isRead: boolean;
+  deliveredAt?: Date;
+  readAt?: Date;
   createdAt: Date;
   bookingId?:
     | string

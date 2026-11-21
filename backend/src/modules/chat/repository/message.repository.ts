@@ -36,17 +36,38 @@ export class MessageRepository
     return docs.map((doc) => this.toEntity(doc)).reverse(); // Reverse to return chronological order
   }
 
-  async markAsRead(roomId: string, receiverId: string): Promise<void> {
-    await this._model.updateMany(
+  async markAsDelivered(roomId: string, receiverId: string, at: Date): Promise<number> {
+    const result = await this._model.updateMany(
+      {
+        chatRoomId: toObjectId(roomId),
+        senderId: { $ne: toObjectId(receiverId) },
+        deliveredAt: null,
+      },
+      { $set: { deliveredAt: at } },
+    );
+    return result.modifiedCount;
+  }
+
+  async markAsRead(roomId: string, receiverId: string, at: Date): Promise<number> {
+    await this.markAsDelivered(roomId, receiverId, at);
+    const result = await this._model.updateMany(
       {
         chatRoomId: toObjectId(roomId),
         senderId: { $ne: toObjectId(receiverId) },
         isRead: false,
       },
-      {
-        $set: { isRead: true },
-      },
+      { $set: { isRead: true, readAt: at } },
     );
+    return result.modifiedCount;
+  }
+
+  async findRoomIdsWithUndelivered(roomIds: string[], receiverId: string): Promise<string[]> {
+    const ids = await this._model.distinct('chatRoomId', {
+      chatRoomId: { $in: roomIds.map(toObjectId) },
+      senderId: { $ne: toObjectId(receiverId) },
+      deliveredAt: null,
+    });
+    return ids.map(String);
   }
 
   async countUnreadMessages(roomId: string, receiverId: string): Promise<number> {

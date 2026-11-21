@@ -8,11 +8,11 @@ import {
   uploadChatMedia,
   markRoomMessagesAsRead,
 } from '@/features/chat/chat.thunks';
-import { resetRoomUnreadCount } from '@/features/chat/chat.slice';
+import { markIncomingRead, resetRoomUnreadCount } from '@/features/chat/chat.slice';
 import { fetchTotalUnreadCount } from '@/features/chat/chat.thunks';
 import { markAllNotificationsAsRead } from '@/features/notification/state/notification.thunks';
 import { useChat } from '@/features/chat/hooks/useChat';
-import type { ChatRoom, SendMessagePayload } from '@/features/chat/chat.types';
+import type { ChatMessage, ChatRoom, SendMessagePayload } from '@/features/chat/chat.types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@iconify/react';
@@ -41,7 +41,9 @@ export default function ChatPage() {
   const isStylist = user?.role === 'STYLIST';
   const isUser = user?.role === 'USER';
 
-  const { isConnected, sendMessage, joinRoom } = useChat(user?.id) as ReturnType<typeof useChat>;
+  const { isConnected, sendMessage, joinRoom, markRead } = useChat(user?.id) as ReturnType<
+    typeof useChat
+  >;
 
   const activeRoom = rooms.find((r: ChatRoom) => r.id === activeRoomId);
   const currentMessages = activeRoomId ? messagesByRoom[activeRoomId] || [] : [];
@@ -63,9 +65,12 @@ export default function ChatPage() {
     if (activeRoomId) {
       dispatch(fetchRoomMessages({ roomId: activeRoomId }));
       dispatch(resetRoomUnreadCount(activeRoomId));
-      dispatch(markRoomMessagesAsRead(activeRoomId)).then(() => {
-        dispatch(fetchTotalUnreadCount());
-      });
+      // A chat opened in a background tab isn't read yet (the visibility effect below handles it)
+      if (document.visibilityState === 'visible') {
+        dispatch(markRoomMessagesAsRead(activeRoomId)).then(() => {
+          dispatch(fetchTotalUnreadCount());
+        });
+      }
       dispatch(markAllNotificationsAsRead());
     }
   }, [activeRoomId, dispatch]);
@@ -73,6 +78,23 @@ export default function ChatPage() {
   useEffect(() => {
     if (activeRoomId && isConnected) joinRoom(activeRoomId);
   }, [activeRoomId, isConnected, joinRoom]);
+
+  // Blue ticks: incoming messages count as read only while this chat is open and visible
+  const hasUnreadIncoming = currentMessages.some(
+    (m: ChatMessage) => m.senderId !== user?.id && !m.isRead,
+  );
+  useEffect(() => {
+    if (!activeRoomId || !isConnected || !user?.id || !hasUnreadIncoming) return;
+    const userId = user.id;
+    const markVisibleAsRead = () => {
+      if (document.visibilityState !== 'visible') return;
+      dispatch(markIncomingRead({ roomId: activeRoomId, userId }));
+      markRead(activeRoomId, () => dispatch(fetchTotalUnreadCount()));
+    };
+    markVisibleAsRead();
+    document.addEventListener('visibilitychange', markVisibleAsRead);
+    return () => document.removeEventListener('visibilitychange', markVisibleAsRead);
+  }, [activeRoomId, isConnected, user?.id, hasUnreadIncoming, markRead, dispatch]);
 
   const prevMsgCount = useRef(0);
   const prevRoomId = useRef<string | null>(null);

@@ -8,6 +8,7 @@ import { env } from '../config/env';
 import jwt from 'jsonwebtoken';
 import type { AuthPayload } from '../common/types/authPayload';
 import { SenderType } from '../modules/chat/constants/chat.types';
+import type { MessageStatusUpdate } from '../modules/chat/dto/chat.response.dto';
 
 const messageRateLimits = new Map<string, { count: number; windowStart: number }>();
 const RATE_LIMIT_MS = 5000;
@@ -72,6 +73,17 @@ export class SocketService {
       // User connection room
       socket.join(`user_${socket.data.userId}`);
 
+      // Coming online: messages waiting for this user are now delivered (✓✓)
+      if (socket.data.role !== 'ADMIN') {
+        container
+          .resolve<IChatService>(TOKENS.ChatService)
+          .markAllDeliveredForUser(socket.data.userId)
+          .then((updates) => updates.forEach((update) => this.emitMessageStatus(update)))
+          .catch((error: Error) =>
+            logError('Socket delivery update error', { message: error.message }),
+          );
+      }
+
       socket.on('joinChat', async (roomId: string) => {
         try {
           const chatService = container.resolve<IChatService>(TOKENS.ChatService);
@@ -116,10 +128,35 @@ export class SocketService {
           const message = await chatService.sendMessage(data);
 
           this.io.to(data.chatRoomId).emit('newMessage', message);
+
+          // Recipient is online somewhere on the site: delivered straight away
+          const recipientId = await chatService.getOtherParticipant(data.chatRoomId, data.senderId);
+          if (recipientId) {
+            const online = await this.io.in(`user_${recipientId}`).fetchSockets();
+            if (online.length) {
+              const update = await chatService.markMessagesDelivered(data.chatRoomId, recipientId);
+              if (update) this.emitMessageStatus(update);
+            }
+          }
         } catch (error) {
           const err = error as Error;
           logError('Socket sendMessage error', { message: err.message });
           socket.emit('error', { message: err.message || 'Failed to send message' });
+        }
+      });
+
+      // The recipient has this chat open and visible. Room members only, so admins
+      // reviewing a dispute never mark messages as read.
+      socket.on('markRead', async (roomId: string, ack?: () => void) => {
+        try {
+          const chatService = container.resolve<IChatService>(TOKENS.ChatService);
+          await chatService.assertRoomAccess(roomId, socket.data.userId);
+          const update = await chatService.markMessagesAsRead(roomId, socket.data.userId);
+          if (update) this.emitMessageStatus(update);
+        } catch (error) {
+          logError('Socket markRead error', { message: (error as Error).message });
+        } finally {
+          if (typeof ack === 'function') ack();
         }
       });
 
@@ -134,6 +171,10 @@ export class SocketService {
       throw new Error('Socket.io not initialized!');
     }
     return this.io;
+  }
+
+  static emitMessageStatus({ notifyUserId, chatRoomId, status, at }: MessageStatusUpdate) {
+    this.sendToUser(notifyUserId, 'messagesStatus', { chatRoomId, status, at });
   }
 
   static sendToUser(userId: string, event: string, data: unknown) {

@@ -3,7 +3,10 @@ import { IMessage } from '../../../models/message.model';
 export interface IMessageRepository {
   create(data: Partial<IMessage>): Promise<IMessage>;
   findByRoomId(roomId: string, limit?: number, skip?: number): Promise<IMessage[]>;
-  markAsRead(roomId: string, receiverId: string): Promise<void>;
+  /** Both return how many messages changed. */
+  markAsDelivered(roomId: string, receiverId: string, at: Date): Promise<number>;
+  markAsRead(roomId: string, receiverId: string, at: Date): Promise<number>;
+  findRoomIdsWithUndelivered(roomIds: string[], receiverId: string): Promise<string[]>;
   countUnreadMessages(roomId: string, receiverId: string): Promise<number>;
   countTotalUnread(roomIds: string[], receiverId: string): Promise<number>;
   countUnreadPerRoom(roomIds: string[], receiverId: string): Promise<Record<string, number>>;

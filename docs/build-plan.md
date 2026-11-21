@@ -86,7 +86,7 @@ Replace database IDs in public URLs with readable names. Old ID links keep worki
 - [x] 9.0 Chat security (prerequisite): socket requires a valid login, only room members can join, sender comes from the login, REST chat routes check room access
 - [ ] 9.1 Voice messages show a waveform (saved at record time; computed from the audio for old messages), progress fills while playing
 - [ ] 9.2 Live waveform + timer while recording; cancel / send controls
-- [ ] 9.3 Message ticks: ✓ sent, ✓✓ delivered, blue ✓✓ read — `deliveredAt` / `readAt` per message, live updates over socket.io
+- [x] 9.3 Message ticks: ✓ sent, ✓✓ delivered (recipient online anywhere on the site), blue ✓✓ read (chat open and tab visible); `deliveredAt` / `readAt`, live over socket.io; admins never trigger read
 - [ ] 9.4 Attach menu: Photo library / Take photo (camera) / Document
 - [ ] 9.5 Preview before sending, with optional caption
 - [ ] 9.6 Send multiple photos at once

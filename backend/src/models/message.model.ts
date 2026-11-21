@@ -10,6 +10,8 @@ export interface IMessage extends Document {
   mediaUrl?: string;
   duration?: number;
   isRead: boolean;
+  deliveredAt?: Date;
+  readAt?: Date;
   bookingId?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -53,6 +55,8 @@ const MessageSchema = new Schema<IMessage>(
       default: false,
       index: true,
     },
+    deliveredAt: { type: Date },
+    readAt: { type: Date },
     bookingId: {
       type: Schema.Types.ObjectId,
       ref: 'Booking',

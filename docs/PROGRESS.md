@@ -1,7 +1,7 @@
 # Progress
 
 **Current:** Phase 9 — WhatsApp-style chat
-**Next step:** merge chat security PR, then 9.3 message ticks
+**Next step:** merge ticks PR, then 9.1–9.2 voice waveforms
 
 ## Log
 - 2026-11-17 — Investigated live site. Data fails because the backend CORS check rejects
@@ -74,3 +74,6 @@
 - 2026-11-21 — 9.0 chat security: the socket trusted the browser's userId and any connection could join any
   room; REST messages/read/upload had no room check. Fixed. Verified: 17/17 attack checks; chat reconnects by
   itself after token expiry + server restart (4s test token).
+- 2026-11-21 — 9.3 ticks built. Verified with two real Chrome sessions (13/13): sent → delivered when the
+  stylist comes online → read when the chat opens, hidden tab stays delivered, survives reload, admin view never
+  turns it blue.

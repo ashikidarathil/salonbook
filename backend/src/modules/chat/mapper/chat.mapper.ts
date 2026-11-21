@@ -88,6 +88,8 @@ export class ChatMapper {
       mediaUrl: message.mediaUrl,
       duration: message.duration,
       isRead: message.isRead,
+      deliveredAt: message.deliveredAt,
+      readAt: message.readAt,
       createdAt: message.createdAt,
       bookingId: bookingPayload ?? message.bookingId?.toString(),
     };

@@ -1,7 +1,12 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useDispatch } from 'react-redux';
-import { addMessageToRoom, updateRoomLastMessage, incrementUnreadCount } from '../chat.slice';
+import {
+  addMessageToRoom,
+  applyMessagesStatus,
+  updateRoomLastMessage,
+  incrementUnreadCount,
+} from '../chat.slice';
 import { type ChatMessage, type SendMessagePayload, MessageType } from '../chat.types';
 import { showError } from '../../../common/utils/swal.utils';
 import { SOCKET_BASE_URL } from '../../../services/api/api';
@@ -57,6 +62,13 @@ export const useChat = (userId: string | undefined) => {
       );
     });
 
+    socketRef.current.on(
+      'messagesStatus',
+      (update: { chatRoomId: string; status: 'delivered' | 'read'; at: string }) => {
+        dispatch(applyMessagesStatus({ ...update, userId }));
+      },
+    );
+
     socketRef.current.on('disconnect', () => {
       setIsConnected(false);
     });
@@ -92,7 +104,14 @@ export const useChat = (userId: string | undefined) => {
     }
   }, []);
 
+  const markRead = useCallback((roomId: string, onDone?: () => void) => {
+    if (socketRef.current?.connected) {
+      socketRef.current.emit('markRead', roomId, onDone);
+    }
+  }, []);
+
   return {
+    markRead,
     joinRoom,
     leaveRoom,
     sendMessage,
