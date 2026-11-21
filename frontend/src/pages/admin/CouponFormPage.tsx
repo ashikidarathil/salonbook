@@ -144,7 +144,7 @@ export default function CouponFormPage() {
 
   if (loadState !== 'ready') {
     return (
-      <div className="mx-auto w-full max-w-3xl space-y-6">
+      <div className="w-full space-y-6">
         <PageHeader title={heading} breadcrumbs={breadcrumbs} backTo={backTo} />
         {loadState === 'loading' ? (
           <div className="flex justify-center py-16">
@@ -190,7 +190,7 @@ export default function CouponFormPage() {
       isSubmitting={isSubmitting}
       onSubmit={onSubmit}
     >
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         <div className="space-y-2">
           <Label htmlFor="coupon-code">Code *</Label>
           <Input

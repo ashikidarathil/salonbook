@@ -1,11 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useCallback } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import {
-  createBranch,
-  updateBranch,
   softDeleteBranch,
   restoreBranch,
   fetchPaginatedBranches,
@@ -22,20 +20,8 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Users, Tags, Scissors, Ban, RotateCcw, Clock } from 'lucide-react';
-import { SlugField } from '@/components/admin/SlugField';
-import { slugFormField, slugForSubmit } from '@/common/utils/slug';
-import { Label } from '@/components/ui/label';
 import Pagination from '@/components/pagination/Pagination';
 import { ERROR_MESSAGES } from '@/common/constants/error.messages';
 import {
@@ -45,58 +31,23 @@ import {
   showLoading,
   closeLoading,
 } from '@/common/utils/swal.utils';
-import { useForm, useWatch } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import type { Branch, MapLocation } from '@/features/branch/branch.types';
-import BranchBreakModal from './BranchBreakModal';
-import { MapPin } from 'lucide-react';
-import LeafletMapPicker from '@/components/branch/LeafletMapPicker';
-
 import { LoadingGate } from '@/components/common/LoadingGate';
 import { clearError } from '@/features/branch/branch.slice';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useListParams } from '@/hooks/useListParams';
+import { PageHeader } from '@/components/common/PageHeader';
 
 const ITEMS_PER_PAGE = 5;
 
-const branchSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  address: z.string().min(5, 'Address must be at least 5 characters'),
-  phone: z.string().optional(),
-  latitude: z.number().min(-90).max(90),
-  longitude: z.number().min(-180).max(180),
-  slug: slugFormField,
-});
-
-type BranchFormData = z.infer<typeof branchSchema>;
-
 export default function BranchesPage() {
-  const navigate = useNavigate();
+  const location = useLocation();
+  const list = useListParams();
   const dispatch = useAppDispatch();
   const { branches, loading, error, pagination } = useAppSelector((state) => state.branch);
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const searchTerm = list.search;
   const debouncedSearch = useDebounce(searchTerm, 500);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
-  const [selectedBreakBranchId, setSelectedBreakBranchId] = useState<string | null>(null);
-  const [isMapOpen, setIsMapOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<MapLocation | undefined>();
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    control,
-    formState: { errors },
-  } = useForm<BranchFormData>({
-    resolver: zodResolver(branchSchema),
-  });
-
-  const slugValue = useWatch({ control: control, name: 'slug' });
-  const nameValue = useWatch({ control: control, name: 'name' });
+  const currentPage = list.page;
 
   const loadBranches = useCallback(() => {
     dispatch(
@@ -111,74 +62,6 @@ export default function BranchesPage() {
   useEffect(() => {
     loadBranches();
   }, [loadBranches]);
-
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-  };
-
-  const handleLocationSelect = (location: MapLocation & { address: string }) => {
-    setSelectedLocation(location);
-    setValue('latitude', location.latitude);
-    setValue('longitude', location.longitude);
-    setValue('address', location.address);
-  };
-
-  const resetFormAndCloseDialog = () => {
-    reset();
-    setEditingBranch(null);
-    setSelectedLocation(undefined);
-    setIsMapOpen(false);
-    setIsAddDialogOpen(false);
-  };
-
-  const onSubmit = async (data: BranchFormData) => {
-    if (!selectedLocation) {
-      await showError('Error', 'Please select a location on the map');
-      return;
-    }
-    showLoading(editingBranch ? 'Updating branch...' : 'Creating branch...');
-
-    const payload = { ...data, slug: slugForSubmit(data.slug) };
-    const result = editingBranch
-      ? await dispatch(updateBranch({ id: editingBranch.id, data: payload }))
-      : await dispatch(createBranch(payload));
-
-    closeLoading();
-
-    if (createBranch.fulfilled.match(result) || updateBranch.fulfilled.match(result)) {
-      showSuccess(
-        editingBranch ? 'Branch Updated' : 'Branch Created',
-        editingBranch ? 'Changes saved successfully' : 'New branch added',
-      );
-      resetFormAndCloseDialog();
-      loadBranches();
-    } else {
-      showError('Failed', (result.payload as string) || ERROR_MESSAGES.OPERATION_FAILED);
-    }
-  };
-
-  const handleDialogClose = (open: boolean) => {
-    if (!open) {
-      resetFormAndCloseDialog();
-    } else {
-      setIsAddDialogOpen(open);
-    }
-  };
-
-  const handleEdit = (branch: Branch) => {
-    setEditingBranch(branch);
-    setSelectedLocation({ latitude: branch.latitude, longitude: branch.longitude });
-    reset({
-      name: branch.name,
-      address: branch.address,
-      phone: branch.phone || '',
-      latitude: branch.latitude,
-      longitude: branch.longitude,
-      slug: branch.slug || '',
-    });
-    setIsAddDialogOpen(true);
-  };
 
   const handleDisable = async (id: string) => {
     const confirmed = await showConfirm(
@@ -203,21 +86,6 @@ export default function BranchesPage() {
     }
   };
 
-  const handleAddNewBranch = () => {
-    reset({
-      name: '',
-      address: '',
-      phone: '',
-      latitude: 0,
-      longitude: 0,
-      slug: '',
-    });
-    setEditingBranch(null);
-    setSelectedLocation(undefined);
-    setIsMapOpen(false);
-    setIsAddDialogOpen(true);
-  };
-
   const handleRestore = async (id: string) => {
     showLoading('Restoring...');
     const result = await dispatch(restoreBranch(id));
@@ -231,98 +99,28 @@ export default function BranchesPage() {
     }
   };
 
-  const handleManageStylists = (branchId: string) => {
-    navigate(`${branchId}/stylists`);
-  };
-
-  const handleManageCategories = (branchId: string) => {
-    navigate(`${branchId}/categories`);
-  };
-
-  const handleManageServices = (branchId: string) => {
-    navigate(`${branchId}/services`);
-  };
-
   return (
-    <div className="p-8 space-y-10">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold">Branch Management</h1>
-          <p className="mt-2 text-muted-foreground">Manage all salon branches</p>
-        </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Branch Management"
+        description="Manage all salon branches"
+        breadcrumbs={[{ label: 'Branches' }]}
+        actions={
+          <Button asChild className="w-full sm:w-auto">
+            <Link to="new">Add New Branch</Link>
+          </Button>
+        }
+      />
 
-        <Dialog open={isAddDialogOpen} onOpenChange={handleDialogClose}>
-          <DialogTrigger asChild>
-            <Button onClick={handleAddNewBranch}>Add New Branch</Button>
-          </DialogTrigger>
-          <DialogContent className="theme-admin sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>{editingBranch ? 'Edit Branch' : 'Add New Branch'}</DialogTitle>
-              <DialogDescription>
-                {editingBranch
-                  ? 'Update branch details'
-                  : 'Fill in details and select location on map'}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div>
-                <Label>Branch Name *</Label>
-                <Input {...register('name')} placeholder="Main Salon Branch" />
-                {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
-              </div>
-              <SlugField
-                pathPrefix="/branches/"
-                value={slugValue}
-                sourceName={nameValue}
-                savedSlug={editingBranch?.slug}
-                error={errors.slug?.message}
-                inputProps={register('slug')}
-              />
-              <div>
-                <Label>Address *</Label>
-                <Input {...register('address')} placeholder="123 Main Street, City" />
-                {errors.address && (
-                  <p className="mt-1 text-sm text-red-600">{errors.address.message}</p>
-                )}
-              </div>
-              <div>
-                <Label>Phone (optional)</Label>
-                <Input {...register('phone')} placeholder="+91 98765 43210" />
-              </div>
-
-              <div>
-                <Label>Location *</Label>
-                <div className="flex gap-2 mt-2">
-                  <Input
-                    type="text"
-                    readOnly
-                    value={
-                      selectedLocation
-                        ? `${selectedLocation.latitude.toFixed(4)}, ${selectedLocation.longitude.toFixed(4)}`
-                        : 'Click "Select on Map" to choose location'
-                    }
-                    className="bg-gray-100"
-                  />
-                  <Button
-                    type="button"
-                    onClick={() => setIsMapOpen(true)}
-                    className="gap-2 whitespace-nowrap"
-                  >
-                    <MapPin className="w-4 h-4" />
-                    Select on Map
-                  </Button>
-                </div>
-              </div>
-              <div className="flex justify-end gap-3">
-                <Button type="button" variant="outline" onClick={() => resetFormAndCloseDialog()}>
-                  Cancel
-                </Button>
-                <Button type="submit">{editingBranch ? 'Update' : 'Create'}</Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+      {/* Stays outside the loader, so typing never loses focus */}
+      <div className="sm:max-w-md">
+        <Input
+          aria-label="Search branches"
+          placeholder="Search by name or address..."
+          value={searchTerm}
+          onChange={(e) => list.update({ q: e.target.value })}
+          className="w-full"
+        />
       </div>
 
       <LoadingGate
@@ -336,23 +134,72 @@ export default function BranchesPage() {
         emptyMessage={searchTerm ? 'No matches' : 'Add your first branch above'}
         emptyIcon="solar:map-point-bold"
       >
-        {/* Search */}
-        <div className="max-w-md">
-          <Input
-            placeholder="Search by name or address..."
-            value={searchTerm}
-            onChange={(e) => handleSearch(e.target.value)}
-            className="w-full"
-          />
-        </div>
-
         {/* Table */}
         <Card>
           <CardHeader>
             <CardTitle>All Branches ({pagination?.totalItems || 0})</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
+            <ul className="divide-y lg:hidden">
+              {branches.map((branch) => (
+                <li key={branch.id} className="space-y-3 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="break-words font-medium">{branch.name}</p>
+                      <p className="mt-1 break-words text-sm text-muted-foreground">
+                        {branch.address}
+                      </p>
+                      {branch.phone && <p className="mt-1 text-sm">{branch.phone}</p>}
+                    </div>
+                    {branch.isDeleted && (
+                      <Badge variant="destructive" className="shrink-0">
+                        Disabled
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      ['edit', 'Edit'],
+                      ['stylists', 'Stylists'],
+                      ['categories', 'Categories'],
+                      ['services', 'Services'],
+                      ['breaks', 'Breaks'],
+                    ].map(([path, label]) => (
+                      <Button
+                        key={path}
+                        variant="outline"
+                        size="sm"
+                        className="px-1 text-xs"
+                        asChild
+                      >
+                        <Link to={`${branch.id}/${path}`} state={{ from: location.search }}>
+                          {label}
+                        </Link>
+                      </Button>
+                    ))}
+                    {branch.isDeleted ? (
+                      <Button
+                        size="sm"
+                        className="bg-green-600 px-1 text-xs text-white hover:bg-green-700"
+                        onClick={() => handleRestore(branch.id)}
+                      >
+                        Restore
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        className="bg-red-600 px-1 text-xs text-white hover:bg-red-700"
+                        onClick={() => handleDisable(branch.id)}
+                      >
+                        Disable
+                      </Button>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            <div className="hidden overflow-x-auto lg:block">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -383,18 +230,19 @@ export default function BranchesPage() {
                         )}
                       </TableCell>
                       <TableCell className="text-right whitespace-nowrap ">
-                        <div className="hidden md:flex items-center justify-end gap-1.5 ">
+                        <div className="flex items-center justify-end gap-1.5">
                           <TooltipProvider>
                             {/* Edit */}
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="w-8 h-8"
-                                  onClick={() => handleEdit(branch)}
-                                >
-                                  <Edit className="w-4 h-4" />
+                                <Button variant="ghost" size="icon" className="w-8 h-8" asChild>
+                                  <Link
+                                    to={`${branch.id}/edit`}
+                                    state={{ from: location.search }}
+                                    aria-label={`Edit for ${branch.name}`}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Link>
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent side="top" className="theme-admin">
@@ -405,13 +253,14 @@ export default function BranchesPage() {
                             {/* Stylists */}
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="w-8 h-8"
-                                  onClick={() => handleManageStylists(branch.id)}
-                                >
-                                  <Users className="w-4 h-4" />
+                                <Button variant="ghost" size="icon" className="w-8 h-8" asChild>
+                                  <Link
+                                    to={`${branch.id}/stylists`}
+                                    state={{ from: location.search }}
+                                    aria-label={`Stylists for ${branch.name}`}
+                                  >
+                                    <Users className="w-4 h-4" />
+                                  </Link>
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent side="top" className="theme-admin">
@@ -422,13 +271,14 @@ export default function BranchesPage() {
                             {/* Categories */}
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="w-8 h-8"
-                                  onClick={() => handleManageCategories(branch.id)}
-                                >
-                                  <Tags className="w-4 h-4" />
+                                <Button variant="ghost" size="icon" className="w-8 h-8" asChild>
+                                  <Link
+                                    to={`${branch.id}/categories`}
+                                    state={{ from: location.search }}
+                                    aria-label={`Categories for ${branch.name}`}
+                                  >
+                                    <Tags className="w-4 h-4" />
+                                  </Link>
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent side="top" className="theme-admin">
@@ -439,13 +289,14 @@ export default function BranchesPage() {
                             {/* Services */}
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="w-8 h-8"
-                                  onClick={() => handleManageServices(branch.id)}
-                                >
-                                  <Scissors className="w-4 h-4" />
+                                <Button variant="ghost" size="icon" className="w-8 h-8" asChild>
+                                  <Link
+                                    to={`${branch.id}/services`}
+                                    state={{ from: location.search }}
+                                    aria-label={`Services for ${branch.name}`}
+                                  >
+                                    <Scissors className="w-4 h-4" />
+                                  </Link>
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent side="top" className="theme-admin">
@@ -456,13 +307,14 @@ export default function BranchesPage() {
                             {/* Breaks */}
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="w-8 h-8"
-                                  onClick={() => setSelectedBreakBranchId(branch.id)}
-                                >
-                                  <Clock className="w-4 h-4" />
+                                <Button variant="ghost" size="icon" className="w-8 h-8" asChild>
+                                  <Link
+                                    to={`${branch.id}/breaks`}
+                                    state={{ from: location.search }}
+                                    aria-label={`Breaks for ${branch.name}`}
+                                  >
+                                    <Clock className="w-4 h-4" />
+                                  </Link>
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent side="top" className="theme-admin">
@@ -504,31 +356,12 @@ export default function BranchesPage() {
               <Pagination
                 currentPage={pagination?.currentPage || 1}
                 totalPages={pagination?.totalPages || 1}
-                onPageChange={setCurrentPage}
+                onPageChange={(page) => list.update({}, page)}
               />
             </div>
           </CardContent>
         </Card>
       </LoadingGate>
-
-      <LeafletMapPicker
-        open={isMapOpen}
-        onClose={() => setIsMapOpen(false)}
-        onLocationSelect={handleLocationSelect}
-        initialLocation={selectedLocation}
-        title={editingBranch ? 'Update Branch Location' : 'Select Branch Location'}
-      />
-
-      {selectedBreakBranchId && (
-        <BranchBreakModal
-          key={selectedBreakBranchId}
-          branchId={selectedBreakBranchId}
-          branchName={branches.find((b) => b.id === selectedBreakBranchId)?.name}
-          defaultBreaks={branches.find((b) => b.id === selectedBreakBranchId)?.defaultBreaks}
-          open={!!selectedBreakBranchId}
-          onClose={() => setSelectedBreakBranchId(null)}
-        />
-      )}
     </div>
   );
 }

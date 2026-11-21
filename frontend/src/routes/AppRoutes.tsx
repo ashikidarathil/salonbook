@@ -27,6 +27,8 @@ import { RoleNotFound } from '@/components/common/RoleNotFound';
 // Admin Pages
 import AdminLoginPage from '@/pages/admin/AdminLogin';
 import StylistManagementPage from '@/pages/admin/stylist/StylistManagementPage';
+import StylistInvitePage from '@/pages/admin/stylist/StylistInvitePage';
+import StylistDetailPage from '@/pages/admin/stylist/StylistDetailPage';
 import SlotManagementPage from '@/pages/admin/SlotManagementPage';
 import UserManagementPage from '@/pages/admin/user/UserManagementPage';
 import CategoriesPage from '@/pages/admin/CategoriesPage';
@@ -34,6 +36,8 @@ import CategoryFormPage from '@/pages/admin/CategoryFormPage';
 import ServicesPage from '@/pages/admin/ServicesPage';
 import ServiceFormPage from '@/pages/admin/ServiceFormPage';
 import BranchesPage from '@/pages/admin/branch/BranchesPage';
+import BranchFormPage from '@/pages/admin/branch/BranchFormPage';
+import BranchBreaksPage from '@/pages/admin/branch/BranchBreaksPage';
 import OffDayManagementPage from '@/pages/admin/stylist/OffDayManagementPage';
 import DashboardContent from '@/pages/admin/DashboardContent';
 import AdminBookingsPage from '@/pages/admin/AdminBookingsPage';
@@ -130,6 +134,8 @@ export default function AppRoutes() {
         <Route path={APP_ROUTES.ADMIN.DASHBOARD} element={<SalonAdminLayout />}>
           <Route index element={<DashboardContent />} />
           <Route path="stylists" element={<StylistManagementPage />} />
+          <Route path="stylists/invite" element={<StylistInvitePage />} />
+          <Route path="stylists/:id" element={<StylistDetailPage />} />
           <Route path="users" element={<UserManagementPage />} />
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="categories/new" element={<CategoryFormPage />} />
@@ -138,6 +144,9 @@ export default function AppRoutes() {
           <Route path="services/new" element={<ServiceFormPage />} />
           <Route path="services/:id/edit" element={<ServiceFormPage />} />
           <Route path="branches" element={<BranchesPage />} />
+          <Route path="branches/new" element={<BranchFormPage />} />
+          <Route path="branches/:id/edit" element={<BranchFormPage />} />
+          <Route path="branches/:branchId/breaks" element={<BranchBreaksPage />} />
           <Route path="branches/:branchId/stylists" element={<BranchStylistsPage />} />
           <Route path="branches/:branchId/categories" element={<BranchCategoriesPage />} />
           <Route path="branches/:branchId/services" element={<BranchServicesPage />} />
