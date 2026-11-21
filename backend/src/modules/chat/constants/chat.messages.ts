@@ -13,4 +13,7 @@ export const CHAT_MESSAGES = {
   BOOKING_REQUIRED: 'Booking ID is required',
   ROOM_REQUIRED: 'Room ID is required',
   MESSAGES_READ: 'Messages marked as read',
+  MESSAGE_NOT_FOUND: 'Message not found',
+  DELETE_NOT_ALLOWED: 'You can only delete messages you sent',
+  DELETED_PREVIEW: '🚫 This message was deleted',
 };

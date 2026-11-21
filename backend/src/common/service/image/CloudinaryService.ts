@@ -71,7 +71,10 @@ export class CloudinaryService implements IImageService {
     if (segments.length > 1 && /^v\d+$/.test(segments[0])) segments.shift();
     const publicId = segments.join('/').replace(/\.[^./]+$/, '');
 
-    await cloudinary.uploader.destroy(publicId, { resource_type: resourceType as ResourceType });
+    await cloudinary.uploader.destroy(publicId, {
+      resource_type: resourceType as ResourceType,
+      invalidate: true,
+    });
   }
 
   async uploadProfilePicture(params: UploadImageParams): Promise<string> {
@@ -134,5 +137,13 @@ export class CloudinaryService implements IImageService {
 
   async deleteAudio(audioUrl: string): Promise<void> {
     await this.deleteByUrl(audioUrl);
+  }
+
+  // A message's mediaUrl comes from the browser, so never delete a file outside the sender's folder
+  async deleteChatMedia(url: string, roomId: string, senderId: string): Promise<void> {
+    const owned = ['images', 'audio'].some((kind) =>
+      url.includes(`/${this.rootFolder}/chat/${kind}/${roomId}/${senderId}/`),
+    );
+    if (owned) await this.deleteByUrl(url);
   }
 }

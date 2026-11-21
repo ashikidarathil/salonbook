@@ -91,6 +91,7 @@ export class ChatMapper {
       isRead: message.isRead,
       deliveredAt: message.deliveredAt,
       readAt: message.readAt,
+      deletedAt: message.deletedAt,
       createdAt: message.createdAt,
       bookingId: bookingPayload ?? message.bookingId?.toString(),
     };

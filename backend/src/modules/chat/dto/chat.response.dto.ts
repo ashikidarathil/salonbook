@@ -30,6 +30,15 @@ export interface MessageStatusUpdate {
   notifyUserId: string;
 }
 
+/** Tells both people in a room that a message was deleted for everyone. */
+export interface MessageDeletedUpdate {
+  chatRoomId: string;
+  messageId: string;
+  deletedAt: Date;
+  /** Set when the deleted message was the newest one in the room */
+  lastMessage?: string;
+}
+
 export interface MessageResponseDto {
   id: string;
   chatRoomId: string;
@@ -43,6 +52,7 @@ export interface MessageResponseDto {
   isRead: boolean;
   deliveredAt?: Date;
   readAt?: Date;
+  deletedAt?: Date;
   createdAt: Date;
   bookingId?:
     | string

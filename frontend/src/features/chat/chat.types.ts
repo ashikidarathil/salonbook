@@ -61,6 +61,7 @@ export interface ChatMessage {
   isRead: boolean;
   deliveredAt?: string;
   readAt?: string;
+  deletedAt?: string;
   createdAt: string;
   /** Browser-only: stable id of a message sent from this tab */
   clientId?: string;
@@ -68,6 +69,13 @@ export interface ChatMessage {
   sendState?: 'sending' | 'failed';
   /** Browser-only: uploaded file address of a pending photo or voice message */
   remoteUrl?: string;
+}
+
+export interface MessageDeletedUpdate {
+  chatRoomId: string;
+  messageId: string;
+  deletedAt: string;
+  lastMessage?: string;
 }
 
 export interface SendMessagePayload {

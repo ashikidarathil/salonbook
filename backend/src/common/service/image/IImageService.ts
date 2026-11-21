@@ -18,4 +18,6 @@ export interface IImageService {
   uploadChatImage(params: UploadAudioParams): Promise<string>;
   uploadAudio(params: UploadAudioParams): Promise<string>;
   deleteAudio(audioUrl: string): Promise<void>;
+  /** Removes a photo or voice note, only if it was uploaded by this sender to this room. */
+  deleteChatMedia(url: string, roomId: string, senderId: string): Promise<void>;
 }
