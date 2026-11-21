@@ -239,9 +239,14 @@ export default function AdminChatPage() {
                               : 'bg-orange-100 text-orange-800 text-xs italic border border-orange-200'
                         }`}
                       >
-                        {msg.messageType === MessageType.TEXT && <p>{msg.content}</p>}
+                        {msg.deletedAt && (
+                          <p className="italic opacity-75">This message was deleted</p>
+                        )}
+                        {!msg.deletedAt && msg.messageType === MessageType.TEXT && (
+                          <p>{msg.content}</p>
+                        )}
                         {msg.messageType === MessageType.SYSTEM && <p>{msg.content}</p>}
-                        {msg.messageType === MessageType.IMAGE && (
+                        {!msg.deletedAt && msg.messageType === MessageType.IMAGE && (
                           <button
                             type="button"
                             aria-label="Open photo"
@@ -262,7 +267,7 @@ export default function AdminChatPage() {
                             )}
                           </button>
                         )}
-                        {msg.messageType === MessageType.VOICE && (
+                        {!msg.deletedAt && msg.messageType === MessageType.VOICE && (
                           <div
                             className={`flex items-center gap-3 px-2 py-1 ${msg.senderType === SenderType.STYLIST ? 'text-white' : ''}`}
                           >

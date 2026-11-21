@@ -3,6 +3,7 @@ import { IMessage } from '../../../models/message.model';
 import {
   ChatRoomResponseDto,
   MessageResponseDto,
+  MessageDeletedUpdate,
   MessageStatusUpdate,
 } from '../dto/chat.response.dto';
 import { SendMessageDto } from '../dto/chat.request.dto';
@@ -16,6 +17,10 @@ export interface IChatService {
   getUserRoomsEnriched(userId: string, search?: string): Promise<ChatRoomResponseDto[]>;
   getStylistRoomsEnriched(userIdFromAuth: string, search?: string): Promise<ChatRoomResponseDto[]>;
   sendMessage(data: SendMessageDto): Promise<MessageResponseDto>;
+  deleteMessage(
+    messageId: string,
+    userId: string,
+  ): Promise<{ update: MessageDeletedUpdate; notifyUserIds: string[] }>;
   assertRoomAccess(roomId: string, userId: string, role?: string): Promise<void>;
   getRoomMessages(roomId: string, limit?: number, skip?: number): Promise<IMessage[]>;
   getAllRooms(limit?: number, skip?: number): Promise<IChatRoom[]>;

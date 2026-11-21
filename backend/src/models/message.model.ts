@@ -13,6 +13,7 @@ export interface IMessage extends Document {
   isRead: boolean;
   deliveredAt?: Date;
   readAt?: Date;
+  deletedAt?: Date;
   bookingId?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -59,6 +60,7 @@ const MessageSchema = new Schema<IMessage>(
     },
     deliveredAt: { type: Date },
     readAt: { type: Date },
+    deletedAt: { type: Date },
     bookingId: {
       type: Schema.Types.ObjectId,
       ref: 'Booking',

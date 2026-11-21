@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { ChatRoom, ChatMessage } from './chat.types';
+import type { ChatRoom, ChatMessage, MessageDeletedUpdate } from './chat.types';
+import { MessageType } from './chat.types';
 import {
   fetchUserRooms,
   fetchStylistRooms,
@@ -118,6 +119,23 @@ const chatSlice = createSlice({
         }
       }
     },
+    /** A message was deleted for everyone: drop its content and show the placeholder. */
+    applyMessageDeleted: (state, action: PayloadAction<MessageDeletedUpdate>) => {
+      const { chatRoomId, messageId, deletedAt, lastMessage } = action.payload;
+      const message = state.messagesByRoom[chatRoomId]?.find((m) => m.id === messageId);
+      if (message) {
+        message.deletedAt = deletedAt;
+        delete message.content;
+        delete message.mediaUrl;
+        delete message.duration;
+        delete message.waveform;
+      }
+      const room = state.rooms.find((r) => r.id === chatRoomId);
+      if (room && lastMessage) {
+        room.lastMessage = lastMessage;
+        room.lastMessageType = MessageType.TEXT;
+      }
+    },
     /** I have read the other person's messages in this room. */
     markIncomingRead: (state, action: PayloadAction<{ roomId: string; userId: string }>) => {
       for (const message of state.messagesByRoom[action.payload.roomId] ?? []) {
@@ -230,6 +248,7 @@ export const {
   setPendingState,
   setPendingRemoteUrl,
   applyMessagesStatus,
+  applyMessageDeleted,
   markIncomingRead,
   updateRoomLastMessage,
   resetRoomUnreadCount,

@@ -8,7 +8,10 @@ import { env } from '../config/env';
 import jwt from 'jsonwebtoken';
 import type { AuthPayload } from '../common/types/authPayload';
 import { SenderType } from '../modules/chat/constants/chat.types';
-import type { MessageStatusUpdate } from '../modules/chat/dto/chat.response.dto';
+import type {
+  MessageDeletedUpdate,
+  MessageStatusUpdate,
+} from '../modules/chat/dto/chat.response.dto';
 
 const messageRateLimits = new Map<string, { count: number; windowStart: number }>();
 const RATE_LIMIT_MS = 5000;
@@ -158,6 +161,38 @@ export class SocketService {
           if (!saved) fail(err.message || 'Failed to send message');
         }
       });
+
+      socket.on(
+        'deleteMessage',
+        async (
+          messageId: unknown,
+          ack?: (
+            result: { ok: true; update: MessageDeletedUpdate } | { ok: false; error: string },
+          ) => void,
+        ) => {
+          const reply = typeof ack === 'function' ? ack : () => {};
+          try {
+            if (typeof messageId !== 'string') {
+              reply({ ok: false, error: 'Message not found' });
+              return;
+            }
+            const chatService = container.resolve<IChatService>(TOKENS.ChatService);
+            const { update, notifyUserIds } = await chatService.deleteMessage(
+              messageId,
+              socket.data.userId,
+            );
+            reply({ ok: true, update });
+            // Also each person's own room, so a chat that isn't open still updates its preview
+            this.io
+              .to([update.chatRoomId, ...notifyUserIds.map((id) => `user_${id}`)])
+              .emit('messageDeleted', update);
+          } catch (error) {
+            const err = error as Error;
+            logError('Socket deleteMessage error', { message: err.message });
+            reply({ ok: false, error: err.message || 'Could not delete message' });
+          }
+        },
+      );
 
       // The recipient has this chat open and visible. Room members only, so admins
       // reviewing a dispute never mark messages as read.

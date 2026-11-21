@@ -3,6 +3,7 @@ import { BaseRepository } from '../../../common/repository/baseRepository';
 import { MessageModel, IMessage } from '../../../models/message.model';
 import { IMessageRepository } from './IMessageRepository';
 import { toObjectId } from '../../../common/utils/mongoose.util';
+import { MessageType } from '../constants/chat.types';
 
 @injectable()
 export class MessageRepository
@@ -59,6 +60,19 @@ export class MessageRepository
       { $set: { isRead: true, readAt: at } },
     );
     return result.modifiedCount;
+  }
+
+  async deleteForEveryone(messageId: string, senderId: string, at: Date): Promise<IMessage | null> {
+    return this._model.findOneAndUpdate(
+      {
+        _id: toObjectId(messageId),
+        senderId: toObjectId(senderId),
+        messageType: { $ne: MessageType.SYSTEM },
+        deletedAt: null,
+      },
+      { $set: { deletedAt: at }, $unset: { content: 1, mediaUrl: 1, duration: 1, waveform: 1 } },
+      { new: false },
+    );
   }
 
   async findRoomIdsWithUndelivered(roomIds: string[], receiverId: string): Promise<string[]> {

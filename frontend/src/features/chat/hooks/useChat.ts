@@ -8,6 +8,7 @@ import {
   setPendingRemoteUrl,
   setPendingState,
   applyMessagesStatus,
+  applyMessageDeleted,
   updateRoomLastMessage,
   incrementUnreadCount,
 } from '../chat.slice';
@@ -15,6 +16,7 @@ import {
   type ChatMediaUploader,
   type ChatMessage,
   type MediaSendItem,
+  type MessageDeletedUpdate,
   type SendMessagePayload,
   MessageType,
 } from '../chat.types';
@@ -109,6 +111,10 @@ export const useChat = (userId: string | undefined) => {
         dispatch(applyMessagesStatus({ ...update, userId }));
       },
     );
+
+    socketRef.current.on('messageDeleted', (update: MessageDeletedUpdate) => {
+      dispatch(applyMessageDeleted(update));
+    });
 
     socketRef.current.on('disconnect', () => {
       setIsConnected(false);
@@ -222,6 +228,37 @@ export const useChat = (userId: string | undefined) => {
     [deliver, dispatch, uploadAndDeliver],
   );
 
+  /** Rejects with a readable message, so the caller can show it. */
+  const deleteMessage = useCallback(
+    (messageId: string) =>
+      new Promise<void>((resolve, reject) => {
+        if (!socketRef.current?.connected) {
+          reject(new Error('You are offline. Try again when connected.'));
+          return;
+        }
+        socketRef.current
+          .timeout(SEND_TIMEOUT_MS)
+          .emit(
+            'deleteMessage',
+            messageId,
+            (
+              err: Error | null,
+              result?: { ok: true; update: MessageDeletedUpdate } | { ok: false; error: string },
+            ) => {
+              if (err || !result) {
+                reject(new Error('Could not delete the message. Try again.'));
+              } else if (!result.ok) {
+                reject(new Error(result.error));
+              } else {
+                dispatch(applyMessageDeleted(result.update));
+                resolve();
+              }
+            },
+          );
+      }),
+    [dispatch],
+  );
+
   const markRead = useCallback((roomId: string, onDone?: () => void) => {
     if (socketRef.current?.connected) {
       socketRef.current.emit('markRead', roomId, onDone);
@@ -235,6 +272,7 @@ export const useChat = (userId: string | undefined) => {
     sendMessage,
     sendMedia,
     retryMessage,
+    deleteMessage,
     isConnected,
   };
 };

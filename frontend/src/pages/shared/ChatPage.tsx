@@ -46,9 +46,8 @@ export default function ChatPage() {
   const isStylist = user?.role === 'STYLIST';
   const isUser = user?.role === 'USER';
 
-  const { isConnected, sendMessage, sendMedia, retryMessage, joinRoom, markRead } = useChat(
-    user?.id,
-  ) as ReturnType<typeof useChat>;
+  const { isConnected, sendMessage, sendMedia, retryMessage, deleteMessage, joinRoom, markRead } =
+    useChat(user?.id) as ReturnType<typeof useChat>;
 
   const activeRoom = rooms.find((r: ChatRoom) => r.id === activeRoomId);
   const currentMessages = activeRoomId ? messagesByRoom[activeRoomId] || [] : [];
@@ -245,6 +244,7 @@ export default function ChatPage() {
               isClosed={isClosed}
               messagesEndRef={messagesEndRef}
               onRetry={retryMessage}
+              onDelete={deleteMessage}
               onImageLoad={() => {
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
               }}

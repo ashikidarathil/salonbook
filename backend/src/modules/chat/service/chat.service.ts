@@ -19,10 +19,13 @@ import { MessageType, SenderType } from '../constants/chat.types';
 import { ChatMapper } from '../mapper/chat.mapper';
 import {
   ChatRoomResponseDto,
+  MessageDeletedUpdate,
   MessageResponseDto,
   MessageStatusUpdate,
 } from '../dto/chat.response.dto';
 import { BookingStatus } from '../../../models/booking.model';
+import { IImageService } from '../../../common/service/image/IImageService';
+import { logError } from '../../../logger/log.util';
 
 import { PopulatedBookingExpiry, PopulatedStylistWithUser } from '../types/chat.types';
 
@@ -37,6 +40,7 @@ export class ChatService implements IChatService {
     @inject(TOKENS.BookingRepository) private readonly bookingRepo: IBookingRepository,
     @inject(TOKENS.StylistRepository) private readonly stylistRepo: IStylistRepository,
     @inject(TOKENS.UserRepository) private readonly userRepo: IUserRepository,
+    @inject(TOKENS.ImageService) private readonly imageService: IImageService,
   ) {}
 
   async initializeRoom(bookingId: string, requestUserId: string): Promise<IChatRoom> {
@@ -181,6 +185,68 @@ export class ChatService implements IChatService {
     this.handleMessagingNotification(room, data, lastMsgPreview).catch(() => {});
 
     return this.buildMessageResponseWithBooking(message, room.bookingId?.toString());
+  }
+
+  /** Only the sender can delete, and the message is wiped for both people. */
+  async deleteMessage(
+    messageId: string,
+    userId: string,
+  ): Promise<{ update: MessageDeletedUpdate; notifyUserIds: string[] }> {
+    if (!isValidObjectId(messageId)) {
+      throw new AppError(CHAT_MESSAGES.MESSAGE_NOT_FOUND, HttpStatus.BAD_REQUEST);
+    }
+    const message = await this.messageRepo.findById(messageId);
+    if (!message || message.deletedAt) {
+      throw new AppError(CHAT_MESSAGES.MESSAGE_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    if (message.senderId.toString() !== userId) {
+      throw new AppError(CHAT_MESSAGES.DELETE_NOT_ALLOWED, HttpStatus.FORBIDDEN);
+    }
+
+    const roomId = message.chatRoomId.toString();
+    const room = await this.chatRoomRepo.findById(roomId);
+    if (!room) {
+      throw new AppError(CHAT_MESSAGES.ROOM_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    if (room.status === ChatRoomStatus.CLOSED) {
+      throw new AppError(CHAT_MESSAGES.ROOM_CLOSED, HttpStatus.FORBIDDEN);
+    }
+    await this.verifyRoomExpiry(roomId);
+
+    const deletedAt = new Date();
+    const removed = await this.messageRepo.deleteForEveryone(messageId, userId, deletedAt);
+    if (!removed) {
+      throw new AppError(CHAT_MESSAGES.DELETE_NOT_ALLOWED, HttpStatus.FORBIDDEN);
+    }
+
+    if (removed.mediaUrl) {
+      this.imageService
+        .deleteChatMedia(removed.mediaUrl, roomId, userId)
+        .catch((error: Error) =>
+          logError('Chat media delete error', { messageId, message: error.message }),
+        );
+    }
+
+    // Keep the room's position in the list; only its preview changes
+    const [newest] = await this.messageRepo.findByRoomId(roomId, 1, 0);
+    const isNewest = newest?._id.toString() === messageId;
+    if (isNewest) {
+      await this.chatRoomRepo.update(roomId, {
+        lastMessage: CHAT_MESSAGES.DELETED_PREVIEW,
+        lastMessageType: MessageType.TEXT,
+      });
+    }
+
+    const otherId = await this.getOtherParticipant(roomId, userId);
+    return {
+      update: {
+        chatRoomId: roomId,
+        messageId,
+        deletedAt,
+        ...(isNewest && { lastMessage: CHAT_MESSAGES.DELETED_PREVIEW }),
+      },
+      notifyUserIds: otherId ? [userId, otherId] : [userId],
+    };
   }
 
   private async persistMessage(data: SendMessageDto, bookingId?: string): Promise<IMessage> {

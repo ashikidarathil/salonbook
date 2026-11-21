@@ -5,6 +5,13 @@ import { format } from 'date-fns';
 import { VoicePlayer } from './VoicePlayer';
 import { MessageTicks } from './MessageTicks';
 import { ImageViewer } from './ImageViewer';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { showConfirm, showError } from '@/common/utils/swal.utils';
 import { MessageType } from '../chat.types';
 import type { ChatMessage, ChatRoom } from '../chat.types';
 
@@ -17,6 +24,7 @@ interface ChatMessageListProps {
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   onImageLoad?: () => void;
   onRetry?: (clientId: string) => void;
+  onDelete?: (messageId: string) => Promise<void>;
 }
 
 export function ChatMessageList({
@@ -28,8 +36,10 @@ export function ChatMessageList({
   messagesEndRef,
   onImageLoad,
   onRetry,
+  onDelete,
 }: ChatMessageListProps) {
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const photos = useMemo(
     () =>
       messages
@@ -38,6 +48,25 @@ export function ChatMessageList({
     [messages],
   );
   const viewerIndex = photos.findIndex((photo) => photo.url === viewerUrl);
+
+  const confirmDelete = async (messageId: string) => {
+    const confirmed = await showConfirm(
+      'Delete for everyone?',
+      'This message will be removed for you and the other person. This cannot be undone.',
+      'Delete for everyone',
+      'Cancel',
+      '#dc2626',
+    );
+    if (!confirmed) return;
+    setDeletingId(messageId);
+    try {
+      await onDelete?.(messageId);
+    } catch (error) {
+      showError('Message not deleted', (error as Error).message);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -71,6 +100,8 @@ export function ChatMessageList({
       {messages.map((msg, index) => {
         const isMine = msg.senderId === userId;
         const isSystem = msg.messageType === MessageType.SYSTEM;
+        const canDelete =
+          isMine && !isSystem && !isClosed && !msg.sendState && !msg.deletedAt && !!onDelete;
         const showDateStamp =
           index === 0 ||
           format(new Date(msg.createdAt), 'MMM d') !==
@@ -101,7 +132,9 @@ export function ChatMessageList({
                 </div>
               </div>
             ) : (
-              <div className={`flex items-end gap-2 w-full ${isMine ? 'flex-row-reverse' : ''}`}>
+              <div
+                className={`group/msg flex items-end gap-2 w-full ${isMine ? 'flex-row-reverse' : ''}`}
+              >
                 <div
                   className={`flex flex-col max-w-[85%] md:max-w-[70%] ${
                     isMine ? 'items-end' : 'items-start'
@@ -114,7 +147,12 @@ export function ChatMessageList({
                         : 'bg-background border border-border/50 text-foreground rounded-bl-none'
                     }`}
                   >
-                    {msg.messageType === MessageType.IMAGE && msg.mediaUrl ? (
+                    {msg.deletedAt ? (
+                      <p className="flex items-center gap-1.5 text-sm italic opacity-75">
+                        <Icon icon="solar:forbidden-circle-linear" className="size-4 shrink-0" />
+                        {isMine ? 'You deleted this message' : 'This message was deleted'}
+                      </p>
+                    ) : msg.messageType === MessageType.IMAGE && msg.mediaUrl ? (
                       <button
                         type="button"
                         aria-label="Open photo"
@@ -161,10 +199,35 @@ export function ChatMessageList({
                     ) : null}
                   </div>
                   <span className="flex items-center gap-1 mt-1 mx-1">
+                    {deletingId === msg.id ? (
+                      <Loader size="xs" label="Deleting message" />
+                    ) : (
+                      canDelete && (
+                        <DropdownMenu modal={false}>
+                          <DropdownMenuTrigger
+                            aria-label="Message options"
+                            className="flex size-6 items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-muted focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/msg:opacity-100"
+                          >
+                            <Icon icon="solar:menu-dots-bold" className="size-4" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              className="text-red-600 focus:text-red-600"
+                              onSelect={() => confirmDelete(msg.id)}
+                            >
+                              <Icon icon="solar:trash-bin-trash-linear" className="size-4" />
+                              Delete for everyone
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )
+                    )}
                     <span className="text-[10px] text-muted-foreground opacity-60">
                       {format(new Date(msg.createdAt), 'h:mm a')}
                     </span>
-                    {isMine && msg.sendState !== 'failed' && <MessageTicks message={msg} />}
+                    {isMine && msg.sendState !== 'failed' && !msg.deletedAt && (
+                      <MessageTicks message={msg} />
+                    )}
                   </span>
                   {msg.sendState === 'failed' && msg.clientId && (
                     <button
@@ -184,7 +247,12 @@ export function ChatMessageList({
       })}
       <div ref={messagesEndRef} className="!mt-0 h-px" />
       {viewerIndex >= 0 && (
-        <ImageViewer images={photos} startIndex={viewerIndex} onClose={() => setViewerUrl(null)} />
+        <ImageViewer
+          key={photos.length}
+          images={photos}
+          startIndex={viewerIndex}
+          onClose={() => setViewerUrl(null)}
+        />
       )}
     </div>
   );
