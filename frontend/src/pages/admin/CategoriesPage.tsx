@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useCallback } from 'react';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import {
   toggleCategoryStatus,
@@ -43,6 +43,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { LoadingGate } from '@/components/common/LoadingGate';
 import { clearError } from '@/features/category/categorySlice';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useListParams } from '@/hooks/useListParams';
 import { Edit, Power, Ban, RotateCcw, CheckCircle2, XCircle } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 5;
@@ -54,38 +55,13 @@ export default function CategoriesPage() {
   const { categories, loading, error, pagination } = useAppSelector((state) => state.category);
 
   const location = useLocation();
-  // Kept in the address so returning from an edit page lands on the same list
-  const [params, setParams] = useSearchParams();
-  const searchTerm = params.get('q') ?? '';
+  const list = useListParams();
+  const searchTerm = list.search;
   const debouncedSearch = useDebounce(searchTerm, 500);
-  const statusParam = params.get('status');
+  const statusParam = list.value('status');
   const statusFilter: StatusFilter =
     statusParam === 'ACTIVE' || statusParam === 'INACTIVE' ? statusParam : 'ALL';
-  const currentPage = Math.max(1, Number(params.get('page')) || 1);
-
-  const updateList = useCallback(
-    (changes: { q?: string; status?: StatusFilter; page?: number }) => {
-      setParams(
-        (current) => {
-          const next = new URLSearchParams(current);
-          if (changes.q !== undefined) {
-            if (changes.q) next.set('q', changes.q);
-            else next.delete('q');
-          }
-          if (changes.status !== undefined) {
-            if (changes.status === 'ALL') next.delete('status');
-            else next.set('status', changes.status);
-          }
-          const page = changes.page ?? 1;
-          if (page > 1) next.set('page', String(page));
-          else next.delete('page');
-          return next;
-        },
-        { replace: true },
-      );
-    },
-    [setParams],
-  );
+  const currentPage = list.page;
 
   const loadCategories = useCallback(() => {
     dispatch(
@@ -190,7 +166,7 @@ export default function CategoriesPage() {
           <Input
             placeholder="Search by name or description..."
             value={searchTerm}
-            onChange={(e) => updateList({ q: e.target.value })}
+            onChange={(e) => list.update({ q: e.target.value })}
           />
         </div>
 
@@ -223,20 +199,20 @@ export default function CategoriesPage() {
             <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => updateList({ status: 'ALL' })}
+              onClick={() => list.update({ status: 'ALL' })}
               className={statusFilter === 'ALL' ? 'bg-accent' : ''}
             >
               All Categories
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => updateList({ status: 'ACTIVE' })}
+              onClick={() => list.update({ status: 'ACTIVE' })}
               className={statusFilter === 'ACTIVE' ? 'bg-accent' : ''}
             >
               <CheckCircle2 className="w-4 h-4 mr-2 text-green-600" />
               Active
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => updateList({ status: 'INACTIVE' })}
+              onClick={() => list.update({ status: 'INACTIVE' })}
               className={statusFilter === 'INACTIVE' ? 'bg-accent' : ''}
             >
               <XCircle className="w-4 h-4 mr-2 text-red-600" />
@@ -420,7 +396,7 @@ export default function CategoriesPage() {
               <Pagination
                 currentPage={pagination.currentPage}
                 totalPages={pagination.totalPages}
-                onPageChange={(page) => updateList({ page })}
+                onPageChange={(page) => list.update({}, page)}
               />
             </div>
           </CardContent>

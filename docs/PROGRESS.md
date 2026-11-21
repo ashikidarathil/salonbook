@@ -94,3 +94,6 @@
   Not tested on a physical phone.
 - 2026-11-21 — 5.1 inner-page foundation: shared breadcrumbs, page header and form page. Admin Categories now uses
   add and edit pages, keeps its list position, and has working action cards on phones.
+- 2026-11-21 — 5.2 admin catalog: Services, Coupons and Holidays now use inner pages and phone cards, and lists keep
+  their search and filters. Fixed creating a new service, which the server was rejecting. Verified in Chrome at
+  laptop, tablet and phone sizes (48/48). Not tested on a physical device.
