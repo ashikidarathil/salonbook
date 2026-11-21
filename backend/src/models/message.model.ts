@@ -9,6 +9,7 @@ export interface IMessage extends Document {
   content?: string;
   mediaUrl?: string;
   duration?: number;
+  waveform?: number[];
   isRead: boolean;
   deliveredAt?: Date;
   readAt?: Date;
@@ -50,6 +51,7 @@ const MessageSchema = new Schema<IMessage>(
     duration: {
       type: Number,
     },
+    waveform: { type: [Number], default: undefined },
     isRead: {
       type: Boolean,
       default: false,

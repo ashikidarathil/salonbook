@@ -118,7 +118,11 @@ export function ChatMessageList({
                         />
                       </a>
                     ) : msg.messageType === MessageType.VOICE && msg.mediaUrl ? (
-                      <VoicePlayer src={msg.mediaUrl} duration={msg.duration} />
+                      <VoicePlayer
+                        src={msg.mediaUrl}
+                        duration={msg.duration}
+                        waveform={msg.waveform}
+                      />
                     ) : msg.messageType === MessageType.TEXT ? (
                       <p className="text-sm break-words whitespace-pre-wrap leading-relaxed">
                         {msg.content}

@@ -57,6 +57,7 @@ export interface ChatMessage {
   content?: string;
   mediaUrl?: string;
   duration?: number;
+  waveform?: number[];
   isRead: boolean;
   deliveredAt?: string;
   readAt?: string;
@@ -71,6 +72,7 @@ export interface SendMessagePayload {
   content?: string;
   mediaUrl?: string;
   duration?: number;
+  waveform?: number[];
 }
 
 export interface ChatUnreadCount {
