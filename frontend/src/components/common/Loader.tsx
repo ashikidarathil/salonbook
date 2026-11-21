@@ -19,7 +19,7 @@ const sideFromPath = (pathname: string) => {
   return 'user';
 };
 
-/** The one loading animation for the whole site: pink (customer), blue (stylist), green (admin). */
+/** The one loading animation for the whole site, in shades of each side's primary color. */
 export function Loader({ size = 'md', label = 'Loading', inverse, className }: LoaderProps) {
   const { pathname } = useLocation();
 
