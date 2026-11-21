@@ -1,20 +1,22 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import {
   approveStylist,
   rejectStylist,
-  createStylistInvite,
   sendInviteToApplied,
   fetchPaginatedStylists,
   blockUnblockStylist,
   updateStylistPosition,
 } from '@/features/stylistInvite/stylistInviteThunks';
-import { clearInviteLink, clearError } from '@/features/stylistInvite/stylistInviteSlice';
+import { clearError } from '@/features/stylistInvite/stylistInviteSlice';
 import { LoadingGate } from '@/components/common/LoadingGate';
 import { ERROR_MESSAGES } from '@/common/constants/error.messages';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useListParams } from '@/hooks/useListParams';
+import { PageHeader } from '@/components/common/PageHeader';
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -28,13 +30,11 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogDescription,
 } from '@/components/ui/dialog';
 import {
@@ -59,35 +59,22 @@ import type {
   StylistListItem,
   StylistPosition,
 } from '@/features/stylistInvite/stylistInvite.types';
-import StylistDetailsView from './StylistDetailsView';
 
 const ITEMS_PER_PAGE = 5;
 
 const ADMIN_COLOR = '#10B981';
 
-type ViewMode = 'LIST' | 'DETAILS';
-
 export default function StylistManagementPage() {
   const dispatch = useAppDispatch();
-  const { stylists, loading, inviteLink, error, pagination } = useAppSelector(
-    (state) => state.stylistInvite,
-  );
+  const { stylists, loading, error, pagination } = useAppSelector((state) => state.stylistInvite);
+  const location = useLocation();
+  const list = useListParams();
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const searchTerm = list.search;
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
-  const [currentPage, setCurrentPage] = useState(1);
+  const currentPage = list.page;
   const [viewInviteDialog, setViewInviteDialog] = useState<StylistListItem | null>(null);
-  const [isManualInviteOpen, setIsManualInviteOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
-
-  const [viewMode, setViewMode] = useState<ViewMode>('LIST');
-  const [selectedStylist, setSelectedStylist] = useState<StylistListItem | null>(null);
-
-  const [manualForm, setManualForm] = useState({
-    email: '',
-    specialization: '',
-    experience: 0,
-  });
 
   const loadStylists = useCallback(() => {
     dispatch(
@@ -102,45 +89,6 @@ export default function StylistManagementPage() {
   useEffect(() => {
     loadStylists();
   }, [loadStylists]);
-
-  useEffect(() => {
-    if (inviteLink) {
-      const timer = setTimeout(() => dispatch(clearInviteLink()), 15000);
-      return () => clearTimeout(timer);
-    }
-  }, [inviteLink, dispatch]);
-
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-  };
-
-  const handleManualInvite = async (e: React.FormEvent) => {
-    e.preventDefault();
-    showLoading('Sending invitation...');
-
-    const result = await dispatch(
-      createStylistInvite({
-        email: manualForm.email,
-        specialization: manualForm.specialization,
-        experience: manualForm.experience,
-      }),
-    );
-
-    closeLoading();
-
-    if (createStylistInvite.fulfilled.match(result)) {
-      await showSuccess('Invitation Sent!', 'Stylist has been invited successfully');
-      loadStylists();
-      setIsManualInviteOpen(false);
-      setManualForm({ email: '', specialization: '', experience: 0 });
-    } else {
-      await showError(
-        'Failed to Send Invite',
-        (result.payload as string) || ERROR_MESSAGES.CREATE_FAILED,
-      );
-    }
-  };
 
   const handleToggleBlock = async (stylistId: string, name: string, isBlocked: boolean) => {
     const action = isBlocked ? 'Unblock' : 'Block';
@@ -331,14 +279,13 @@ export default function StylistManagementPage() {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => {
-              setSelectedStylist(stylist);
-              setViewMode('DETAILS');
-            }}
             className="font-bold border-primary/20 text-primary hover:bg-primary/5 shadow-sm"
+            asChild
           >
-            <Icon icon="solar:settings-bold" className="mr-2 size-4" />
-            Manage
+            <Link to={stylist.id} state={{ from: location.search }}>
+              <Icon icon="solar:settings-bold" className="mr-2 size-4" />
+              Manage
+            </Link>
           </Button>
 
           <Button
@@ -358,215 +305,161 @@ export default function StylistManagementPage() {
   };
 
   return (
-    <div className="p-8 space-y-10">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold">Stylist Management</h1>
-          <p className="mt-2 text-muted-foreground">
-            Manage all stylist applications, invites, registrations, and team members
-          </p>
-        </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Stylist Management"
+        description="Manage all stylist applications, invites, registrations, and team members"
+        breadcrumbs={[{ label: 'Stylists' }]}
+        actions={
+          <Button
+            asChild
+            style={{ backgroundColor: ADMIN_COLOR }}
+            className="w-full text-white hover:opacity-90 sm:w-auto"
+          >
+            <Link to="invite">Invite Stylist</Link>
+          </Button>
+        }
+      />
 
-        {/* Manual Invite Modal */}
-        <Dialog open={isManualInviteOpen} onOpenChange={setIsManualInviteOpen}>
-          <DialogTrigger asChild>
-            <Button
-              size="lg"
-              style={{ backgroundColor: ADMIN_COLOR }}
-              className="text-white hover:opacity-90"
-            >
-              Invite Stylist
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="theme-admin">
-            <DialogHeader>
-              <DialogTitle>Invite New Stylist</DialogTitle>
-              <DialogDescription>Send an invitation link to a stylist's email.</DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleManualInvite} className="space-y-6">
-              <div>
-                <Label>Email</Label>
-                <Input
-                  type="email"
-                  placeholder="stylist@salon.com"
-                  value={manualForm.email}
-                  onChange={(e) => setManualForm({ ...manualForm, email: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <Label>Specialization</Label>
-                <Input
-                  placeholder="Hair Cutting, Coloring..."
-                  value={manualForm.specialization}
-                  onChange={(e) => setManualForm({ ...manualForm, specialization: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <Label>Experience (years)</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={manualForm.experience}
-                  onChange={(e) =>
-                    setManualForm({ ...manualForm, experience: Number(e.target.value) || 0 })
-                  }
-                  required
-                />
-              </div>
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full text-white hover:opacity-90"
-                style={{ backgroundColor: ADMIN_COLOR }}
-              >
-                Send Invitation
-              </Button>
-            </form>
-
-            {inviteLink && (
-              <div className="p-6 mt-6 border border-green-300 rounded-lg bg-green-50">
-                <p className="mb-3 font-bold text-green-800">✓ Invitation Created!</p>
-                <div className="flex gap-2 mb-3">
-                  <input
-                    type="text"
-                    value={inviteLink}
-                    readOnly
-                    className="flex-1 p-2 font-mono text-sm break-all bg-white border rounded"
-                  />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleCopyLink(inviteLink)}
-                    className="px-3"
-                  >
-                    {copiedLink === inviteLink ? (
-                      <Check className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
-                <p className="text-xs text-green-700">Expires in 24 hours</p>
-              </div>
-            )}
-
-            {error && (
-              <div className="p-4 mt-4 border border-red-300 rounded-lg bg-red-50">
-                <p className="text-sm text-red-800">{error}</p>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+      <div className="sm:max-w-md">
+        <Input
+          placeholder="Search by name, email, specialization..."
+          value={searchTerm}
+          onChange={(e) => list.update({ q: e.target.value })}
+          className="w-full"
+        />
       </div>
 
-      {viewMode === 'LIST' ? (
-        <>
-          <div className="max-w-md">
-            <Input
-              placeholder="Search by name, email, specialization..."
-              value={searchTerm}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="w-full"
-            />
-          </div>
+      <LoadingGate
+        loading={loading}
+        error={error}
+        data={stylists}
+        resetError={() => {
+          dispatch(clearError());
+          loadStylists();
+        }}
+        emptyMessage={searchTerm ? 'No matches' : 'No applications or team members yet'}
+        emptyIcon="hugeicons:user-group"
+      >
+        {/* Stylists Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>All Stylists ({pagination?.totalItems || 0})</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <ul className="divide-y lg:hidden">
+              {stylists.map((stylist) => (
+                <li key={stylist.userId} className="space-y-3 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="break-words font-medium">
+                        {stylist.name || 'Pending Registration'}
+                      </p>
+                      <p className="mt-0.5 break-all text-sm text-muted-foreground">
+                        {stylist.email || '—'}
+                      </p>
+                      <p className="mt-1 break-words text-sm">
+                        {stylist.specialization} · {stylist.experience} years
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-1">
+                      {getStatusBadge(stylist)}
+                      {stylist.isBlocked && <Badge variant="destructive">BLOCKED</Badge>}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <Select
+                      value={stylist.position || 'TRAINEE'}
+                      onValueChange={(val) =>
+                        handleUpdatePosition(stylist.id, val as StylistPosition)
+                      }
+                      disabled={stylist.status !== 'ACTIVE'}
+                    >
+                      <SelectTrigger
+                        aria-label={`Position of ${stylist.name || 'stylist'}`}
+                        className="w-full sm:w-36"
+                      >
+                        <SelectValue placeholder="Position" />
+                      </SelectTrigger>
+                      <SelectContent className="theme-admin">
+                        <SelectItem value="TRAINEE">Trainee</SelectItem>
+                        <SelectItem value="JUNIOR">Junior</SelectItem>
+                        <SelectItem value="SENIOR">Senior</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {getActionButtons(stylist)}
+                  </div>
+                </li>
+              ))}
+            </ul>
 
-          <LoadingGate
-            loading={loading}
-            error={error}
-            data={stylists}
-            resetError={() => {
-              dispatch(clearError());
-              loadStylists();
-            }}
-            emptyMessage={searchTerm ? 'No matches' : 'No applications or team members yet'}
-            emptyIcon="hugeicons:user-group"
-          >
-            {/* Stylists Table */}
-            <Card>
-              <CardHeader>
-                <CardTitle>All Stylists ({pagination?.totalItems || 0})</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Specialization</TableHead>
-                        <TableHead>Experience</TableHead>
-                        <TableHead>Position</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Blocked</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {stylists.map((stylist) => (
-                        <TableRow key={stylist.userId}>
-                          <TableCell className="font-medium">
-                            {stylist.name || 'Pending Registration'}
-                          </TableCell>
-                          <TableCell>{stylist.email || '—'}</TableCell>
-                          <TableCell>{stylist.specialization}</TableCell>
-                          <TableCell>{stylist.experience} years</TableCell>
-                          <TableCell>
-                            <Select
-                              value={stylist.position || 'TRAINEE'}
-                              onValueChange={(val) =>
-                                handleUpdatePosition(stylist.id, val as StylistPosition)
-                              }
-                              disabled={stylist.status !== 'ACTIVE'}
-                            >
-                              <SelectTrigger className="w-[120px]">
-                                <SelectValue placeholder="Position" />
-                              </SelectTrigger>
-                              <SelectContent className="theme-admin">
-                                <SelectItem value="TRAINEE">Trainee</SelectItem>
-                                <SelectItem value="JUNIOR">Junior</SelectItem>
-                                <SelectItem value="SENIOR">Senior</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </TableCell>
-                          <TableCell>{getStatusBadge(stylist)}</TableCell>
-                          <TableCell>
-                            <Badge variant={stylist.isBlocked ? 'destructive' : 'secondary'}>
-                              {stylist.isBlocked ? 'YES' : 'NO'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">{getActionButtons(stylist)}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+            <div className="hidden overflow-x-auto lg:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Specialization</TableHead>
+                    <TableHead>Experience</TableHead>
+                    <TableHead>Position</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Blocked</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {stylists.map((stylist) => (
+                    <TableRow key={stylist.userId}>
+                      <TableCell className="font-medium">
+                        {stylist.name || 'Pending Registration'}
+                      </TableCell>
+                      <TableCell>{stylist.email || '—'}</TableCell>
+                      <TableCell>{stylist.specialization}</TableCell>
+                      <TableCell>{stylist.experience} years</TableCell>
+                      <TableCell>
+                        <Select
+                          value={stylist.position || 'TRAINEE'}
+                          onValueChange={(val) =>
+                            handleUpdatePosition(stylist.id, val as StylistPosition)
+                          }
+                          disabled={stylist.status !== 'ACTIVE'}
+                        >
+                          <SelectTrigger className="w-[120px]">
+                            <SelectValue placeholder="Position" />
+                          </SelectTrigger>
+                          <SelectContent className="theme-admin">
+                            <SelectItem value="TRAINEE">Trainee</SelectItem>
+                            <SelectItem value="JUNIOR">Junior</SelectItem>
+                            <SelectItem value="SENIOR">Senior</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>{getStatusBadge(stylist)}</TableCell>
+                      <TableCell>
+                        <Badge variant={stylist.isBlocked ? 'destructive' : 'secondary'}>
+                          {stylist.isBlocked ? 'YES' : 'NO'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">{getActionButtons(stylist)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
 
-                <div className="p-4 border-t">
-                  <Pagination
-                    currentPage={pagination?.currentPage || 1}
-                    totalPages={pagination?.totalPages || 1}
-                    onPageChange={setCurrentPage}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </LoadingGate>
-        </>
-      ) : viewMode === 'DETAILS' && selectedStylist ? (
-        <StylistDetailsView
-          stylist={selectedStylist}
-          onClose={() => {
-            setViewMode('LIST');
-            setSelectedStylist(null);
-          }}
-        />
-      ) : null}
-
+            <div className="p-4 border-t">
+              <Pagination
+                currentPage={pagination?.currentPage || 1}
+                totalPages={pagination?.totalPages || 1}
+                onPageChange={(page) => list.update({}, page)}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </LoadingGate>
       {/* View Invite Link Dialog */}
       <Dialog open={!!viewInviteDialog} onOpenChange={() => setViewInviteDialog(null)}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="theme-admin sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Stylist Invitation Link</DialogTitle>
             <DialogDescription>

@@ -29,7 +29,7 @@ export function FormPage({
   children,
 }: FormPageProps) {
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6">
+    <div className="w-full space-y-6">
       <PageHeader
         title={title}
         description={description}

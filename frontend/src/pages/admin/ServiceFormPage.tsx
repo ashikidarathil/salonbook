@@ -209,7 +209,7 @@ export default function ServiceFormPage() {
 
   if (loadState !== 'ready') {
     return (
-      <div className="mx-auto w-full max-w-3xl space-y-6">
+      <div className="w-full space-y-6">
         <PageHeader title={heading} breadcrumbs={breadcrumbs} backTo={backTo} />
         {loadState === 'loading' ? (
           <div className="flex justify-center py-16">
@@ -240,171 +240,185 @@ export default function ServiceFormPage() {
         isSubmitting={isSubmitting}
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="space-y-2">
-          <Label htmlFor="service-name">Service Name *</Label>
-          <Input id="service-name" placeholder="Hair Cut & Style" {...register('name')} />
-          {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
-        </div>
+        <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
+          <div className="min-w-0 space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="service-name">Service Name *</Label>
+              <Input id="service-name" placeholder="Hair Cut & Style" {...register('name')} />
+              {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
+            </div>
 
-        <SlugField
-          pathPrefix="/branches/<branch>/services/"
-          value={slugValue}
-          sourceName={nameValue}
-          savedSlug={service?.slug}
-          error={errors.slug?.message}
-          inputProps={register('slug')}
-        />
+            <SlugField
+              pathPrefix="/branches/<branch>/services/"
+              value={slugValue}
+              sourceName={nameValue}
+              savedSlug={service?.slug}
+              error={errors.slug?.message}
+              inputProps={register('slug')}
+            />
 
-        <div className="space-y-2">
-          <Label htmlFor="service-category">Category *</Label>
-          <select
-            id="service-category"
-            value={categoryId || ''}
-            onChange={(e) =>
-              setValue('categoryId', e.target.value, { shouldDirty: true, shouldValidate: true })
-            }
-            className="h-10 w-full rounded-md border border-input bg-background px-3 text-base focus:outline-none focus:ring-2 focus:ring-primary md:text-sm"
-          >
-            <option value="">Select category</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {capitalizeFirst(category.name)}
-              </option>
-            ))}
-          </select>
-          {errors.categoryId && <p className="text-sm text-red-600">{errors.categoryId.message}</p>}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="service-description">Description (optional)</Label>
-          <Textarea
-            id="service-description"
-            rows={4}
-            placeholder="Detailed description of the service..."
-            {...register('description')}
-          />
-        </div>
-
-        <div className="space-y-3 border-t pt-6">
-          <div>
-            <Label htmlFor="service-included" className="text-base font-semibold">
-              What's Included (optional)
-            </Label>
-            <p className="mt-1 text-sm text-muted-foreground">Add up to {MAX_INCLUDED} items</p>
-          </div>
-          <div className="flex gap-2">
-            <Input
-              id="service-included"
-              value={includedInput}
-              placeholder="e.g., Free hair consultation"
-              disabled={whatIncluded.length >= MAX_INCLUDED}
-              onChange={(e) => setIncludedInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  addIncluded();
+            <div className="space-y-2">
+              <Label htmlFor="service-category">Category *</Label>
+              <select
+                id="service-category"
+                value={categoryId || ''}
+                onChange={(e) =>
+                  setValue('categoryId', e.target.value, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  })
                 }
-              }}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              className="shrink-0 gap-2"
-              disabled={whatIncluded.length >= MAX_INCLUDED}
-              onClick={addIncluded}
-            >
-              <Plus className="size-4" />
-              Add
-            </Button>
-          </div>
-          {whatIncluded.length > 0 && (
-            <ul className="space-y-2">
-              {whatIncluded.map((item, index) => (
-                <li
-                  key={`${item}-${index}`}
-                  className="flex items-center justify-between gap-2 rounded-lg border bg-muted/30 p-3"
-                >
-                  <span className="flex min-w-0 items-start gap-2 text-sm">
-                    <Check className="mt-0.5 size-4 shrink-0 text-green-600" />
-                    <span className="break-words">{item}</span>
-                  </span>
-                  <button
-                    type="button"
-                    aria-label={`Remove ${item}`}
-                    className="flex size-8 shrink-0 items-center justify-center rounded-full text-red-600 hover:bg-red-50"
-                    onClick={() =>
-                      setValue(
-                        'whatIncluded',
-                        whatIncluded.filter((_, i) => i !== index),
-                        { shouldDirty: true },
-                      )
-                    }
-                  >
-                    <X className="size-4" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-base focus:outline-none focus:ring-2 focus:ring-primary md:text-sm"
+              >
+                <option value="">Select category</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {capitalizeFirst(category.name)}
+                  </option>
+                ))}
+              </select>
+              {errors.categoryId && (
+                <p className="text-sm text-red-600">{errors.categoryId.message}</p>
+              )}
+            </div>
 
-        {id ? (
-          <div ref={photoRef} id="photo" className="scroll-mt-4 space-y-3 border-t pt-6">
-            <div>
-              <p className="text-base font-semibold">Service Photo</p>
-              <p className="mt-1 text-sm text-muted-foreground">Photos save straight away</p>
-            </div>
-            <div className="flex h-56 items-center justify-center overflow-hidden rounded-lg border-2 border-dashed bg-muted/30 sm:h-72">
-              {photo ? (
-                <img src={photo} alt="Service" className="size-full object-cover" />
-              ) : (
-                <ImagePlus className="size-8 text-muted-foreground" />
-              )}
-            </div>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              aria-label="Choose service photo"
-              className="hidden"
-              onChange={onPickImage}
-            />
-            <div className="flex flex-col gap-2 sm:flex-row">
-              {pendingFile ? (
-                <>
-                  <Button type="button" disabled={imageLoading} onClick={uploadPhoto}>
-                    {imageLoading ? 'Uploading...' : 'Save Photo'}
-                  </Button>
-                  <Button type="button" variant="outline" onClick={clearPending}>
-                    Discard
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button type="button" variant="outline" onClick={() => fileRef.current?.click()}>
-                    <ImagePlus className="mr-2 size-4" />
-                    {service?.imageUrl ? 'Change Photo' : 'Choose Photo'}
-                  </Button>
-                  {service?.imageUrl && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="text-red-600"
-                      onClick={removePhoto}
-                    >
-                      <Trash2 className="mr-2 size-4" />
-                      Delete Photo
-                    </Button>
-                  )}
-                </>
-              )}
+            <div className="space-y-2">
+              <Label htmlFor="service-description">Description (optional)</Label>
+              <Textarea
+                id="service-description"
+                rows={4}
+                placeholder="Detailed description of the service..."
+                {...register('description')}
+              />
             </div>
           </div>
-        ) : (
-          <p className="border-t pt-6 text-sm text-muted-foreground">
-            You can add a photo right after creating the service.
-          </p>
-        )}
+          <div className="min-w-0 space-y-6">
+            <div className="space-y-3 border-t pt-6 lg:border-t-0 lg:pt-0">
+              <div>
+                <Label htmlFor="service-included" className="text-base font-semibold">
+                  What's Included (optional)
+                </Label>
+                <p className="mt-1 text-sm text-muted-foreground">Add up to {MAX_INCLUDED} items</p>
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  id="service-included"
+                  value={includedInput}
+                  placeholder="e.g., Free hair consultation"
+                  disabled={whatIncluded.length >= MAX_INCLUDED}
+                  onChange={(e) => setIncludedInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addIncluded();
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="shrink-0 gap-2"
+                  disabled={whatIncluded.length >= MAX_INCLUDED}
+                  onClick={addIncluded}
+                >
+                  <Plus className="size-4" />
+                  Add
+                </Button>
+              </div>
+              {whatIncluded.length > 0 && (
+                <ul className="space-y-2">
+                  {whatIncluded.map((item, index) => (
+                    <li
+                      key={`${item}-${index}`}
+                      className="flex items-center justify-between gap-2 rounded-lg border bg-muted/30 p-3"
+                    >
+                      <span className="flex min-w-0 items-start gap-2 text-sm">
+                        <Check className="mt-0.5 size-4 shrink-0 text-green-600" />
+                        <span className="break-words">{item}</span>
+                      </span>
+                      <button
+                        type="button"
+                        aria-label={`Remove ${item}`}
+                        className="flex size-8 shrink-0 items-center justify-center rounded-full text-red-600 hover:bg-red-50"
+                        onClick={() =>
+                          setValue(
+                            'whatIncluded',
+                            whatIncluded.filter((_, i) => i !== index),
+                            { shouldDirty: true },
+                          )
+                        }
+                      >
+                        <X className="size-4" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {id ? (
+              <div ref={photoRef} id="photo" className="scroll-mt-4 space-y-3 border-t pt-6">
+                <div>
+                  <p className="text-base font-semibold">Service Photo</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Photos save straight away</p>
+                </div>
+                <div className="flex h-56 items-center justify-center overflow-hidden rounded-lg border-2 border-dashed bg-muted/30 sm:h-72">
+                  {photo ? (
+                    <img src={photo} alt="Service" className="size-full object-cover" />
+                  ) : (
+                    <ImagePlus className="size-8 text-muted-foreground" />
+                  )}
+                </div>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  aria-label="Choose service photo"
+                  className="hidden"
+                  onChange={onPickImage}
+                />
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  {pendingFile ? (
+                    <>
+                      <Button type="button" disabled={imageLoading} onClick={uploadPhoto}>
+                        {imageLoading ? 'Uploading...' : 'Save Photo'}
+                      </Button>
+                      <Button type="button" variant="outline" onClick={clearPending}>
+                        Discard
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => fileRef.current?.click()}
+                      >
+                        <ImagePlus className="mr-2 size-4" />
+                        {service?.imageUrl ? 'Change Photo' : 'Choose Photo'}
+                      </Button>
+                      {service?.imageUrl && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="text-red-600"
+                          onClick={removePhoto}
+                        >
+                          <Trash2 className="mr-2 size-4" />
+                          Delete Photo
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <p className="border-t pt-6 text-sm text-muted-foreground">
+                You can add a photo right after creating the service.
+              </p>
+            )}
+          </div>
+        </div>
       </FormPage>
 
       {cropSource && (

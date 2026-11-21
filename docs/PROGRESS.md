@@ -97,3 +97,7 @@
 - 2026-11-21 — 5.2 admin catalog: Services, Coupons and Holidays now use inner pages and phone cards, and lists keep
   their search and filters. Fixed creating a new service, which the server was rejecting. Verified in Chrome at
   laptop, tablet and phone sizes (48/48). Not tested on a physical device.
+- 2026-11-21 — 5.3 branches and stylists: branch form with the map on the page, branch breaks, stylist invite and
+  stylist Manage are inner pages. All form pages now use the full screen width. Fixed search boxes dropping letters
+  during fast typing. Verified in Chrome from phone to 1920px (81/81), with map lookups and invite sending simulated.
+  Not tested on a physical device.

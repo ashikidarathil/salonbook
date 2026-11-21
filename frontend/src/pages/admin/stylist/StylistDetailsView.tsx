@@ -107,31 +107,31 @@ export default function StylistDetailsView({ stylist, onClose }: StylistDetailsV
 
       {/* Unified Management Tabs */}
       <Tabs defaultValue="schedule" className="space-y-6">
-        <TabsList className="bg-slate-50/50 border p-1 rounded-xl w-full md:w-auto overflow-x-auto justify-start inline-flex">
+        <TabsList className="bg-slate-50/50 border p-1 rounded-xl w-full max-w-full md:w-auto overflow-x-auto !justify-start inline-flex">
           <TabsTrigger
             value="schedule"
-            className="rounded-lg px-8 py-2 text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+            className="shrink-0 rounded-lg px-3 py-2 sm:px-8 text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
           >
             <Icon icon="solar:clock-circle-linear" className="mr-2 size-4" />
             Schedule
           </TabsTrigger>
           <TabsTrigger
             value="services"
-            className="rounded-lg px-8 py-2 text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+            className="shrink-0 rounded-lg px-3 py-2 sm:px-8 text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
           >
             <Icon icon="solar:scissors-square-linear" className="mr-2 size-4" />
             Services
           </TabsTrigger>
           <TabsTrigger
             value="off-days"
-            className="rounded-lg px-8 py-2 text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+            className="shrink-0 rounded-lg px-3 py-2 sm:px-8 text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
           >
             <Icon icon="solar:calendar-linear" className="mr-2 size-4" />
             Off-Days
           </TabsTrigger>
           <TabsTrigger
             value="wallet"
-            className="rounded-lg px-8 py-2 text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+            className="shrink-0 rounded-lg px-3 py-2 sm:px-8 text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
           >
             <Icon icon="solar:wallet-bold" className="mr-2 size-4" />
             Wallet

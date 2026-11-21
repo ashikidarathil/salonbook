@@ -87,7 +87,7 @@ export default function CategoryFormPage() {
 
   if (loadState !== 'ready') {
     return (
-      <div className="mx-auto w-full max-w-3xl space-y-6">
+      <div className="w-full space-y-6">
         <PageHeader title={heading} breadcrumbs={breadcrumbs} backTo={backTo} />
         {loadState === 'loading' ? (
           <div className="flex justify-center py-16">
@@ -115,23 +115,25 @@ export default function CategoryFormPage() {
       isSubmitting={isSubmitting}
       onSubmit={handleSubmit(onSubmit)}
     >
-      <div className="space-y-2">
-        <Label htmlFor="category-name">Category Name *</Label>
-        <Input
-          id="category-name"
-          aria-invalid={!!errors.name}
-          placeholder="Hair Coloring"
-          {...register('name')}
-        />
-        {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="category-description">Description (optional)</Label>
-        <Input
-          id="category-description"
-          placeholder="For all coloring services..."
-          {...register('description')}
-        />
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="category-name">Category Name *</Label>
+          <Input
+            id="category-name"
+            aria-invalid={!!errors.name}
+            placeholder="Hair Coloring"
+            {...register('name')}
+          />
+          {errors.name && <p className="text-sm text-red-600">{errors.name.message}</p>}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="category-description">Description (optional)</Label>
+          <Input
+            id="category-description"
+            placeholder="For all coloring services..."
+            {...register('description')}
+          />
+        </div>
       </div>
     </FormPage>
   );
