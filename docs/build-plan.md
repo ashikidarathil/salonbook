@@ -48,16 +48,17 @@ Tick `[x]` as each item is done. One sub-phase ≈ one PR. Update [PROGRESS.md](
 - [x] 4.4 Old profile/service images deleted from Cloudinary on replace/delete (delete failures no longer fail the upload); verified deletion
 - [x] 4.5 Re-upload images — not needed: seed data uses Unsplash photos (Phase 3); admins can replace any image in the admin panel
 
-## Phase 5 — Responsive UI cleanup (mobile 360px · tablet 768px · laptop 1280px+)
-- [ ] 5.1 Audit: list every page per role with what breaks at each size
-- [ ] 5.2 Shared layout: header/nav (mobile menu), footer, page containers, spacing scale
-- [ ] 5.3 Public pages: home, branches, services, service detail, contact
-- [ ] 5.4 Auth pages: login, signup, OTP, forgot password
-- [ ] 5.5 User area: booking flow (slot picker, calendar), cart/checkout, bookings, wallet, wishlist, profile, chat
-- [ ] 5.6 Stylist area: dashboard, schedule, bookings, wallet, chat
-- [ ] 5.7 Admin area: sidebar → drawer on mobile, tables → cards on small screens, forms, dashboard charts
-- [ ] 5.8 Modals/dialogs/toasts fit small screens; no horizontal scroll anywhere
-- [ ] 5.9 Final pass on real devices (phone, tablet, laptop)
+## Phase 5 — Inner pages and responsive UI (mobile 360px · tablet 768px · laptop 1280px+)
+Forms and large popups become inner pages with breadcrumbs. Popups stay only for small confirmations,
+the image cropper, full-screen photo viewer, chat camera and photo preview, and mobile menus.
+- [x] 5.1 Shared foundation: breadcrumbs, page header, form page, mobile cards (pattern: admin Categories)
+- [ ] 5.2 Admin catalog: Services (including What's Included and image), Coupons, Holidays
+- [ ] 5.3 Admin branches and stylists: branch form, map picker, branch breaks, stylist invite and invite details
+- [ ] 5.4 Schedules and slots (admin + stylist): special slots, breaks, daily adjustments
+- [ ] 5.5 Customer booking flow: choose service, slot picker (from stylist, cart, bookings and admin reschedule)
+- [ ] 5.6 Customer account: review, wallet top-up, become a stylist, home map
+- [ ] 5.7 Every remaining table becomes cards on phones; shared spacing on every page
+- [ ] 5.8 Final pass on all sizes and on real devices (phone, tablet, laptop)
 
 ## Phase 6 — Code cleanup
 - [ ] 6.1 Remove commented-out code and stray `console.log`s (backend + frontend)

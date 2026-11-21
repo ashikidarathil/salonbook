@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import {
-  createCategory,
-  updateCategory,
   toggleCategoryStatus,
   softDeleteCategory,
   restoreCategory,
@@ -30,16 +29,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-  DialogClose,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+import { PageHeader } from '@/components/common/PageHeader';
 import Pagination from '@/components/pagination/Pagination';
 import { ERROR_MESSAGES } from '@/common/constants/error.messages';
 import {
@@ -49,10 +39,6 @@ import {
   showLoading,
   closeLoading,
 } from '@/common/utils/swal.utils';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import type { Category } from '@/features/category/category.types';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { LoadingGate } from '@/components/common/LoadingGate';
 import { clearError } from '@/features/category/categorySlice';
@@ -61,32 +47,45 @@ import { Edit, Power, Ban, RotateCcw, CheckCircle2, XCircle } from 'lucide-react
 
 const ITEMS_PER_PAGE = 5;
 
-const categorySchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  description: z.string().optional(),
-});
-
-type CategoryFormData = z.infer<typeof categorySchema>;
+type StatusFilter = 'ACTIVE' | 'INACTIVE' | 'ALL';
 
 export default function CategoriesPage() {
   const dispatch = useAppDispatch();
   const { categories, loading, error, pagination } = useAppSelector((state) => state.category);
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const location = useLocation();
+  // Kept in the address so returning from an edit page lands on the same list
+  const [params, setParams] = useSearchParams();
+  const searchTerm = params.get('q') ?? '';
   const debouncedSearch = useDebounce(searchTerm, 500);
-  const [statusFilter, setStatusFilter] = useState<'ACTIVE' | 'INACTIVE' | 'ALL'>('ALL');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const statusParam = params.get('status');
+  const statusFilter: StatusFilter =
+    statusParam === 'ACTIVE' || statusParam === 'INACTIVE' ? statusParam : 'ALL';
+  const currentPage = Math.max(1, Number(params.get('page')) || 1);
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<CategoryFormData>({
-    resolver: zodResolver(categorySchema),
-  });
+  const updateList = useCallback(
+    (changes: { q?: string; status?: StatusFilter; page?: number }) => {
+      setParams(
+        (current) => {
+          const next = new URLSearchParams(current);
+          if (changes.q !== undefined) {
+            if (changes.q) next.set('q', changes.q);
+            else next.delete('q');
+          }
+          if (changes.status !== undefined) {
+            if (changes.status === 'ALL') next.delete('status');
+            else next.set('status', changes.status);
+          }
+          const page = changes.page ?? 1;
+          if (page > 1) next.set('page', String(page));
+          else next.delete('page');
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setParams],
+  );
 
   const loadCategories = useCallback(() => {
     dispatch(
@@ -102,42 +101,6 @@ export default function CategoriesPage() {
   useEffect(() => {
     loadCategories();
   }, [loadCategories]);
-
-  const onSubmit = async (data: CategoryFormData) => {
-    showLoading(editingCategory ? 'Updating category...' : 'Creating category...');
-
-    const result = editingCategory
-      ? await dispatch(updateCategory({ id: editingCategory.id, data }))
-      : await dispatch(createCategory(data));
-
-    closeLoading();
-
-    if (createCategory.fulfilled.match(result) || updateCategory.fulfilled.match(result)) {
-      showSuccess(
-        editingCategory ? 'Category Updated' : 'Category Created',
-        editingCategory ? 'Changes saved successfully' : 'New category added',
-      );
-      reset({
-        name: '',
-        description: '',
-      });
-      setEditingCategory(null);
-      setIsAddDialogOpen(false);
-      setCurrentPage(1);
-      loadCategories();
-    } else {
-      showError('Failed', (result.payload as string) || ERROR_MESSAGES.OPERATION_FAILED);
-    }
-  };
-
-  const handleEdit = (cat: Category) => {
-    setEditingCategory(cat);
-    reset({
-      name: cat.name,
-      description: cat.description || '',
-    });
-    setIsAddDialogOpen(true);
-  };
 
   const handleToggleStatus = async (id: string, currentStatus: 'ACTIVE' | 'INACTIVE') => {
     const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
@@ -209,79 +172,34 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="p-8 space-y-10">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold">Category Management</h1>
-          <p className="mt-2 text-muted-foreground">Manage all salon service categories</p>
-        </div>
-
-        <Dialog
-          open={isAddDialogOpen}
-          onOpenChange={(open) => {
-            setIsAddDialogOpen(open);
-
-            if (!open) {
-              setEditingCategory(null);
-              reset({
-                name: '',
-                description: '',
-              });
-            }
-          }}
-        >
-          {' '}
-          <DialogTrigger asChild>
-            <Button>Add New Category</Button>
-          </DialogTrigger>
-          <DialogContent className="theme-admin">
-            <DialogHeader>
-              <DialogTitle>{editingCategory ? 'Edit Category' : 'Add New Category'}</DialogTitle>
-              <DialogDescription className="sr-only">
-                {editingCategory
-                  ? 'Edit the details of this category'
-                  : 'Add a new category to the salon'}
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div>
-                <Label>Category Name *</Label>
-                <Input {...register('name')} placeholder="Hair Coloring" />
-                {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
-              </div>
-              <div>
-                <Label>Description (optional)</Label>
-                <Input {...register('description')} placeholder="For all coloring services..." />
-              </div>
-              <div className="flex justify-end gap-3">
-                <DialogClose asChild>
-                  <Button type="button" variant="outline">
-                    Cancel
-                  </Button>
-                </DialogClose>
-                <Button type="submit">{editingCategory ? 'Update' : 'Create'}</Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Category Management"
+        description="Manage all salon service categories"
+        breadcrumbs={[{ label: 'Categories' }]}
+        actions={
+          <Button asChild className="w-full sm:w-auto">
+            <Link to="new">Add New Category</Link>
+          </Button>
+        }
+      />
 
       {/* Search */}
-      <div className="flex gap-4">
-        <div className="flex-1 max-w-md">
+      <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+        <div className="flex-1 sm:max-w-md">
           <Input
             placeholder="Search by name or description..."
             value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
+            onChange={(e) => updateList({ q: e.target.value })}
           />
         </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="min-w-[140px] justify-between gap-2">
+            <Button
+              variant="outline"
+              className="w-full justify-between gap-2 sm:w-auto sm:min-w-[140px]"
+            >
               {statusFilter === 'ALL' && (
                 <>
                   <span>All Categories</span>
@@ -305,29 +223,20 @@ export default function CategoriesPage() {
             <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => {
-                setStatusFilter('ALL');
-                setCurrentPage(1);
-              }}
+              onClick={() => updateList({ status: 'ALL' })}
               className={statusFilter === 'ALL' ? 'bg-accent' : ''}
             >
               All Categories
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => {
-                setStatusFilter('ACTIVE');
-                setCurrentPage(1);
-              }}
+              onClick={() => updateList({ status: 'ACTIVE' })}
               className={statusFilter === 'ACTIVE' ? 'bg-accent' : ''}
             >
               <CheckCircle2 className="w-4 h-4 mr-2 text-green-600" />
               Active
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => {
-                setStatusFilter('INACTIVE');
-                setCurrentPage(1);
-              }}
+              onClick={() => updateList({ status: 'INACTIVE' })}
               className={statusFilter === 'INACTIVE' ? 'bg-accent' : ''}
             >
               <XCircle className="w-4 h-4 mr-2 text-red-600" />
@@ -354,7 +263,61 @@ export default function CategoriesPage() {
             <CardTitle>All Categories ({pagination.totalItems})</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
+            {/* Phones and small tablets */}
+            <ul className="divide-y lg:hidden">
+              {categories.map((cat) => (
+                <li key={cat.id} className="space-y-3 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="break-words font-medium">
+                        {cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}
+                      </p>
+                      <p className="mt-1 break-words text-sm text-muted-foreground">
+                        {cat.description || 'No description'}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-1">
+                      {getStatusBadge(cat.status)}
+                      {cat.isDeleted && <Badge variant="destructive">Deleted</Badge>}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to={`${cat.id}/edit`} state={{ from: location.search }}>
+                        <Edit className="mr-1 h-3.5 w-3.5" />
+                        Edit
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleToggleStatus(cat.id, cat.status)}
+                    >
+                      {cat.status === 'ACTIVE' ? 'Disable' : 'Enable'}
+                    </Button>
+                    {cat.isDeleted ? (
+                      <Button
+                        size="sm"
+                        className="bg-green-600 text-white hover:bg-green-700"
+                        onClick={() => handleRestore(cat.id)}
+                      >
+                        Restore
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        className="bg-red-600 text-white hover:bg-red-700"
+                        onClick={() => handleSoftDelete(cat.id)}
+                      >
+                        Delete
+                      </Button>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            <div className="hidden overflow-x-auto lg:block">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -381,18 +344,19 @@ export default function CategoriesPage() {
                         )}
                       </TableCell>
                       <TableCell className="text-right whitespace-nowrap">
-                        <div className="hidden md:flex items-center justify-end gap-1.5">
+                        <div className="flex items-center justify-end gap-1.5">
                           <TooltipProvider>
                             {/* Edit */}
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="w-8 h-8"
-                                  onClick={() => handleEdit(cat)}
-                                >
-                                  <Edit className="w-4 h-4" />
+                                <Button variant="ghost" size="icon" className="w-8 h-8" asChild>
+                                  <Link
+                                    to={`${cat.id}/edit`}
+                                    state={{ from: location.search }}
+                                    aria-label={`Edit ${cat.name}`}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Link>
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent side="top" className="theme-admin">
@@ -456,7 +420,7 @@ export default function CategoriesPage() {
               <Pagination
                 currentPage={pagination.currentPage}
                 totalPages={pagination.totalPages}
-                onPageChange={setCurrentPage}
+                onPageChange={(page) => updateList({ page })}
               />
             </div>
           </CardContent>

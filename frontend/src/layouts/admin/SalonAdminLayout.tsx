@@ -176,7 +176,7 @@ export function SalonAdminLayout() {
             </div>
           </header>
 
-          <main className="flex-1 p-6 overflow-auto bg-muted/40">
+          <main className="min-w-0 flex-1 overflow-auto bg-muted/40 p-4 lg:p-6">
             <Outlet /> {/* Child pages render here */}
           </main>
         </SidebarInset>
