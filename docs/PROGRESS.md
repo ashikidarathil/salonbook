@@ -87,3 +87,5 @@
 - 2026-11-21 — 9.8 + 9.9: messages, photos and voice notes appear instantly with a loader, and failures show
   Not sent · Retry. Every spinner and skeleton replaced by one Loader, coloured by site area. Verified in real Chrome
   sessions with slow, dropped and rate-limited sends (32/32). Not tested on a physical phone.
+- 2026-11-21 — 9.9 follow-up: loader colors now come from each side's exact primary color (customer coral, stylist
+  blue, admin green), with darker and lighter shades of that same color instead of the earlier pink.

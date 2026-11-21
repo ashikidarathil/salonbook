@@ -182,14 +182,17 @@
   }
 }
 
-/* The one site-wide loader. Colours come from data-loader on the element. */
+/* The one site-wide loader. Shades of each side's --primary, chosen by data-loader. */
 .sb-loader {
   --sb-box: 12px;
-  --sb-1: #e11d74;
-  --sb-2: #ec4899;
-  --sb-3: #f472b6;
-  --sb-4: #f9a8d4;
-  --sb-5: #fbcfe8;
+  --sb-h: 0;
+  --sb-s: 92%;
+  --sb-l: 71%;
+  --sb-1: hsl(var(--sb-h) var(--sb-s) calc(var(--sb-l) * 0.72));
+  --sb-2: hsl(var(--sb-h) var(--sb-s) var(--sb-l));
+  --sb-3: hsl(var(--sb-h) var(--sb-s) calc(var(--sb-l) + (100% - var(--sb-l)) * 0.3));
+  --sb-4: hsl(var(--sb-h) var(--sb-s) calc(var(--sb-l) + (100% - var(--sb-l)) * 0.55));
+  --sb-5: hsl(var(--sb-h) var(--sb-s) calc(var(--sb-l) + (100% - var(--sb-l)) * 0.75));
   --sb-width: calc(var(--sb-box) * 7.576);
   display: inline-flex;
   flex-shrink: 0;
@@ -203,18 +206,14 @@
   display: flex;
 }
 .sb-loader[data-loader='stylist'] {
-  --sb-1: #1d4ed8;
-  --sb-2: #2563eb;
-  --sb-3: #3b82f6;
-  --sb-4: #93c5fd;
-  --sb-5: #bfdbfe;
+  --sb-h: 221.2;
+  --sb-s: 83.2%;
+  --sb-l: 53.3%;
 }
 .sb-loader[data-loader='admin'] {
-  --sb-1: #047857;
-  --sb-2: #059669;
-  --sb-3: #10b981;
-  --sb-4: #6ee7b7;
-  --sb-5: #a7f3d0;
+  --sb-h: 152.4;
+  --sb-s: 76.3%;
+  --sb-l: 42.2%;
 }
 .sb-loader[data-loader-inverse='true'],
 .bg-primary .sb-loader,
