@@ -1,10 +1,12 @@
-import { useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { showError } from '@/common/utils/swal.utils';
 import { MessageType, SenderType } from '../chat.types';
 import type { SendMessagePayload } from '../chat.types';
+import { RecordingWave } from './RecordingWave';
+import { waveformFromBlob } from '../waveform';
 
 interface ChatInputProps {
   isConnected: boolean;
@@ -35,6 +37,19 @@ export function ChatInput({
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<number | null>(null);
   const recordingStartRef = useRef(0);
+  const cancelledRef = useRef(false);
+  const [recordingStream, setRecordingStream] = useState<MediaStream | null>(null);
+
+  // Leaving the chat mid-recording discards it and releases the microphone
+  useEffect(
+    () => () => {
+      cancelledRef.current = true;
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+      const recorder = mediaRecorderRef.current;
+      if (recorder?.state === 'recording') recorder.stop();
+    },
+    [],
+  );
 
   const handleSend = () => {
     if (!inputText.trim() || isClosed || !activeRoomId) return;
@@ -89,6 +104,7 @@ export function ChatInput({
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
       recordingStartRef.current = Date.now();
+      cancelledRef.current = false;
 
       mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) audioChunksRef.current.push(e.data);
@@ -96,6 +112,7 @@ export function ChatInput({
 
       mediaRecorder.onstop = async () => {
         stream.getTracks().forEach((track) => track.stop());
+        if (cancelledRef.current) return;
         const mimeType = (mediaRecorder.mimeType || preferred || 'audio/webm').split(';')[0];
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         // Measured here: the recordingDuration state captured by this closure is stale (0)
@@ -104,10 +121,12 @@ export function ChatInput({
           showError('Recording Failed', 'No audio was captured. Please try again.');
           return;
         }
-        await handleAudioUpload(audioBlob, mimeType, duration);
+        const waveform = await waveformFromBlob(audioBlob);
+        await handleAudioUpload(audioBlob, mimeType, duration, waveform);
       };
 
       mediaRecorder.start();
+      setRecordingStream(stream);
       setIsRecording(true);
       setRecordingDuration(0);
       recordingTimerRef.current = window.setInterval(() => {
@@ -122,11 +141,22 @@ export function ChatInput({
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      setRecordingStream(null);
       if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
     }
   };
 
-  const handleAudioUpload = async (blob: Blob, mimeType: string, duration: number) => {
+  const cancelRecording = () => {
+    cancelledRef.current = true;
+    stopRecording();
+  };
+
+  const handleAudioUpload = async (
+    blob: Blob,
+    mimeType: string,
+    duration: number,
+    waveform?: number[],
+  ) => {
     try {
       setIsUploading(true);
       const ext = mimeType.includes('mp4') ? 'm4a' : mimeType.includes('ogg') ? 'ogg' : 'webm';
@@ -140,6 +170,7 @@ export function ChatInput({
         messageType: MessageType.VOICE,
         mediaUrl,
         duration,
+        waveform,
       });
     } catch (err: unknown) {
       showError('Upload Failed', (err as Error).message || 'Voice upload failed');
@@ -169,28 +200,42 @@ export function ChatInput({
           ref={fileInputRef}
           className="hidden"
         />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="shrink-0 h-11 w-11 rounded-full text-muted-foreground hover:bg-muted/50 hover:text-foreground active:scale-95 transition-all"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isUploading || isRecording || !isConnected}
-        >
-          <Icon
-            icon={isUploading ? 'solar:spinner-bold-duotone' : 'solar:camera-bold'}
-            className={`size-5 ${isUploading ? 'animate-spin opacity-50' : ''}`}
-          />
-        </Button>
+        {isRecording ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Delete recording"
+            className="shrink-0 h-11 w-11 rounded-full text-red-500 hover:bg-red-50 hover:text-red-600 active:scale-95 transition-all"
+            onClick={cancelRecording}
+          >
+            <Icon icon="solar:trash-bin-trash-bold" className="size-5" />
+          </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Send a photo"
+            className="shrink-0 h-11 w-11 rounded-full text-muted-foreground hover:bg-muted/50 hover:text-foreground active:scale-95 transition-all"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading || !isConnected}
+          >
+            <Icon
+              icon={isUploading ? 'solar:spinner-bold-duotone' : 'solar:camera-bold'}
+              className={`size-5 ${isUploading ? 'animate-spin opacity-50' : ''}`}
+            />
+          </Button>
+        )}
 
-        <div className="flex-1 relative bg-muted/30 rounded-2xl border border-border/50 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
+        <div className="flex-1 min-w-0 relative bg-muted/30 rounded-2xl border border-border/50 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
           {isRecording ? (
-            <div className="w-full flex items-center gap-3 px-4 py-3 text-sm animate-pulse">
-              <div className="size-2 rounded-full bg-red-500" />
-              <span className="font-medium text-red-500">Recording...</span>
-              <span className="text-muted-foreground font-mono ml-auto">
+            <div className="w-full flex items-center gap-3 px-4 py-2.5 text-sm">
+              <div className="size-2 shrink-0 rounded-full bg-red-500 animate-pulse" />
+              <span className="shrink-0 text-muted-foreground font-mono tabular-nums">
                 {Math.floor(recordingDuration / 60)}:
                 {(recordingDuration % 60).toString().padStart(2, '0')}
               </span>
+              <span className="sr-only">Recording</span>
+              {recordingStream && <RecordingWave stream={recordingStream} />}
             </div>
           ) : (
             <Input
@@ -207,10 +252,11 @@ export function ChatInput({
         {isRecording ? (
           <Button
             size="icon"
+            aria-label="Send voice message"
             onClick={stopRecording}
-            className="shrink-0 h-11 w-11 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-sm active:scale-95 transition-all animate-in zoom-in"
+            className="shrink-0 h-11 w-11 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm active:scale-95 transition-all animate-in zoom-in"
           >
-            <Icon icon="solar:stop-bold" className="size-5" />
+            <Icon icon="solar:plain-bold" className="size-5 transform rotate-45 mr-0.5 mt-0.5" />
           </Button>
         ) : inputText.trim() ? (
           <Button
@@ -225,6 +271,7 @@ export function ChatInput({
           <Button
             variant="ghost"
             size="icon"
+            aria-label="Record a voice message"
             className="shrink-0 h-11 w-11 rounded-full text-muted-foreground hover:bg-muted/50 hover:text-primary active:scale-95 transition-all"
             onClick={startRecording}
             disabled={isUploading || !isConnected}

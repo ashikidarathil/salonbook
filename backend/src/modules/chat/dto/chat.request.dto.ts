@@ -12,6 +12,7 @@ export interface SendMessageDto {
   content?: string;
   mediaUrl?: string;
   duration?: number;
+  waveform?: number[];
 }
 
 export interface PaginationDto {

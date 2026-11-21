@@ -77,3 +77,7 @@
 - 2026-11-21 — 9.3 ticks built. Verified with two real Chrome sessions (13/13): sent → delivered when the
   stylist comes online → read when the chat opens, hidden tab stays delivered, survives reload, admin view never
   turns it blue.
+- 2026-11-21 — Chat gap fix (#22): the newest message now sits right above the input box.
+- 2026-11-21 — 9.1 + 9.2 voice waveforms: live wave + timer while recording, delete / send controls, wave saved
+  with the message, bars fill while playing, tap to seek, old messages rebuild their wave from the audio.
+  Verified with two real Chrome sessions and a fake mic (20/20), including cancel, phone width and a forged wave.

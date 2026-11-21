@@ -192,9 +192,19 @@ export class ChatService implements IChatService {
       content: data.content,
       mediaUrl: data.mediaUrl,
       duration: data.duration,
+      waveform:
+        data.messageType === MessageType.VOICE ? this.cleanWaveform(data.waveform) : undefined,
       isRead: false,
       bookingId: bookingId ? toObjectId(bookingId) : undefined,
     });
+  }
+
+  /** The wave comes from the browser: keep it small and within 0–100. */
+  private cleanWaveform(waveform: unknown): number[] | undefined {
+    if (!Array.isArray(waveform) || !waveform.length) return undefined;
+    const bars = waveform.slice(0, 64).map(Number);
+    if (bars.some((bar) => !Number.isFinite(bar))) return undefined;
+    return bars.map((bar) => Math.max(0, Math.min(100, Math.round(bar))));
   }
 
   private getMessagePreview(data: SendMessageDto): string {

@@ -87,6 +87,7 @@ export class ChatMapper {
       content: message.content,
       mediaUrl: message.mediaUrl,
       duration: message.duration,
+      waveform: message.waveform,
       isRead: message.isRead,
       deliveredAt: message.deliveredAt,
       readAt: message.readAt,

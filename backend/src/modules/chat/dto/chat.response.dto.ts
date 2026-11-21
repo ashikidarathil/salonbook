@@ -39,6 +39,7 @@ export interface MessageResponseDto {
   content?: string;
   mediaUrl?: string;
   duration?: number;
+  waveform?: number[];
   isRead: boolean;
   deliveredAt?: Date;
   readAt?: Date;

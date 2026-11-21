@@ -247,6 +247,7 @@ export default function ChatPage() {
 
             {!isClosed && (
               <ChatInput
+                key={activeRoomId}
                 isConnected={isConnected}
                 activeRoomId={activeRoomId}
                 userId={user?.id || ''}
