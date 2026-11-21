@@ -8,7 +8,6 @@ import { fetchBranchById } from '@/features/branch/branch.thunks';
 import { processRemainingPayment, payRemainingWithWallet } from '@/features/payment/payment.thunks';
 import { fetchMyWallet } from '@/features/wallet/wallet.thunks';
 import { PAYMENT_MESSAGES as PM } from '@/features/payment/payment.constants';
-import { ReviewModal } from '@/features/review/components/ReviewModal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -82,7 +81,6 @@ export default function BookingDetailPage() {
   const { loading: paymentLoading } = useAppSelector((state) => state.payment);
   const { wallet } = useAppSelector((state) => state.wallet);
   const [remainingPayMethod, setRemainingPayMethod] = useState<'razorpay' | 'wallet'>('razorpay');
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   useEffect(() => {
     if (ref) dispatch(fetchBookingDetails(ref));
@@ -432,7 +430,11 @@ export default function BookingDetailPage() {
                 <Button
                   variant="default"
                   className="flex-1 gap-2 bg-yellow-500 hover:bg-yellow-600 text-white"
-                  onClick={() => setIsReviewModalOpen(true)}
+                  onClick={() =>
+                    navigate(
+                      `/profile/bookings/${currentBooking.bookingNumber || currentBooking.id}/review`,
+                    )
+                  }
                 >
                   <Icon icon="solar:star-bold" className="size-4" />
                   Rate & Review
@@ -464,12 +466,6 @@ export default function BookingDetailPage() {
                 )}
             </div>
 
-            <ReviewModal
-              isOpen={isReviewModalOpen}
-              onClose={() => setIsReviewModalOpen(false)}
-              bookingId={currentBooking.id}
-              onSuccess={() => dispatch(fetchBookingDetails(currentBooking.id))}
-            />
           </>
         )}
       </LoadingGate>
