@@ -17,7 +17,11 @@ import { CHAT_MESSAGES } from '../constants/chat.messages';
 import { toObjectId, isValidObjectId, getIdString } from '../../../common/utils/mongoose.util';
 import { MessageType, SenderType } from '../constants/chat.types';
 import { ChatMapper } from '../mapper/chat.mapper';
-import { ChatRoomResponseDto, MessageResponseDto } from '../dto/chat.response.dto';
+import {
+  ChatRoomResponseDto,
+  MessageResponseDto,
+  MessageStatusUpdate,
+} from '../dto/chat.response.dto';
 import { BookingStatus } from '../../../models/booking.model';
 
 import { PopulatedBookingExpiry, PopulatedStylistWithUser } from '../types/chat.types';
@@ -274,8 +278,62 @@ export class ChatService implements IChatService {
     return this.chatRoomRepo.findAll(limit, skip);
   }
 
-  async markMessagesAsRead(roomId: string, receiverId: string): Promise<void> {
-    await this.messageRepo.markAsRead(roomId, receiverId);
+  /** The other person in a room: the stylist's user for a customer, and vice versa. */
+  async getOtherParticipant(roomId: string, userId: string): Promise<string | null> {
+    const room = await this.chatRoomRepo.findById(roomId, [
+      { path: 'stylistId', select: 'userId' },
+    ]);
+    if (!room) return null;
+    const customerId = getIdString(room.userId);
+    const stylistDoc = room.stylistId as unknown as PopulatedStylistWithUser;
+    const stylistUserId = getIdString(stylistDoc?.userId);
+    if (userId === customerId) return stylistUserId || null;
+    return userId === stylistUserId ? customerId : null;
+  }
+
+  private async buildStatusUpdate(
+    roomId: string,
+    receiverId: string,
+    status: 'delivered' | 'read',
+    at: Date,
+  ): Promise<MessageStatusUpdate | null> {
+    const notifyUserId = await this.getOtherParticipant(roomId, receiverId);
+    return notifyUserId ? { chatRoomId: roomId, status, at, notifyUserId } : null;
+  }
+
+  async markMessagesAsRead(
+    roomId: string,
+    receiverId: string,
+  ): Promise<MessageStatusUpdate | null> {
+    const at = new Date();
+    const changed = await this.messageRepo.markAsRead(roomId, receiverId, at);
+    return changed ? this.buildStatusUpdate(roomId, receiverId, 'read', at) : null;
+  }
+
+  async markMessagesDelivered(
+    roomId: string,
+    receiverId: string,
+  ): Promise<MessageStatusUpdate | null> {
+    const at = new Date();
+    const changed = await this.messageRepo.markAsDelivered(roomId, receiverId, at);
+    return changed ? this.buildStatusUpdate(roomId, receiverId, 'delivered', at) : null;
+  }
+
+  /** When someone comes online, everything waiting for them counts as delivered. */
+  async markAllDeliveredForUser(userId: string): Promise<MessageStatusUpdate[]> {
+    const stylistId = await this.stylistRepo.findIdByUserId(userId);
+    const [customerRooms, stylistRooms] = await Promise.all([
+      this.chatRoomRepo.findUserRooms(userId),
+      stylistId ? this.chatRoomRepo.findStylistRooms(stylistId) : Promise.resolve([]),
+    ]);
+    const roomIds = [...customerRooms, ...stylistRooms].map((r) => r._id.toString());
+    if (!roomIds.length) return [];
+
+    const pending = await this.messageRepo.findRoomIdsWithUndelivered(roomIds, userId);
+    const updates = await Promise.all(
+      pending.map((roomId) => this.markMessagesDelivered(roomId, userId)),
+    );
+    return updates.filter((u): u is MessageStatusUpdate => u !== null);
   }
 
   async getUnreadCount(roomId: string, receiverId: string): Promise<number> {

@@ -1,6 +1,7 @@
 import { Icon } from '@iconify/react';
 import { format } from 'date-fns';
 import { VoicePlayer } from './VoicePlayer';
+import { MessageTicks } from './MessageTicks';
 import { MessageType } from '../chat.types';
 import type { ChatMessage, ChatRoom } from '../chat.types';
 
@@ -122,8 +123,11 @@ export function ChatMessageList({
                       </p>
                     ) : null}
                   </div>
-                  <span className="text-[10px] text-muted-foreground mt-1 mx-1 opacity-40">
-                    {format(new Date(msg.createdAt), 'h:mm a')}
+                  <span className="flex items-center gap-1 mt-1 mx-1">
+                    <span className="text-[10px] text-muted-foreground opacity-60">
+                      {format(new Date(msg.createdAt), 'h:mm a')}
+                    </span>
+                    {isMine && <MessageTicks message={msg} />}
                   </span>
                 </div>
               </div>

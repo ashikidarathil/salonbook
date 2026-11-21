@@ -46,6 +46,32 @@ const chatSlice = createSlice({
         state.messagesByRoom[chatRoomId].push(action.payload);
       }
     },
+    /** The other person received or read my messages in this room. */
+    applyMessagesStatus: (
+      state,
+      action: PayloadAction<{
+        chatRoomId: string;
+        status: 'delivered' | 'read';
+        at: string;
+        userId: string;
+      }>,
+    ) => {
+      const { chatRoomId, status, at, userId } = action.payload;
+      for (const message of state.messagesByRoom[chatRoomId] ?? []) {
+        if (message.senderId !== userId) continue;
+        message.deliveredAt ??= at;
+        if (status === 'read') {
+          message.isRead = true;
+          message.readAt ??= at;
+        }
+      }
+    },
+    /** I have read the other person's messages in this room. */
+    markIncomingRead: (state, action: PayloadAction<{ roomId: string; userId: string }>) => {
+      for (const message of state.messagesByRoom[action.payload.roomId] ?? []) {
+        if (message.senderId !== action.payload.userId) message.isRead = true;
+      }
+    },
     updateRoomLastMessage: (
       state,
       action: PayloadAction<{
@@ -143,6 +169,8 @@ const chatSlice = createSlice({
 export const {
   setActiveRoom,
   addMessageToRoom,
+  applyMessagesStatus,
+  markIncomingRead,
   updateRoomLastMessage,
   resetRoomUnreadCount,
   clearChatError,

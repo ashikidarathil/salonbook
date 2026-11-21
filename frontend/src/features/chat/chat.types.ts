@@ -58,6 +58,8 @@ export interface ChatMessage {
   mediaUrl?: string;
   duration?: number;
   isRead: boolean;
+  deliveredAt?: string;
+  readAt?: string;
   createdAt: string;
 }
 

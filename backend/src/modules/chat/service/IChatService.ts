@@ -1,6 +1,10 @@
 import { IChatRoom } from '../../../models/chatRoom.model';
 import { IMessage } from '../../../models/message.model';
-import { ChatRoomResponseDto, MessageResponseDto } from '../dto/chat.response.dto';
+import {
+  ChatRoomResponseDto,
+  MessageResponseDto,
+  MessageStatusUpdate,
+} from '../dto/chat.response.dto';
 import { SendMessageDto } from '../dto/chat.request.dto';
 
 export interface IChatService {
@@ -15,7 +19,10 @@ export interface IChatService {
   assertRoomAccess(roomId: string, userId: string, role?: string): Promise<void>;
   getRoomMessages(roomId: string, limit?: number, skip?: number): Promise<IMessage[]>;
   getAllRooms(limit?: number, skip?: number): Promise<IChatRoom[]>;
-  markMessagesAsRead(roomId: string, receiverId: string): Promise<void>;
+  markMessagesAsRead(roomId: string, receiverId: string): Promise<MessageStatusUpdate | null>;
+  markMessagesDelivered(roomId: string, receiverId: string): Promise<MessageStatusUpdate | null>;
+  markAllDeliveredForUser(userId: string): Promise<MessageStatusUpdate[]>;
+  getOtherParticipant(roomId: string, userId: string): Promise<string | null>;
   getUnreadCount(roomId: string, receiverId: string): Promise<number>;
   getTotalUnreadCount(userId: string): Promise<number>;
   verifyRoomExpiry(roomId: string): Promise<void>;

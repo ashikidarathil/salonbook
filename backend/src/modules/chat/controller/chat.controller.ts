@@ -10,6 +10,7 @@ import { ChatMapper } from '../mapper/chat.mapper';
 import { IImageService } from '../../../common/service/image/IImageService';
 import { AppError } from '../../../common/errors/appError';
 import { isValidObjectId } from '../../../common/utils/mongoose.util';
+import { SocketService } from '../../../socket/socket.service';
 
 @injectable()
 export class ChatController {
@@ -86,7 +87,8 @@ export class ChatController {
     }
 
     await this.chatService.assertRoomAccess(roomId, userId);
-    await this.chatService.markMessagesAsRead(roomId, userId);
+    const update = await this.chatService.markMessagesAsRead(roomId, userId);
+    if (update) SocketService.emitMessageStatus(update);
 
     return ApiResponse.success(res, null, CHAT_MESSAGES.MESSAGES_READ);
   };
