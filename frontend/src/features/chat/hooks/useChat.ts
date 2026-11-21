@@ -5,6 +5,7 @@ import { addMessageToRoom, updateRoomLastMessage, incrementUnreadCount } from '.
 import { type ChatMessage, type SendMessagePayload, MessageType } from '../chat.types';
 import { showError } from '../../../common/utils/swal.utils';
 import { SOCKET_BASE_URL } from '../../../services/api/api';
+import { reconnectAfterTokenRefresh } from '../../../common/utils/socketAuth';
 
 export const useChat = (userId: string | undefined) => {
   const socketRef = useRef<Socket | null>(null);
@@ -21,6 +22,8 @@ export const useChat = (userId: string | undefined) => {
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
     });
+
+    reconnectAfterTokenRefresh(socketRef.current);
 
     socketRef.current.on('connect', () => {
       setIsConnected(true);

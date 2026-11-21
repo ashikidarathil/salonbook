@@ -92,6 +92,19 @@ export class ChatService implements IChatService {
     }
   }
 
+  /** Only the room's customer or stylist may use it; admins may too (dispute review). */
+  async assertRoomAccess(roomId: string, userId: string, role?: string): Promise<void> {
+    if (!isValidObjectId(roomId)) {
+      throw new AppError(CHAT_MESSAGES.ROOM_NOT_FOUND, HttpStatus.BAD_REQUEST);
+    }
+    const room = await this.chatRoomRepo.findById(roomId);
+    if (!room) {
+      throw new AppError(CHAT_MESSAGES.ROOM_NOT_FOUND, HttpStatus.NOT_FOUND);
+    }
+    if (role === 'ADMIN') return;
+    await this.authorizeRoomAccess(userId, getIdString(room.userId), getIdString(room.stylistId));
+  }
+
   async getRoomByBookingId(bookingId: string): Promise<IChatRoom | null> {
     return this.chatRoomRepo.findByBookingId(bookingId);
   }

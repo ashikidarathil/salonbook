@@ -12,6 +12,7 @@ export interface IChatService {
   getUserRoomsEnriched(userId: string, search?: string): Promise<ChatRoomResponseDto[]>;
   getStylistRoomsEnriched(userIdFromAuth: string, search?: string): Promise<ChatRoomResponseDto[]>;
   sendMessage(data: SendMessageDto): Promise<MessageResponseDto>;
+  assertRoomAccess(roomId: string, userId: string, role?: string): Promise<void>;
   getRoomMessages(roomId: string, limit?: number, skip?: number): Promise<IMessage[]>;
   getAllRooms(limit?: number, skip?: number): Promise<IChatRoom[]>;
   markMessagesAsRead(roomId: string, receiverId: string): Promise<void>;

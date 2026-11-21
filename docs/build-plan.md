@@ -83,6 +83,7 @@ Replace database IDs in public URLs with readable names. Old ID links keep worki
 - [x] 8.7 Seed sets slugs (`ensureSlugs`); verified in the browser — 9 public-page + 8 booking-page checks
 
 ## Phase 9 — WhatsApp-style chat (after Phase 8)
+- [x] 9.0 Chat security (prerequisite): socket requires a valid login, only room members can join, sender comes from the login, REST chat routes check room access
 - [ ] 9.1 Voice messages show a waveform (saved at record time; computed from the audio for old messages), progress fills while playing
 - [ ] 9.2 Live waveform + timer while recording; cancel / send controls
 - [ ] 9.3 Message ticks: ✓ sent, ✓✓ delivered, blue ✓✓ read — `deliveredAt` / `readAt` per message, live updates over socket.io
