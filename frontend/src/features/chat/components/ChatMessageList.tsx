@@ -53,7 +53,9 @@ export function ChatMessageList({
   }
 
   return (
-    <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-6 w-full custom-scrollbar">
+    <div className="flex flex-1 flex-col px-4 pt-4 pb-2 md:px-6 md:pt-6 overflow-y-auto space-y-6 w-full custom-scrollbar [&>*]:shrink-0">
+      {/* Pushes a short conversation down so the newest message sits above the input */}
+      <div className="mt-auto" aria-hidden="true" />
       {messages.map((msg, index) => {
         const isMine = msg.senderId === userId;
         const isSystem = msg.messageType === MessageType.SYSTEM;
@@ -135,7 +137,7 @@ export function ChatMessageList({
           </div>
         );
       })}
-      <div ref={messagesEndRef} className="h-1" />
+      <div ref={messagesEndRef} className="!mt-0 h-px" />
     </div>
   );
 }
