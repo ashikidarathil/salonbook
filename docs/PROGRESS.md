@@ -81,3 +81,6 @@
 - 2026-11-21 — 9.1 + 9.2 voice waveforms: live wave + timer while recording, delete / send controls, wave saved
   with the message, bars fill while playing, tap to seek, old messages rebuild their wave from the audio.
   Verified with two real Chrome sessions and a fake mic (20/20), including cancel, phone width and a forged wave.
+- 2026-11-21 — 9.4–9.7 photos: attach menu (Photos / Camera / Files), full-screen preview with a caption per photo,
+  up to 10 photos paced under the server's message limit, full-screen viewer (zoom, pan, swipe, download), also for
+  admin. Verified in real Chrome sessions with a fake camera (34/34). Not tested on a physical phone. Phase 9 built.

@@ -1,7 +1,9 @@
+import { useMemo, useState } from 'react';
 import { Icon } from '@iconify/react';
 import { format } from 'date-fns';
 import { VoicePlayer } from './VoicePlayer';
 import { MessageTicks } from './MessageTicks';
+import { ImageViewer } from './ImageViewer';
 import { MessageType } from '../chat.types';
 import type { ChatMessage, ChatRoom } from '../chat.types';
 
@@ -24,6 +26,16 @@ export function ChatMessageList({
   messagesEndRef,
   onImageLoad,
 }: ChatMessageListProps) {
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const photos = useMemo(
+    () =>
+      messages
+        .filter((msg) => msg.messageType === MessageType.IMAGE && msg.mediaUrl)
+        .map((msg) => ({ url: msg.mediaUrl as string, caption: msg.content })),
+    [messages],
+  );
+  const viewerIndex = photos.findIndex((photo) => photo.url === viewerUrl);
+
   if (isLoading) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center h-full gap-2">
@@ -103,10 +115,15 @@ export function ChatMessageList({
                     }`}
                   >
                     {msg.messageType === MessageType.IMAGE && msg.mediaUrl ? (
-                      <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer">
+                      <button
+                        type="button"
+                        aria-label="Open photo"
+                        className="block cursor-zoom-in text-left"
+                        onClick={() => setViewerUrl(msg.mediaUrl as string)}
+                      >
                         <img
                           src={msg.mediaUrl}
-                          alt="Chat attachment"
+                          alt={msg.content || 'Chat attachment'}
                           className="max-sm:max-w-48 max-w-sm rounded-lg object-contain bg-muted/20"
                           loading="lazy"
                           onLoad={onImageLoad}
@@ -116,7 +133,12 @@ export function ChatMessageList({
                             onImageLoad?.();
                           }}
                         />
-                      </a>
+                        {msg.content && (
+                          <span className="mt-2 block max-w-48 sm:max-w-sm text-sm break-words whitespace-pre-wrap leading-relaxed">
+                            {msg.content}
+                          </span>
+                        )}
+                      </button>
                     ) : msg.messageType === MessageType.VOICE && msg.mediaUrl ? (
                       <VoicePlayer
                         src={msg.mediaUrl}
@@ -142,6 +164,9 @@ export function ChatMessageList({
         );
       })}
       <div ref={messagesEndRef} className="!mt-0 h-px" />
+      {viewerIndex >= 0 && (
+        <ImageViewer images={photos} startIndex={viewerIndex} onClose={() => setViewerUrl(null)} />
+      )}
     </div>
   );
 }

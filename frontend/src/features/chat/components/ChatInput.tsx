@@ -2,11 +2,25 @@ import { useEffect, useState, useRef } from 'react';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { showError } from '@/common/utils/swal.utils';
 import { MessageType, SenderType } from '../chat.types';
 import type { SendMessagePayload } from '../chat.types';
 import { RecordingWave } from './RecordingWave';
+import { PhotoComposer } from './PhotoComposer';
+import type { PhotoDraft } from './PhotoComposer';
+import { CameraCapture } from './CameraCapture';
 import { waveformFromBlob } from '../waveform';
+
+const MAX_PHOTOS = 10;
+const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
+const PHOTO_SEND_GAP_MS = 1300;
+const ALLOWED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
 interface ChatInputProps {
   isConnected: boolean;
@@ -32,13 +46,37 @@ export function ChatInput({
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [drafts, setDrafts] = useState<PhotoDraft[]>([]);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [sendingNumber, setSendingNumber] = useState<number | null>(null);
+  const [sendingTotal, setSendingTotal] = useState(0);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const draftsRef = useRef<PhotoDraft[]>([]);
+  const isConnectedRef = useRef(isConnected);
+
+  const libraryInputRef = useRef<HTMLInputElement>(null);
+  const filesInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<number | null>(null);
   const recordingStartRef = useRef(0);
   const cancelledRef = useRef(false);
   const [recordingStream, setRecordingStream] = useState<MediaStream | null>(null);
+
+  const updateDrafts = (next: PhotoDraft[]) => {
+    draftsRef.current = next;
+    setDrafts(next);
+  };
+
+  useEffect(() => {
+    isConnectedRef.current = isConnected;
+  }, [isConnected]);
+
+  useEffect(
+    () => () => draftsRef.current.forEach((draft) => URL.revokeObjectURL(draft.previewUrl)),
+    [],
+  );
 
   // Leaving the chat mid-recording discards it and releases the microphone
   useEffect(
@@ -67,29 +105,92 @@ export function ChatInput({
     if (e.key === 'Enter') handleSend();
   };
 
-  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      showError('Upload Error', 'Please select an image file');
-      return;
+  const closeComposerNotice = (message: string) => {
+    if (draftsRef.current.length) setPhotoError(message);
+    else showError('Photos', message);
+  };
+
+  const addPhotos = (files: File[]) => {
+    if (!files.length) return;
+    const room = MAX_PHOTOS - draftsRef.current.length;
+    const valid = files.filter(
+      (file) => ALLOWED_PHOTO_TYPES.includes(file.type) && file.size <= MAX_PHOTO_BYTES,
+    );
+    const accepted = valid.slice(0, Math.max(0, room));
+    let notice: string | null = null;
+    if (valid.length < files.length) {
+      notice = 'Some files were skipped. Use JPG, PNG, WebP or GIF photos up to 10 MB.';
+    } else if (accepted.length < valid.length) {
+      notice = `You can send up to ${MAX_PHOTOS} photos at once.`;
     }
+    const added = accepted.map((file) => ({
+      id: crypto.randomUUID(),
+      file,
+      previewUrl: URL.createObjectURL(file),
+      caption: '',
+    }));
+    if (added.length) updateDrafts([...draftsRef.current, ...added]);
+    setPhotoError(null);
+    if (notice) closeComposerNotice(notice);
+  };
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    addPhotos(Array.from(e.target.files ?? []));
+    e.target.value = '';
+  };
+
+  const openCamera = () => {
+    // Phones open their own camera app; laptops use the webcam screen
+    if (window.matchMedia('(pointer: coarse)').matches) cameraInputRef.current?.click();
+    else setIsCameraOpen(true);
+  };
+
+  const removeDraft = (id: string) => {
+    const draft = draftsRef.current.find((item) => item.id === id);
+    if (draft) URL.revokeObjectURL(draft.previewUrl);
+    updateDrafts(draftsRef.current.filter((item) => item.id !== id));
+  };
+
+  const discardDrafts = () => {
+    draftsRef.current.forEach((draft) => URL.revokeObjectURL(draft.previewUrl));
+    updateDrafts([]);
+    setPhotoError(null);
+  };
+
+  const sendPhotos = async () => {
+    if (!activeRoomId || sendingNumber !== null) return;
+    const queue = [...draftsRef.current];
+    setPhotoError(null);
+    setSendingTotal(queue.length);
     try {
-      setIsUploading(true);
-      const mediaUrl = await onUploadMedia(file);
-      if (!activeRoomId) return;
-      onSendMessage({
-        chatRoomId: activeRoomId,
-        senderId: userId,
-        senderType: isStylist ? SenderType.STYLIST : SenderType.USER,
-        messageType: MessageType.IMAGE,
-        mediaUrl,
-      });
+      for (let i = 0; i < queue.length; i++) {
+        if (!isConnectedRef.current) {
+          setPhotoError('You are offline. Reconnect, then press send again.');
+          return;
+        }
+        const startedAt = Date.now();
+        setSendingNumber(i + 1);
+        const draft = queue[i];
+        const mediaUrl = await onUploadMedia(draft.file);
+        onSendMessage({
+          chatRoomId: activeRoomId,
+          senderId: userId,
+          senderType: isStylist ? SenderType.STYLIST : SenderType.USER,
+          messageType: MessageType.IMAGE,
+          mediaUrl,
+          content: draft.caption.trim() || undefined,
+        });
+        removeDraft(draft.id);
+        // The server allows 5 messages per 5 seconds and drops the rest
+        if (i < queue.length - 1) {
+          const wait = PHOTO_SEND_GAP_MS - (Date.now() - startedAt);
+          if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+        }
+      }
     } catch (err: unknown) {
-      showError('Upload Failed', (err as Error).message || 'Image upload failed');
+      setPhotoError((err as Error).message || 'Photo upload failed. Press send to try again.');
     } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      setSendingNumber(null);
     }
   };
 
@@ -194,10 +295,29 @@ export function ChatInput({
     <div className="p-3 md:p-4 bg-background/95 backdrop-blur-md border-t border-border/50 sticky bottom-0 shrink-0 w-full pb-safe-offset-2 shadow-[0_-8px_30px_rgb(0,0,0,0.04)] z-20">
       <div className="flex items-end gap-2 max-w-4xl mx-auto w-full">
         <input
+          ref={libraryInputRef}
+          data-photo-library
           type="file"
           accept="image/*"
-          onChange={handleImageSelect}
-          ref={fileInputRef}
+          multiple
+          onChange={handlePhotoSelect}
+          className="hidden"
+        />
+        <input
+          ref={filesInputRef}
+          data-photo-files
+          type="file"
+          accept=".jpg,.jpeg,.png,.webp,.gif"
+          multiple
+          onChange={handlePhotoSelect}
+          className="hidden"
+        />
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handlePhotoSelect}
           className="hidden"
         />
         {isRecording ? (
@@ -211,19 +331,36 @@ export function ChatInput({
             <Icon icon="solar:trash-bin-trash-bold" className="size-5" />
           </Button>
         ) : (
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Send a photo"
-            className="shrink-0 h-11 w-11 rounded-full text-muted-foreground hover:bg-muted/50 hover:text-foreground active:scale-95 transition-all"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading || !isConnected}
-          >
-            <Icon
-              icon={isUploading ? 'solar:spinner-bold-duotone' : 'solar:camera-bold'}
-              className={`size-5 ${isUploading ? 'animate-spin opacity-50' : ''}`}
-            />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Attach"
+                className="shrink-0 h-11 w-11 rounded-full text-muted-foreground hover:bg-muted/50 hover:text-foreground active:scale-95 transition-all"
+                disabled={isUploading || !isConnected}
+              >
+                <Icon
+                  icon={isUploading ? 'solar:spinner-bold-duotone' : 'solar:paperclip-linear'}
+                  className={`size-5 ${isUploading ? 'animate-spin opacity-50' : ''}`}
+                />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="start" className="w-44">
+              <DropdownMenuItem onSelect={() => libraryInputRef.current?.click()}>
+                <Icon icon="solar:gallery-bold" className="mr-2 size-4" />
+                Photos
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={openCamera}>
+                <Icon icon="solar:camera-bold" className="mr-2 size-4" />
+                Camera
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => filesInputRef.current?.click()}>
+                <Icon icon="solar:folder-bold" className="mr-2 size-4" />
+                Files
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
 
         <div className="flex-1 min-w-0 relative bg-muted/30 rounded-2xl border border-border/50 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-sm">
@@ -280,6 +417,37 @@ export function ChatInput({
           </Button>
         )}
       </div>
+
+      {drafts.length > 0 && (
+        <PhotoComposer
+          drafts={drafts}
+          maxPhotos={MAX_PHOTOS}
+          error={photoError}
+          sendingNumber={sendingNumber}
+          sendingTotal={sendingTotal}
+          onCaptionChange={(id, caption) =>
+            updateDrafts(
+              draftsRef.current.map((draft) => (draft.id === id ? { ...draft, caption } : draft)),
+            )
+          }
+          onRemove={(id) => {
+            setPhotoError(null);
+            removeDraft(id);
+          }}
+          onAddMore={() => libraryInputRef.current?.click()}
+          onSend={sendPhotos}
+          onClose={discardDrafts}
+        />
+      )}
+      {isCameraOpen && (
+        <CameraCapture
+          onClose={() => setIsCameraOpen(false)}
+          onCapture={(file) => {
+            setIsCameraOpen(false);
+            addPhotos([file]);
+          }}
+        />
+      )}
     </div>
   );
 }
