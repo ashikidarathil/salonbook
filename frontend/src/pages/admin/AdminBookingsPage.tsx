@@ -1,14 +1,12 @@
 'use client';
 import { bookingRef } from '@/common/utils/bookingRef';
 
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useListParams } from '@/hooks/useListParams';
+import { PageHeader } from '@/components/common/PageHeader';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import {
-  fetchAdminBookings,
-  cancelBooking,
-  rescheduleBooking,
-} from '@/features/booking/booking.thunks';
+import { fetchAdminBookings, cancelBooking } from '@/features/booking/booking.thunks';
 import { fetchBranches } from '@/features/branch/branch.thunks';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,10 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { Icon } from '@iconify/react';
 import { LoadingGate } from '@/components/common/LoadingGate';
 import { format } from 'date-fns';
-import { showSuccess, showApiError, showCancellationConfirm } from '@/common/utils/swal.utils';
-import Swal from 'sweetalert2';
-import { SlotBookingDialog } from '@/components/booking/SlotBookingDialog';
-import type { BookingItem, BookingDetailsItem } from '@/features/booking/booking.types';
+import { showSuccess, showCancellationConfirm } from '@/common/utils/swal.utils';
+import type { BookingItem } from '@/features/booking/booking.types';
 import { BookingStatus, BOOKING_MESSAGES } from '@/features/booking/booking.constants';
 import {
   Select,
@@ -35,14 +31,12 @@ export default function AdminBookingsPage() {
   const { myBookings: bookings, loading, error } = useAppSelector((state) => state.booking);
   const { branches } = useAppSelector((state) => state.branch);
 
-  const [selectedBranch, setSelectedBranch] = useState<string>('all');
-  const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'));
-
-  // Dialog states
-  const [rescheduleData, setRescheduleData] = useState<{
-    isOpen: boolean;
-    booking: BookingItem | null;
-  }>({ isOpen: false, booking: null });
+  const location = useLocation();
+  const list = useListParams();
+  const branchParam = list.value('branch');
+  const dateParam = list.value('date');
+  const selectedBranch = branchParam === 'ALL' ? 'all' : branchParam;
+  const selectedDate = dateParam === 'ALL' ? format(new Date(), 'yyyy-MM-dd') : dateParam;
 
   useEffect(() => {
     dispatch(fetchBranches());
@@ -63,53 +57,6 @@ export default function AdminBookingsPage() {
       const result = await dispatch(cancelBooking({ bookingId: booking.id, reason }));
       if (cancelBooking.fulfilled.match(result)) {
         showSuccess('Cancelled', BOOKING_MESSAGES.CANCEL_SUCCESS);
-      }
-    }
-  };
-
-  const handleRescheduleSubmit = async (data: {
-    stylistId: string;
-    date: string;
-    startTime: string;
-    slotId: string;
-  }) => {
-    if (!rescheduleData.booking) return;
-
-    const { value: reason } = await Swal.fire({
-      title: 'Reschedule Reason',
-      input: 'text',
-      inputPlaceholder: 'Reason for rescheduling...',
-      showCancelButton: true,
-      preConfirm: (value) => {
-        if (!value || !value.trim()) {
-          Swal.showValidationMessage('Reason is required');
-        }
-        return value;
-      },
-    });
-
-    if (reason) {
-      const result = await dispatch(
-        rescheduleBooking({
-          bookingId: rescheduleData.booking.id,
-          data: {
-            reason,
-            items: rescheduleData.booking.items.map((item) => ({
-              serviceId: item.serviceId,
-              stylistId: data.stylistId,
-              date: data.date,
-              startTime: data.startTime,
-              slotId: data.slotId,
-            })),
-          },
-        }),
-      );
-
-      if (rescheduleBooking.fulfilled.match(result)) {
-        showSuccess('Rescheduled', BOOKING_MESSAGES.RESCHEDULE_SUCCESS);
-        setRescheduleData({ isOpen: false, booking: null });
-      } else {
-        showApiError(result.payload as string, 'Reschedule Failed');
       }
     }
   };
@@ -137,52 +84,56 @@ export default function AdminBookingsPage() {
 
   return (
     <div className="space-y-6 text-foreground">
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight font-heading">Booking Management</h1>
-          <p className="text-muted-foreground">Monitor and manage all salon appointments</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex flex-col gap-1.5 min-w-[200px]">
-            <span className="ml-1 text-xs font-bold uppercase text-muted-foreground">Branch</span>
-            <Select value={selectedBranch} onValueChange={setSelectedBranch}>
-              <SelectTrigger className="bg-background border-border/60">
-                <SelectValue placeholder="All Branches" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Branches</SelectItem>
-                {branches.map((b) => (
-                  <SelectItem key={b.id} value={b.id}>
-                    {b.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col gap-1.5 min-w-[160px]">
-            <span className="ml-1 text-xs font-bold uppercase text-muted-foreground">Date</span>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="h-10 px-3 text-sm border rounded-md bg-background border-border/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-          <Button
-            variant="outline"
-            className="h-10 mt-5"
-            onClick={() =>
-              dispatch(
-                fetchAdminBookings({
-                  branchId: selectedBranch === 'all' ? undefined : selectedBranch,
-                  date: selectedDate,
-                }),
-              )
-            }
+      <PageHeader
+        title="Booking Management"
+        description="Monitor and manage all salon appointments"
+        breadcrumbs={[{ label: 'Bookings' }]}
+      />
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end lg:max-w-2xl">
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <span className="ml-1 text-xs font-bold uppercase text-muted-foreground">Branch</span>
+          <Select
+            value={selectedBranch}
+            onValueChange={(value) => list.update({ branch: value === 'all' ? undefined : value })}
           >
-            <Icon icon="solar:restart-bold" className="size-4" />
-          </Button>
+            <SelectTrigger aria-label="Filter by branch" className="border-border/60 bg-background">
+              <SelectValue placeholder="All Branches" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Branches</SelectItem>
+              {branches.map((b) => (
+                <SelectItem key={b.id} value={b.id}>
+                  {b.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <span className="ml-1 text-xs font-bold uppercase text-muted-foreground">Date</span>
+          <input
+            type="date"
+            aria-label="Filter by date"
+            value={selectedDate}
+            onChange={(e) => list.update({ date: e.target.value })}
+            className="h-10 w-full rounded-md border border-border/60 bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+          />
+        </div>
+        <Button
+          variant="outline"
+          className="h-10"
+          aria-label="Refresh bookings"
+          onClick={() =>
+            dispatch(
+              fetchAdminBookings({
+                branchId: selectedBranch === 'all' ? undefined : selectedBranch,
+                date: selectedDate,
+              }),
+            )
+          }
+        >
+          <Icon icon="solar:restart-bold" className="size-4" />
+        </Button>
       </div>
 
       <LoadingGate
@@ -198,17 +149,17 @@ export default function AdminBookingsPage() {
               className="overflow-hidden transition-all border-border/60 hover:shadow-md"
             >
               <div className="flex flex-col lg:flex-row">
-                <div className="flex-1 p-6">
-                  <div className="flex items-start justify-between mb-4">
+                <div className="min-w-0 flex-1 p-4 sm:p-6">
+                  <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <Icon icon="solar:hashtag-bold" className="size-4 text-primary" />
                         <span className="text-lg font-bold">{booking.bookingNumber}</span>
                         <Badge className={getStatusColor(booking.status)}>
                           {booking.status === BookingStatus.SPECIAL ? '⚡ Special' : booking.status}
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                         <div className="relative flex items-center gap-1 group">
                           <Icon icon="solar:user-bold" className="size-3.5 text-blue-500" />
                           <span className="font-medium text-foreground">
@@ -224,7 +175,7 @@ export default function AdminBookingsPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="sm:text-right">
                       <p className="text-xs font-bold tracking-wider uppercase text-muted-foreground">
                         Appointment Time
                       </p>
@@ -269,7 +220,7 @@ export default function AdminBookingsPage() {
                   )}
                 </div>
 
-                <div className="flex flex-col justify-between gap-4 p-6 border-t bg-muted/10 lg:w-72 lg:border-t-0 lg:border-l border-border/40">
+                <div className="flex flex-col justify-between gap-4 border-t bg-muted/10 p-4 sm:p-6 lg:w-72 lg:border-t-0 lg:border-l border-border/40">
                   <div className="space-y-4">
                     <div>
                       <p className="text-xs font-bold tracking-wider uppercase text-muted-foreground">
@@ -293,7 +244,11 @@ export default function AdminBookingsPage() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => setRescheduleData({ isOpen: true, booking })}
+                          onClick={() =>
+                            navigate(`/admin/bookings/${bookingRef(booking)}/reschedule`, {
+                              state: { from: location.search },
+                            })
+                          }
                         >
                           <Icon icon="solar:calendar-rotate-bold" className="mr-2 size-4" />
                           Reschedule
@@ -324,22 +279,6 @@ export default function AdminBookingsPage() {
           ))}
         </div>
       </LoadingGate>
-
-      {rescheduleData.isOpen && rescheduleData.booking && (
-        <SlotBookingDialog
-          isOpen={rescheduleData.isOpen}
-          onClose={() => setRescheduleData({ isOpen: false, booking: null })}
-          branchId={rescheduleData.booking.branchId}
-          selectedServices={rescheduleData.booking.items.map((i: BookingDetailsItem) => ({
-            serviceId: i.serviceId,
-            name: i.serviceName || 'Service',
-            price: i.price,
-            duration: i.duration,
-          }))}
-          isCartMode={true}
-          onSelect={handleRescheduleSubmit}
-        />
-      )}
     </div>
   );
 }

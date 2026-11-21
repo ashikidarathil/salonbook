@@ -104,3 +104,7 @@
 - 2026-11-21 — 5.4 schedules and slots: day adjustments, breaks and special slots are inner pages for admin and
   stylist, slots become cards on phones, and stylist pages use the full width. Verified in Chrome from phone to
   1920px (75/75). Not tested on a physical device.
+- 2026-11-21 — 5.5 booking flow: choosing a service, stylist, date and time, plus customer and admin reschedule, are
+  inner pages. Fixed admin reschedule having no stylist or times, stale times after changing date, re-picking a
+  service in the cart, and blank calendar arrows. Verified in Chrome from phone to 1920px (39/39), with the payment
+  step simulated. Not tested on a physical device.

@@ -7,17 +7,11 @@ import { Header } from '@/components/user/Header';
 import { Footer } from '@/components/user/Footer';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@iconify/react';
-import {
-  removeFromCart,
-  clearCart,
-  updateStylist,
-  updateItemSlot,
-} from '@/features/cart/cart.slice';
+import { removeFromCart, clearCart } from '@/features/cart/cart.slice';
 import { Card } from '@/components/ui/card';
 import StylistBranchService from '@/services/stylistBranch.service';
 
 import type { BranchStylist } from '@/features/stylistBranch/stylistBranch.types';
-import { SlotBookingDialog } from '@/components/booking/SlotBookingDialog';
 import { createBooking as createBookingThunk } from '@/features/booking/booking.thunks';
 import { fetchBranchStylists } from '@/features/stylistBranch/stylistBranch.thunks';
 import { showError } from '@/common/utils/swal.utils';
@@ -36,7 +30,6 @@ export default function CartPage() {
   } = useAppSelector((state) => state.booking);
 
   const [stylistsByService, setStylistsByService] = useState<Record<string, BranchStylist[]>>({});
-  const [activeServiceId, setActiveServiceId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -105,7 +98,6 @@ export default function CartPage() {
   const totalPrice = items.reduce((sum, item) => sum + item.price, 0);
   const totalDuration = items.reduce((sum, item) => sum + item.duration, 0);
   const allSlotsSelected = items.every((item) => item.slotId);
-  const activeItem = items.find((i) => i.serviceId === activeServiceId);
 
   const handleBookAll = async () => {
     if (!allSlotsSelected || bookingLoading) return;
@@ -150,12 +142,12 @@ export default function CartPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="flex items-center gap-3 mb-8">
+      <main className="w-full flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mb-6 flex flex-wrap items-center gap-3 sm:mb-8">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full">
             <Icon icon="solar:arrow-left-linear" className="size-6" />
           </Button>
-          <h1 className="text-3xl font-bold">Booking Cart</h1>
+          <h1 className="text-2xl font-bold sm:text-3xl">Booking Cart</h1>
           <div className="ml-auto">
             <Button
               variant="outline"
@@ -252,21 +244,21 @@ export default function CartPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => setActiveServiceId(item.serviceId)}
+                              onClick={() => navigate(`/cart/schedule/${item.serviceId}`)}
                               className="text-xs h-8 px-2"
                             >
                               Change
                             </Button>
                           </div>
                         ) : (
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <p className="text-xs text-muted-foreground italic">
                               No time slot selected yet
                             </p>
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => setActiveServiceId(item.serviceId)}
+                              onClick={() => navigate(`/cart/schedule/${item.serviceId}`)}
                               className="bg-primary/10 text-primary hover:bg-primary/20 border-primary/20 hover:text-primary/80 transition-colors h-8"
                             >
                               Select Stylist & Time
@@ -345,39 +337,6 @@ export default function CartPage() {
       </main>
       <Footer />
 
-      {branchId && activeServiceId && activeItem && (
-        <SlotBookingDialog
-          isOpen={!!activeServiceId}
-          onClose={() => setActiveServiceId(null)}
-          branchId={branchId}
-          selectedServices={[
-            {
-              serviceId: activeItem.serviceId,
-              name: activeItem.name,
-              price: activeItem.price,
-              duration: activeItem.duration,
-            },
-          ]}
-          availableStylists={stylistsByService[activeItem.serviceId]}
-          onSelect={(data) => {
-            dispatch(
-              updateStylist({
-                serviceId: activeItem.serviceId,
-                stylistId: data.stylistId,
-                stylistName: data.stylistName,
-              }),
-            );
-            dispatch(
-              updateItemSlot({
-                serviceId: activeItem.serviceId,
-                date: data.date,
-                startTime: data.startTime,
-                slotId: data.slotId,
-              }),
-            );
-          }}
-        />
-      )}
     </div>
   );
 }

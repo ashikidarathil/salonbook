@@ -15,6 +15,9 @@ import ServiceDetailsPage from '@/pages/user/service/ServiceDetailsPage';
 import StylistsListingPage from '@/pages/user/stylist/StylistsListingPage';
 import StylistDetailsPage from '@/pages/user/stylist/StylistDetailsPage';
 import CartPage from '@/pages/user/CartPage';
+import CartSlotPage from '@/pages/user/CartSlotPage';
+import StylistBookPage from '@/pages/user/stylist/StylistBookPage';
+import RescheduleBookingPage from '@/pages/shared/booking/RescheduleBookingPage';
 import CheckoutPage from '@/pages/user/CheckoutPage';
 import BookingsPage from '@/pages/user/BookingsPage';
 import BookingDetailPage from '@/pages/user/BookingDetailPage';
@@ -120,6 +123,9 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute roles={['USER']} />}>
         <Route path={APP_ROUTES.USER.CART} element={<CartPage />} />
         <Route path={APP_ROUTES.USER.CHECKOUT} element={<CheckoutPage />} />
+        <Route path="/cart/schedule/:serviceId" element={<CartSlotPage />} />
+        <Route path="/stylists/:stylistId/book" element={<StylistBookPage />} />
+        <Route path="/stylists/:stylistId/book/:serviceId" element={<StylistBookPage />} />
         <Route path="/payment/success/:bookingId" element={<PaymentSuccessPage />} />
         <Route path="/payment/failure/:bookingId" element={<PaymentFailurePage />} />
         <Route path="/chat" element={<UserChatPage />} />
@@ -129,6 +135,7 @@ export default function AppRoutes() {
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="bookings" element={<BookingsPage />} />
           <Route path="bookings/:id" element={<BookingDetailPage />} />
+          <Route path="bookings/:id/reschedule" element={<RescheduleBookingPage />} />
           <Route path="wallet" element={<WalletPage />} />
         </Route>
       </Route>
@@ -159,6 +166,7 @@ export default function AppRoutes() {
           <Route path="slots/special/new" element={<SpecialSlotFormPage />} />
           <Route path="bookings" element={<AdminBookingsPage />} />
           <Route path="bookings/:id" element={<AdminBookingDetailPage />} />
+          <Route path="bookings/:id/reschedule" element={<RescheduleBookingPage />} />
           <Route path="off-days" element={<OffDayManagementPage />} />
           <Route path="holidays" element={<HolidayManagementPage />} />
           <Route path="holidays/new" element={<HolidayFormPage />} />
