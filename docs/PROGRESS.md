@@ -84,3 +84,6 @@
 - 2026-11-21 — 9.4–9.7 photos: attach menu (Photos / Camera / Files), full-screen preview with a caption per photo,
   up to 10 photos paced under the server's message limit, full-screen viewer (zoom, pan, swipe, download), also for
   admin. Verified in real Chrome sessions with a fake camera (34/34). Not tested on a physical phone. Phase 9 built.
+- 2026-11-21 — 9.8 + 9.9: messages, photos and voice notes appear instantly with a loader, and failures show
+  Not sent · Retry. Every spinner and skeleton replaced by one Loader, coloured by site area. Verified in real Chrome
+  sessions with slow, dropped and rate-limited sends (32/32). Not tested on a physical phone.

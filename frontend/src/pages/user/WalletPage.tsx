@@ -1,3 +1,4 @@
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import {
@@ -148,7 +149,9 @@ export default function WalletPage() {
                   Available Balance
                 </p>
                 {isLoading ? (
-                  <div className="h-8 sm:h-10 w-24 sm:w-28 bg-white/20 rounded-lg animate-pulse" />
+                  <div className="flex h-8 items-center sm:h-12">
+                    <Loader size="sm" inverse label="Loading balance" />
+                  </div>
                 ) : (
                   <p className="text-2xl sm:text-5xl font-black tracking-tight truncate">
                     ₹{(wallet?.balance ?? 0).toLocaleString('en-IN')}
@@ -236,7 +239,7 @@ export default function WalletPage() {
               disabled={topupLoading || effectiveAmount < 100}
             >
               {topupLoading ? (
-                <Icon icon="solar:spinner-bold" className="size-6 animate-spin mr-2" />
+                <Loader size="sm" className="mr-2" />
               ) : (
                 <Icon icon="solar:card-send-bold" className="size-6 mr-2" />
               )}
@@ -259,16 +262,8 @@ export default function WalletPage() {
         <Card className="overflow-hidden border-none shadow-md">
           <CardContent className="p-0">
             {isLoading ? (
-              <div className="divide-y">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center gap-4 p-6">
-                    <div className="size-12 rounded-2xl bg-muted animate-pulse" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-muted rounded animate-pulse w-1/2" />
-                      <div className="h-3 bg-muted rounded animate-pulse w-1/4" />
-                    </div>
-                  </div>
-                ))}
+              <div className="flex justify-center py-16">
+                <Loader label="Loading transactions" />
               </div>
             ) : transactions.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 sm:py-20 px-4 text-center">

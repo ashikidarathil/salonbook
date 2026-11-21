@@ -1,5 +1,6 @@
 'use client';
 
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
@@ -195,7 +196,7 @@ export default function AcceptInvitePage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-4 border-t-4 border-b-4 rounded-full animate-spin border-primary"></div>
+          <Loader size="md" className="mx-auto mb-4" />
           <p className="text-lg">Validating invitation...</p>
         </div>
       </div>

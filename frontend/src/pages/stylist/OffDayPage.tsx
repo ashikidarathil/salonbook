@@ -1,3 +1,4 @@
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchMyOffDays, requestOffDay, deleteOffDay } from '@/features/offDay/offDay.thunks';
@@ -228,7 +229,7 @@ export default function OffDayPage() {
                 disabled={loading}
               >
                 {loading ? (
-                  <Icon icon="eos-icons:loading" className="mr-2 size-4 animate-spin" />
+                  <Loader size="xs" className="mr-2" />
                 ) : (
                   <Icon icon="solar:paper-plane-bold" className="mr-2 size-4" />
                 )}

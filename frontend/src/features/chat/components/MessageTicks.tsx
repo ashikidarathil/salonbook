@@ -1,3 +1,4 @@
+import { Loader } from '@/components/common/Loader';
 import type { ChatMessage } from '../chat.types';
 
 type TickStatus = 'sent' | 'delivered' | 'read';
@@ -15,6 +16,14 @@ const LABELS: Record<TickStatus, string> = {
 
 /** ✓ sent, ✓✓ delivered, blue ✓✓ read */
 export function MessageTicks({ message }: { message: ChatMessage }) {
+  if (message.sendState === 'sending') {
+    return (
+      <span data-tick-status="sending" title="Sending" className="inline-flex shrink-0">
+        <Loader size="xs" label="Sending" />
+      </span>
+    );
+  }
+
   const status = getTickStatus(message);
   return (
     <span

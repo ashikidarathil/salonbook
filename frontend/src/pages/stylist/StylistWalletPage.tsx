@@ -1,3 +1,4 @@
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useState, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchStylistWallet } from '@/features/stylistWallet/stylistWallet.thunks';
@@ -55,7 +56,7 @@ export default function StylistWalletPage() {
   if (walletLoading && !wallet) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <Loader size="sm" />
       </div>
     );
   }
@@ -72,7 +73,7 @@ export default function StylistWalletPage() {
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" size="sm" className="gap-2 rounded-xl h-10 px-5 border-border/60 hover:bg-background" onClick={handleRefresh}>
-            <RefreshCw className={`size-4 ${escrowLoading ? 'animate-spin' : ''} text-primary`} />
+            {escrowLoading ? <Loader size="xs" /> : <RefreshCw className="size-4 text-primary" />}
             <span className="font-medium">Refresh</span>
           </Button>
         </div>
@@ -197,7 +198,7 @@ export default function StylistWalletPage() {
                 {escrowLoading && escrows.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-8 py-20 text-center text-muted-foreground">
-                      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-4 opacity-20"></div>
+                      <Loader size="md" className="mx-auto mb-4" />
                       <span className="font-medium text-xs opacity-40">Syncing data...</span>
                     </td>
                   </tr>

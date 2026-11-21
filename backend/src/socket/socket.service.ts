@@ -15,6 +15,11 @@ const RATE_LIMIT_MS = 5000;
 const RATE_LIMIT_MAX_MESSAGES = 5;
 
 type SendMessageData = Parameters<IChatService['sendMessage']>[0];
+type SendMessageAck = (
+  result:
+    | { ok: true; message: Awaited<ReturnType<IChatService['sendMessage']>> }
+    | { ok: false; error: string },
+) => void;
 
 const parseCookies = (header = ''): Record<string, string> =>
   Object.fromEntries(
@@ -100,11 +105,17 @@ export class SocketService {
         logInfo(`User ${socket.data.userId} left room ${roomId}`);
       });
 
-      socket.on('sendMessage', async (payload: SendMessageData) => {
+      socket.on('sendMessage', async (payload: SendMessageData, ack?: SendMessageAck) => {
+        let saved = false;
+        // Browsers that pass an ack show the failure on the message itself
+        const fail = (message: string) => {
+          if (typeof ack === 'function') ack({ ok: false, error: message });
+          else socket.emit('error', { message });
+        };
         try {
           // The sender is always the logged-in user, never what the browser claims
           if (payload.senderType === SenderType.SYSTEM) {
-            socket.emit('error', { message: 'Not allowed' });
+            fail('Not allowed');
             return;
           }
           const data: SendMessageData = { ...payload, senderId: socket.data.userId };
@@ -118,7 +129,7 @@ export class SocketService {
           } else {
             userRate.count++;
             if (userRate.count > RATE_LIMIT_MAX_MESSAGES) {
-              socket.emit('error', { message: 'Rate limit exceeded. Try again in 5 seconds.' });
+              fail('Rate limit exceeded. Try again in 5 seconds.');
               return;
             }
           }
@@ -126,7 +137,10 @@ export class SocketService {
           const chatService = container.resolve<IChatService>(TOKENS.ChatService);
 
           const message = await chatService.sendMessage(data);
+          saved = true;
 
+          // Ack first, so the sender swaps the pending bubble before the broadcast arrives
+          if (typeof ack === 'function') ack({ ok: true, message });
           this.io.to(data.chatRoomId).emit('newMessage', message);
 
           // Recipient is online somewhere on the site: delivered straight away
@@ -141,7 +155,7 @@ export class SocketService {
         } catch (error) {
           const err = error as Error;
           logError('Socket sendMessage error', { message: err.message });
-          socket.emit('error', { message: err.message || 'Failed to send message' });
+          if (!saved) fail(err.message || 'Failed to send message');
         }
       });
 

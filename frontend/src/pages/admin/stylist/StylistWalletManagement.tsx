@@ -1,3 +1,4 @@
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchStylistWalletById } from '@/features/stylistWallet/stylistWallet.thunks';
@@ -10,7 +11,6 @@ import {
   Wallet,
   TrendingUp,
   Clock,
-  Loader2,
   Info,
   Search,
   ChevronLeft,
@@ -83,7 +83,7 @@ export default function StylistWalletManagement({ stylistId }: StylistWalletMana
   if (walletLoading && !wallet) {
     return (
       <div className="flex items-center justify-center py-16 text-muted-foreground">
-        <Loader2 className="size-6 animate-spin mr-3" />
+        <Loader size="sm" className="mr-3" />
         Loading wallet...
       </div>
     );
@@ -162,7 +162,7 @@ export default function StylistWalletManagement({ stylistId }: StylistWalletMana
               className="h-8 gap-2 text-xs"
               onClick={handleRefresh}
             >
-              <RefreshCw className={`size-3 ${escrowLoading ? 'animate-spin' : ''}`} />
+              {escrowLoading ? <Loader size="xs" /> : <RefreshCw className="size-3" />}
               Refresh
             </Button>
             <form onSubmit={handleSearch} className="relative w-full sm:w-64">
@@ -192,7 +192,7 @@ export default function StylistWalletManagement({ stylistId }: StylistWalletMana
                 {escrowLoading && escrows.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground italic">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mx-auto mb-2"></div>
+                      <Loader size="sm" className="mx-auto mb-2" />
                       Loading...
                     </td>
                   </tr>

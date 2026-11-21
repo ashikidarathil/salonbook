@@ -1,3 +1,4 @@
+import { Loader } from '@/components/common/Loader';
 import React from 'react';
 import { ErrorDisplay } from './ErrorDisplay';
 import { Icon } from '@iconify/react';
@@ -49,7 +50,7 @@ export function LoadingGate({
   if (loading && (!data || (Array.isArray(data) && data.length === 0))) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <div className="w-16 h-16 mb-4 border-4 rounded-full border-primary border-t-transparent animate-spin"></div>
+        <Loader size="lg" className="mb-4" label={loadingMessage} />
         <p className="font-medium text-muted-foreground">{loadingMessage}</p>
       </div>
     );

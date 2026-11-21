@@ -62,6 +62,12 @@ export interface ChatMessage {
   deliveredAt?: string;
   readAt?: string;
   createdAt: string;
+  /** Browser-only: stable id of a message sent from this tab */
+  clientId?: string;
+  /** Browser-only: set until the server has saved the message */
+  sendState?: 'sending' | 'failed';
+  /** Browser-only: uploaded file address of a pending photo or voice message */
+  remoteUrl?: string;
 }
 
 export interface SendMessagePayload {
@@ -74,6 +80,13 @@ export interface SendMessagePayload {
   duration?: number;
   waveform?: number[];
 }
+
+export interface MediaSendItem {
+  file: File;
+  payload: SendMessagePayload;
+}
+
+export type ChatMediaUploader = (roomId: string, file: File) => Promise<string>;
 
 export interface ChatUnreadCount {
   count: number;

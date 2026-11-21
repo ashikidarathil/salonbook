@@ -12,7 +12,12 @@ import { markIncomingRead, resetRoomUnreadCount } from '@/features/chat/chat.sli
 import { fetchTotalUnreadCount } from '@/features/chat/chat.thunks';
 import { markAllNotificationsAsRead } from '@/features/notification/state/notification.thunks';
 import { useChat } from '@/features/chat/hooks/useChat';
-import type { ChatMessage, ChatRoom, SendMessagePayload } from '@/features/chat/chat.types';
+import type {
+  ChatMessage,
+  ChatRoom,
+  MediaSendItem,
+  SendMessagePayload,
+} from '@/features/chat/chat.types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@iconify/react';
@@ -41,9 +46,9 @@ export default function ChatPage() {
   const isStylist = user?.role === 'STYLIST';
   const isUser = user?.role === 'USER';
 
-  const { isConnected, sendMessage, joinRoom, markRead } = useChat(user?.id) as ReturnType<
-    typeof useChat
-  >;
+  const { isConnected, sendMessage, sendMedia, retryMessage, joinRoom, markRead } = useChat(
+    user?.id,
+  ) as ReturnType<typeof useChat>;
 
   const activeRoom = rooms.find((r: ChatRoom) => r.id === activeRoomId);
   const currentMessages = activeRoomId ? messagesByRoom[activeRoomId] || [] : [];
@@ -133,12 +138,11 @@ export default function ChatPage() {
     [sendMessage],
   );
 
-  const handleUploadMedia = useCallback(
-    async (file: File) => {
-      if (!activeRoomId) throw new Error('No active room');
-      return await dispatch(uploadChatMedia({ roomId: activeRoomId, file })).unwrap();
+  const handleSendMedia = useCallback(
+    (items: MediaSendItem[]) => {
+      sendMedia(items, (roomId, file) => dispatch(uploadChatMedia({ roomId, file })).unwrap());
     },
-    [dispatch, activeRoomId],
+    [dispatch, sendMedia],
   );
 
   const getPartnerDetails = (room: ChatRoom) => {
@@ -240,6 +244,7 @@ export default function ChatPage() {
               isLoading={isLoadingMessages}
               isClosed={isClosed}
               messagesEndRef={messagesEndRef}
+              onRetry={retryMessage}
               onImageLoad={() => {
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
               }}
@@ -254,7 +259,7 @@ export default function ChatPage() {
                 isStylist={isStylist}
                 isClosed={isClosed}
                 onSendMessage={handleSendMessage}
-                onUploadMedia={handleUploadMedia}
+                onSendMedia={handleSendMedia}
               />
             )}
           </>

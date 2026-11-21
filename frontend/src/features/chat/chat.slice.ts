@@ -41,10 +41,62 @@ const chatSlice = createSlice({
         state.messagesByRoom[chatRoomId] = [];
       }
 
-      const exists = state.messagesByRoom[chatRoomId].some((m) => m.id === action.payload.id);
-      if (!exists) {
-        state.messagesByRoom[chatRoomId].push(action.payload);
+      const list = state.messagesByRoom[chatRoomId];
+      if (list.some((m) => m.id === action.payload.id)) return;
+
+      // Safety net if the confirmation was missed: the broadcast settles my pending bubble
+      const incoming = action.payload;
+      const pendingIndex = list.findIndex(
+        (m) =>
+          m.sendState &&
+          m.senderId === incoming.senderId &&
+          m.messageType === incoming.messageType &&
+          (m.content ?? '') === (incoming.content ?? '') &&
+          (m.remoteUrl ?? m.mediaUrl) === incoming.mediaUrl,
+      );
+      if (pendingIndex >= 0) {
+        list[pendingIndex] = { ...incoming, clientId: list[pendingIndex].clientId };
+      } else {
+        list.push(incoming);
       }
+    },
+    addPendingMessage: (state, action: PayloadAction<ChatMessage>) => {
+      (state.messagesByRoom[action.payload.chatRoomId] ??= []).push(action.payload);
+    },
+    confirmPendingMessage: (
+      state,
+      action: PayloadAction<{ clientId: string; message: ChatMessage }>,
+    ) => {
+      const { clientId, message } = action.payload;
+      const list = (state.messagesByRoom[message.chatRoomId] ??= []);
+      const pendingIndex = list.findIndex((m) => m.id === clientId);
+      if (list.some((m) => m.id === message.id)) {
+        if (pendingIndex >= 0) list.splice(pendingIndex, 1);
+      } else if (pendingIndex >= 0) {
+        list[pendingIndex] = { ...message, clientId };
+      } else {
+        list.push(message);
+      }
+    },
+    setPendingState: (
+      state,
+      action: PayloadAction<{
+        roomId: string;
+        clientId: string;
+        sendState: 'sending' | 'failed';
+      }>,
+    ) => {
+      const { roomId, clientId, sendState } = action.payload;
+      const pending = state.messagesByRoom[roomId]?.find((m) => m.id === clientId);
+      if (pending?.sendState) pending.sendState = sendState;
+    },
+    setPendingRemoteUrl: (
+      state,
+      action: PayloadAction<{ roomId: string; clientId: string; remoteUrl: string }>,
+    ) => {
+      const { roomId, clientId, remoteUrl } = action.payload;
+      const pending = state.messagesByRoom[roomId]?.find((m) => m.id === clientId);
+      if (pending?.sendState) pending.remoteUrl = remoteUrl;
     },
     /** The other person received or read my messages in this room. */
     applyMessagesStatus: (
@@ -58,7 +110,7 @@ const chatSlice = createSlice({
     ) => {
       const { chatRoomId, status, at, userId } = action.payload;
       for (const message of state.messagesByRoom[chatRoomId] ?? []) {
-        if (message.senderId !== userId) continue;
+        if (message.senderId !== userId || message.sendState) continue;
         message.deliveredAt ??= at;
         if (status === 'read') {
           message.isRead = true;
@@ -120,7 +172,11 @@ const chatSlice = createSlice({
       })
       .addCase(fetchRoomMessages.fulfilled, (state, action) => {
         state.isLoadingMessages = false;
-        state.messagesByRoom[action.payload.roomId] = action.payload.messages;
+        // Reloading the history must not wipe messages still being sent
+        const pending = (state.messagesByRoom[action.payload.roomId] ?? []).filter(
+          (m) => m.sendState,
+        );
+        state.messagesByRoom[action.payload.roomId] = [...action.payload.messages, ...pending];
       })
       .addCase(fetchRoomMessages.rejected, (state, action) => {
         state.isLoadingMessages = false;
@@ -169,6 +225,10 @@ const chatSlice = createSlice({
 export const {
   setActiveRoom,
   addMessageToRoom,
+  addPendingMessage,
+  confirmPendingMessage,
+  setPendingState,
+  setPendingRemoteUrl,
   applyMessagesStatus,
   markIncomingRead,
   updateRoomLastMessage,

@@ -1,3 +1,4 @@
+import { Loader } from '@/components/common/Loader';
 import { useEffect, useState, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import {
@@ -23,7 +24,6 @@ import {
 import { format, subDays, startOfDay, endOfDay } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { showConfirm, showSuccess, showApiError } from '@/common/utils/swal.utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -212,7 +212,9 @@ export default function AdminReviewsPage() {
 
       <div className="grid gap-4">
         {isLoading ? (
-          Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-40 w-full" />)
+          <div className="flex justify-center py-16">
+            <Loader label="Loading reviews" />
+          </div>
         ) : reviews.length === 0 ? (
           <Card className="p-12 text-center text-muted-foreground">
             <MessageSquare className="h-12 w-12 mx-auto opacity-10 mb-4" />

@@ -1,5 +1,6 @@
 'use client';
 
+import { Loader } from '@/components/common/Loader';
 import { useState, useRef, useMemo } from 'react';
 import { useAppSelector, useAppDispatch } from '@/app/hooks';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -342,7 +343,7 @@ export default function ProfileContent() {
               </Avatar>
               {uploading && (
                 <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
-                  <Icon icon="eos-icons:loading" className="w-12 h-12 text-white animate-spin" />
+                  <Loader size="md" />
                 </div>
               )}
             </div>

@@ -91,6 +91,8 @@ Replace database IDs in public URLs with readable names. Old ID links keep worki
 - [x] 9.5 Preview before sending, with optional caption
 - [x] 9.6 Send multiple photos at once
 - [x] 9.7 Full-screen image viewer (zoom, close, download)
+- [x] 9.8 Sending states: message shows instantly with a loader, failed messages get Retry
+- [x] 9.9 One site-wide loader: pink (customer), blue (stylist), green (admin)
 
 ## Phase 7 — New features
 - [ ] 7.1 _(list features here as we decide them)_

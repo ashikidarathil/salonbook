@@ -1,3 +1,4 @@
+import { Loader } from '@/components/common/Loader';
 import React, { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { Icon } from '@iconify/react';
@@ -76,7 +77,7 @@ export const NotificationCenter: React.FC = () => {
     if (isLoading && notifications.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center h-40 space-y-2">
-          <div className="size-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <Loader size="sm" />
           <p className="text-xs text-muted-foreground">Loading...</p>
         </div>
       );

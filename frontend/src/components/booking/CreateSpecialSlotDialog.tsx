@@ -1,5 +1,6 @@
 'use client';
 
+import { Loader } from '@/components/common/Loader';
 import { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -12,7 +13,6 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Icon } from '@iconify/react';
 import { showSuccess, showApiError } from '@/common/utils/swal.utils';
 import { slotService } from '@/services/slot.service';
 import { format } from 'date-fns';
@@ -163,7 +163,7 @@ export function CreateSpecialSlotDialog({
             >
               {loading ? (
                 <>
-                  <Icon icon="eos-icons:loading" className="mr-2 animate-spin size-4" />
+                  <Loader size="xs" className="mr-2" />
                   Creating...
                 </>
               ) : (
