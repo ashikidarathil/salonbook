@@ -139,11 +139,7 @@ export default function StylistDetailsView({ stylist, onClose }: StylistDetailsV
         </TabsList>
 
         <TabsContent value="schedule" className="mt-0 outline-none">
-          <StylistScheduleManagement
-            stylistId={stylist.id}
-            stylistName={stylist.name}
-            onClose={onClose}
-          />
+          <StylistScheduleManagement stylistId={stylist.id} stylistName={stylist.name} />
         </TabsContent>
 
         <TabsContent value="services" className="mt-0 outline-none">

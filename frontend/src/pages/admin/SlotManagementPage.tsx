@@ -2,12 +2,15 @@
 
 import { Loader } from '@/components/common/Loader';
 import { useEffect, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useListParams } from '@/hooks/useListParams';
+import { PageHeader } from '@/components/common/PageHeader';
+import { SlotCards } from '@/components/booking/SlotCards';
 import { branchService } from '@/services/branch.service';
 import { stylistInviteService } from '@/services/stylistInvite.service';
 import { slotService } from '@/services/slot.service';
 import type { SlotItem, ListSlotsParams } from '@/features/slot/slot.types';
-import { CreateSpecialSlotDialog } from '@/components/booking/CreateSpecialSlotDialog';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -47,16 +50,31 @@ export default function SlotManagementPage() {
   const [specialSlots, setSpecialSlots] = useState<SlotItem[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const [filters, setFilters] = useState({
-    branchId: '',
-    date: '',
-    stylistId: 'all',
-  });
-
+  // Kept in the address so returning from the special slot page restores them
+  const list = useListParams();
+  const paramOr = (key: string, fallback: string) => {
+    const value = list.value(key);
+    return value === 'ALL' ? fallback : value;
+  };
+  const filters = {
+    branchId: paramOr('branch', ''),
+    date: paramOr('date', ''),
+    stylistId: paramOr('stylist', 'all'),
+  };
+  const slotView: 'normal' | 'special' = list.value('view') === 'special' ? 'special' : 'normal';
+  const setSlotView = (view: 'normal' | 'special') =>
+    list.update({ view: view === 'special' ? view : undefined });
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
-  const [specialSlotOpen, setSpecialSlotOpen] = useState(false);
-  const [slotView, setSlotView] = useState<'normal' | 'special'>('normal');
+  const visibleSlots = slots.filter(
+    (slot) =>
+      !['OFF_DAY', 'NON_WORKING', 'NO_SCHEDULE', 'HOLIDAY', 'SPECIAL'].includes(slot.status),
+  );
+  const specialSlotHref = `special/new?${new URLSearchParams({
+    branch: filters.branchId,
+    stylist: filters.stylistId,
+    date: filters.date,
+  })}`;
 
   useEffect(() => {
     const init = async () => {
@@ -220,44 +238,27 @@ export default function SlotManagementPage() {
   };
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold">Slot Management</h1>
-          <p className="text-muted-foreground">
-            Monitor and manage booking slots across all branches.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="relative group">
+    <div className="space-y-6">
+      <PageHeader
+        title="Slot Management"
+        description="Monitor and manage booking slots across all branches."
+        breadcrumbs={[{ label: 'Slots' }]}
+        actions={
+          <div className="group relative w-full sm:w-64">
             <Input
+              aria-label="Search stylists"
               placeholder="Search stylists..."
-              className="w-full h-10 pl-10 transition-all duration-200 md:w-64 rounded-xl border-muted bg-white/50 backdrop-blur-sm focus:md:w-72 focus:shadow-md"
+              className="h-10 w-full rounded-xl border-muted bg-white/50 pl-10"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <Icon
               icon="solar:magnifer-linear"
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors"
+              className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary"
             />
           </div>
-        </div>
-      </div>
-
-      {/* Special Slot Dialog */}
-      {specialSlotOpen && filters.branchId && filters.stylistId !== 'all' && (
-        <CreateSpecialSlotDialog
-          isOpen={specialSlotOpen}
-          onClose={() => setSpecialSlotOpen(false)}
-          branchId={filters.branchId}
-          stylistId={filters.stylistId}
-          date={filters.date}
-          onCreated={() => {
-            if (slotView === 'normal') fetchSlots();
-            else fetchSpecialSlots();
-          }}
-        />
-      )}
+        }
+      />
 
       <Card>
         <CardHeader>
@@ -265,14 +266,14 @@ export default function SlotManagementPage() {
             <Icon icon="solar:filter-bold" /> Filters
           </CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="space-y-2">
             <label className="text-sm font-medium text-muted-foreground uppercase text-[10px] font-bold tracking-wider">
               Branch
             </label>
             <Select
               value={filters.branchId}
-              onValueChange={(val) => setFilters((prev) => ({ ...prev, branchId: val }))}
+              onValueChange={(val) => list.update({ branch: val, stylist: undefined })}
             >
               <SelectTrigger className="rounded-xl">
                 <SelectValue placeholder="Select Branch" />
@@ -294,7 +295,7 @@ export default function SlotManagementPage() {
             <Input
               type="date"
               value={filters.date}
-              onChange={(e) => setFilters((prev) => ({ ...prev, date: e.target.value }))}
+              onChange={(e) => list.update({ date: e.target.value })}
               className="rounded-xl"
             />
           </div>
@@ -305,7 +306,7 @@ export default function SlotManagementPage() {
             </label>
             <Select
               value={filters.stylistId}
-              onValueChange={(val) => setFilters((prev) => ({ ...prev, stylistId: val }))}
+              onValueChange={(val) => list.update({ stylist: val === 'all' ? undefined : val })}
               disabled={!filters.branchId}
             >
               <SelectTrigger className="rounded-xl">
@@ -325,8 +326,8 @@ export default function SlotManagementPage() {
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div className="flex items-center gap-3">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <div className="flex flex-wrap items-center gap-3">
             <CardTitle>
               Available Slots (
               {
@@ -360,19 +361,26 @@ export default function SlotManagementPage() {
               </button>
             </div>
           </div>
-          <div className="flex gap-2">
-            {slotView === 'special' && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 border-primary/30 text-primary hover:bg-primary/5 gap-1.5 font-semibold"
-                onClick={() => setSpecialSlotOpen(true)}
-                disabled={!filters.branchId || filters.stylistId === 'all'}
-              >
-                <Icon icon="solar:add-square-bold" className="size-3.5" />
-                Create Special Slot
-              </Button>
-            )}
+          <div className="flex flex-wrap gap-2">
+            {slotView === 'special' &&
+              (filters.branchId && filters.stylistId !== 'all' ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 gap-1.5 border-primary/30 font-semibold text-primary hover:bg-primary/5"
+                  asChild
+                >
+                  <Link to={specialSlotHref}>
+                    <Icon icon="solar:add-square-bold" className="size-3.5" />
+                    Create Special Slot
+                  </Link>
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" className="h-8 gap-1.5 font-semibold" disabled>
+                  <Icon icon="solar:add-square-bold" className="size-3.5" />
+                  Create Special Slot
+                </Button>
+              ))}
             <Button
               variant="outline"
               size="sm"
@@ -437,96 +445,124 @@ export default function SlotManagementPage() {
                   </p>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Time</TableHead>
-                      <TableHead>Stylist</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {!filters.branchId || !filters.date ? (
-                      <TableRow>
-                        <TableCell colSpan={4} className="py-20 text-center">
-                          <div className="flex flex-col items-center gap-3 text-muted-foreground">
-                            <Icon icon="solar:filter-linear" className="size-10 opacity-20" />
-                            <p className="max-w-xs mx-auto text-sm">
-                              Please select a branch and date to view available slots.
-                            </p>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ) : loading ? (
-                      <TableRow>
-                        <TableCell colSpan={4} className="py-12 text-center text-muted-foreground">
-                          <Loader size="sm" className="mx-auto mb-2" />
-                          Loading slots...
-                        </TableCell>
-                      </TableRow>
-                    ) : slots.filter(
-                        (slot) =>
-                          !['OFF_DAY', 'NON_WORKING', 'NO_SCHEDULE', 'HOLIDAY', 'SPECIAL'].includes(
-                            slot.status,
-                          ),
-                      ).length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={4} className="py-12 text-center text-muted-foreground">
-                          No slots found for the selected criteria.
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      slots
-                        .filter(
-                          (slot) =>
-                            ![
-                              'OFF_DAY',
-                              'NON_WORKING',
-                              'NO_SCHEDULE',
-                              'HOLIDAY',
-                              'SPECIAL',
-                            ].includes(slot.status),
-                        )
-                        .map((slot) => (
-                          <TableRow key={slot.id}>
-                            <TableCell className="font-medium">
-                              <div className="flex flex-col">
-                                <span>
-                                  {slot.startTime} - {slot.endTime}
-                                </span>
-                                {slot.note && (
-                                  <span className="text-[10px] text-red-600 font-medium italic mt-0.5">
-                                    Note: {slot.note}
-                                  </span>
-                                )}
+                <>
+                  <SlotCards
+                    slots={visibleSlots}
+                    loading={loading}
+                    showStylist
+                    emptyMessage={
+                      !filters.branchId || !filters.date
+                        ? 'Please select a branch and date to view available slots.'
+                        : 'No slots found for the selected criteria.'
+                    }
+                    renderStatus={(status) => getStatusBadge(status)}
+                    onToggleBlock={handleBlockToggle}
+                  />
+                  <div className="hidden overflow-x-auto lg:block">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Time</TableHead>
+                          <TableHead>Stylist</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {!filters.branchId || !filters.date ? (
+                          <TableRow>
+                            <TableCell colSpan={4} className="py-20 text-center">
+                              <div className="flex flex-col items-center gap-3 text-muted-foreground">
+                                <Icon icon="solar:filter-linear" className="size-10 opacity-20" />
+                                <p className="max-w-xs mx-auto text-sm">
+                                  Please select a branch and date to view available slots.
+                                </p>
                               </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex flex-col">
-                                <span className="font-medium">{slot.stylistName || 'Unknown'}</span>
-                                <span className="text-xs text-muted-foreground">
-                                  {slot.stylistEmail}
-                                </span>
-                              </div>
-                            </TableCell>
-                            <TableCell>{getStatusBadge(slot.status)}</TableCell>
-                            <TableCell className="text-right">
-                              <Button
-                                size="sm"
-                                variant={slot.status === 'BLOCKED' ? 'outline' : 'destructive'}
-                                className="h-8"
-                                onClick={() => handleBlockToggle(slot)}
-                                disabled={!['AVAILABLE', 'BLOCKED'].includes(slot.status)}
-                              >
-                                {slot.status === 'BLOCKED' ? 'Unblock' : 'Block'}
-                              </Button>
                             </TableCell>
                           </TableRow>
-                        ))
-                    )}
-                  </TableBody>
-                </Table>
+                        ) : loading ? (
+                          <TableRow>
+                            <TableCell
+                              colSpan={4}
+                              className="py-12 text-center text-muted-foreground"
+                            >
+                              <Loader size="sm" className="mx-auto mb-2" />
+                              Loading slots...
+                            </TableCell>
+                          </TableRow>
+                        ) : slots.filter(
+                            (slot) =>
+                              ![
+                                'OFF_DAY',
+                                'NON_WORKING',
+                                'NO_SCHEDULE',
+                                'HOLIDAY',
+                                'SPECIAL',
+                              ].includes(slot.status),
+                          ).length === 0 ? (
+                          <TableRow>
+                            <TableCell
+                              colSpan={4}
+                              className="py-12 text-center text-muted-foreground"
+                            >
+                              No slots found for the selected criteria.
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          slots
+                            .filter(
+                              (slot) =>
+                                ![
+                                  'OFF_DAY',
+                                  'NON_WORKING',
+                                  'NO_SCHEDULE',
+                                  'HOLIDAY',
+                                  'SPECIAL',
+                                ].includes(slot.status),
+                            )
+                            .map((slot) => (
+                              <TableRow key={slot.id}>
+                                <TableCell className="font-medium">
+                                  <div className="flex flex-col">
+                                    <span>
+                                      {slot.startTime} - {slot.endTime}
+                                    </span>
+                                    {slot.note && (
+                                      <span className="text-[10px] text-red-600 font-medium italic mt-0.5">
+                                        Note: {slot.note}
+                                      </span>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">
+                                      {slot.stylistName || 'Unknown'}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {slot.stylistEmail}
+                                    </span>
+                                  </div>
+                                </TableCell>
+                                <TableCell>{getStatusBadge(slot.status)}</TableCell>
+                                <TableCell className="text-right">
+                                  <Button
+                                    size="sm"
+                                    variant={slot.status === 'BLOCKED' ? 'outline' : 'destructive'}
+                                    className="h-8"
+                                    onClick={() => handleBlockToggle(slot)}
+                                    disabled={!['AVAILABLE', 'BLOCKED'].includes(slot.status)}
+                                  >
+                                    {slot.status === 'BLOCKED' ? 'Unblock' : 'Block'}
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </>
               )}
             </>
           ) : (
@@ -552,7 +588,7 @@ export default function SlotManagementPage() {
                   {specialSlots.map((slot) => (
                     <div
                       key={slot.id}
-                      className="flex items-center justify-between p-4 border rounded-xl border-primary/20 bg-primary/5"
+                      className="flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="flex items-center gap-3">
                         <div className="flex items-center justify-center rounded-full size-10 bg-primary/20">
@@ -598,6 +634,7 @@ export default function SlotManagementPage() {
                           <Button
                             size="sm"
                             variant="ghost"
+                            aria-label="Cancel special slot"
                             className="w-8 h-8 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50"
                             onClick={() => handleCancelSpecialSlot(slot.id)}
                           >

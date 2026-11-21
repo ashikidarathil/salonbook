@@ -101,3 +101,6 @@
   stylist Manage are inner pages. All form pages now use the full screen width. Fixed search boxes dropping letters
   during fast typing. Verified in Chrome from phone to 1920px (81/81), with map lookups and invite sending simulated.
   Not tested on a physical device.
+- 2026-11-21 — 5.4 schedules and slots: day adjustments, breaks and special slots are inner pages for admin and
+  stylist, slots become cards on phones, and stylist pages use the full width. Verified in Chrome from phone to
+  1920px (75/75). Not tested on a physical device.

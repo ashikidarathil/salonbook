@@ -32,6 +32,9 @@ import StylistDetailPage from '@/pages/admin/stylist/StylistDetailPage';
 import SlotManagementPage from '@/pages/admin/SlotManagementPage';
 import UserManagementPage from '@/pages/admin/user/UserManagementPage';
 import CategoriesPage from '@/pages/admin/CategoriesPage';
+import DayAdjustmentPage from '@/pages/shared/schedule/DayAdjustmentPage';
+import BreakFormPage from '@/pages/shared/schedule/BreakFormPage';
+import SpecialSlotFormPage from '@/pages/shared/schedule/SpecialSlotFormPage';
 import CategoryFormPage from '@/pages/admin/CategoryFormPage';
 import ServicesPage from '@/pages/admin/ServicesPage';
 import ServiceFormPage from '@/pages/admin/ServiceFormPage';
@@ -136,6 +139,8 @@ export default function AppRoutes() {
           <Route path="stylists" element={<StylistManagementPage />} />
           <Route path="stylists/invite" element={<StylistInvitePage />} />
           <Route path="stylists/:id" element={<StylistDetailPage />} />
+          <Route path="stylists/:id/schedule/day/:date" element={<DayAdjustmentPage />} />
+          <Route path="stylists/:id/schedule/breaks/new" element={<BreakFormPage />} />
           <Route path="users" element={<UserManagementPage />} />
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="categories/new" element={<CategoryFormPage />} />
@@ -151,6 +156,7 @@ export default function AppRoutes() {
           <Route path="branches/:branchId/categories" element={<BranchCategoriesPage />} />
           <Route path="branches/:branchId/services" element={<BranchServicesPage />} />
           <Route path="slots" element={<SlotManagementPage />} />
+          <Route path="slots/special/new" element={<SpecialSlotFormPage />} />
           <Route path="bookings" element={<AdminBookingsPage />} />
           <Route path="bookings/:id" element={<AdminBookingDetailPage />} />
           <Route path="off-days" element={<OffDayManagementPage />} />
@@ -172,7 +178,10 @@ export default function AppRoutes() {
           <Route index element={<StylistDashboard />} />
           <Route path="profile" element={<StylistProfilePage />} />
           <Route path="schedule" element={<StylistSchedulePage />} />
+          <Route path="schedule/day/:date" element={<DayAdjustmentPage />} />
+          <Route path="schedule/breaks/new" element={<BreakFormPage />} />
           <Route path="slots" element={<StylistSlotManagementPage />} />
+          <Route path="slots/special/new" element={<SpecialSlotFormPage />} />
           <Route path="off-days" element={<OffDayPage />} />
           <Route path="appointments" element={<StylistAppointmentsPage />} />
           <Route path="appointments/:id" element={<StylistBookingDetailPage />} />
