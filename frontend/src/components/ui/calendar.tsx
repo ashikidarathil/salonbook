@@ -52,11 +52,11 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
             type="button"
             className={cn(
               buttonVariants({ variant: 'ghost' }),
-              'h-8 w-8 p-0 absolute left-1 z-20 flex items-center justify-center transition-opacity hover:opacity-70',
               className,
+              'h-8 w-8 !p-0 absolute left-1 z-20 flex items-center justify-center text-primary transition-opacity hover:text-primary hover:opacity-70',
             )}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="m15 18-6-6 6-6"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 shrink-0"><path d="m15 18-6-6 6-6"/></svg>
           </button>
         ),
         NextMonthButton: ({ className, ...props }) => (
@@ -65,17 +65,17 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
             type="button"
             className={cn(
               buttonVariants({ variant: 'ghost' }),
-              'h-8 w-8 p-0 absolute right-1 z-20 flex items-center justify-center transition-opacity hover:opacity-70',
               className,
+              'h-8 w-8 !p-0 absolute right-1 z-20 flex items-center justify-center text-primary transition-opacity hover:text-primary hover:opacity-70',
             )}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="m9 18 6-6-6-6"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 shrink-0"><path d="m9 18 6-6-6-6"/></svg>
           </button>
         ),
         Chevron: ({ orientation }) => {
           const isLeft = orientation === 'left';
           return (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 shrink-0">
               <path d={isLeft ? "m15 18-6-6 6-6" : "m9 18 6-6-6-6"} />
             </svg>
           );

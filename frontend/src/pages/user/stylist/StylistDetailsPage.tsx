@@ -9,7 +9,6 @@ import { fetchPublicStylistById } from '@/features/stylistInvite/stylistInviteTh
 import { fetchMyFavorites } from '@/features/wishlist/wishlistSlice';
 import { useWishlist } from '@/hooks/useWishlist';
 import { loadSelectedBranchFromStorage } from '@/features/branch/branch.slice';
-import { addToCart } from '@/features/cart/cart.slice';
 import { reviewService } from '@/features/review/review.service';
 import type { Review } from '@/features/review/review.types';
 import { LoadingGate } from '@/components/common/LoadingGate';
@@ -19,15 +18,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Icon } from '@iconify/react';
 import { Header } from '@/components/user/Header';
 import { Footer } from '@/components/user/Footer';
-import { SlotBookingDialog } from '@/components/booking/SlotBookingDialog';
-import type { BranchStylist } from '@/features/stylistBranch/stylistBranch.types';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
 
 export default function StylistDetailsPage() {
   // URL part is a readable slug (/stylists/arjun-menon) or an old id
@@ -53,16 +43,6 @@ export default function StylistDetailsPage() {
       ? storedStylist
       : null;
   const { isFavorite, handleToggleFavorite, isAuthenticated } = useWishlist();
-  const { selectedBranch } = useAppSelector((state) => state.branch);
-
-  const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
-  const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
-  const [selectedServiceForBooking, setSelectedServiceForBooking] = useState<{
-    serviceId: string;
-    name: string;
-    price: number;
-    duration: number;
-  } | null>(null);
 
   // Tagged with the stylist they were loaded for, so another stylist's reviews never show
   const [reviewState, setReviewState] = useState<{ stylistId?: string; items: Review[] }>({
@@ -137,41 +117,8 @@ export default function StylistDetailsPage() {
       return;
     }
 
-    const services = selectedStylist?.assignedServiceDetails || [];
-    if (services.length > 0) {
-      setIsServiceDialogOpen(true);
-    }
+    navigate(`/stylists/${stylistRef}/book`);
   };
-
-  const handleServiceSelect = (
-    service: NonNullable<NonNullable<typeof selectedStylist>['assignedServiceDetails']>[number],
-  ) => {
-    setSelectedServiceForBooking({
-      serviceId: service.id,
-      name: service.name,
-      price: service.price,
-      duration: service.duration,
-    });
-    setIsServiceDialogOpen(false);
-    setIsBookingDialogOpen(true);
-  };
-
-  const stylistForDialog: BranchStylist[] = selectedStylist
-    ? [
-        {
-          mappingId: '',
-          branchId: selectedBranch?.id || '',
-          stylistId: selectedStylist.id,
-          userId: selectedStylist.userId,
-          name: selectedStylist.name,
-          specialization: selectedStylist.specialization,
-          experience: selectedStylist.experience,
-          stylistStatus: 'ACTIVE',
-          assignedAt: new Date().toISOString(),
-          profilePicture: selectedStylist.profilePicture,
-        } as BranchStylist,
-      ]
-    : [];
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground w-full flex flex-col">
@@ -193,7 +140,7 @@ export default function StylistDetailsPage() {
             </div>
 
             <Card className="border-none shadow-sm bg-gradient-to-r from-primary/5 to-white overflow-visible">
-              <CardContent className="p-8">
+              <CardContent className="p-4 sm:p-8">
                 <div className="flex flex-col md:flex-row gap-6 relative">
                   <button
                     className={`absolute top-0 right-0 p-2 rounded-full shadow-sm transition-colors ${
@@ -461,77 +408,6 @@ export default function StylistDetailsPage() {
       </main>
       <Footer />
 
-      {/* Service Selection Dialog */}
-      <Dialog open={isServiceDialogOpen} onOpenChange={setIsServiceDialogOpen}>
-        <DialogContent className="sm:max-w-[500px] rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold font-heading">Select a Service</DialogTitle>
-            <DialogDescription>
-              Choose a service you'd like to book with {selectedStylist?.name}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid grid-cols-1 gap-3 py-4">
-            {selectedStylist?.assignedServiceDetails?.map((service) => (
-              <div
-                key={service.id}
-                onClick={() => handleServiceSelect(service)}
-                className="flex items-center justify-between p-4 border rounded-xl cursor-pointer hover:border-primary hover:bg-primary/5 transition-all group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-                    <Icon icon="solar:scissors-square-bold" className="size-5" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">{service.name}</h4>
-                    <p className="text-xs text-muted-foreground">{service.duration} mins</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-primary">₹{service.price}</p>
-                  <Icon
-                    icon="solar:alt-arrow-right-linear"
-                    className="size-4 text-muted-foreground ml-auto mt-1"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Booking Dialog */}
-      {selectedServiceForBooking && selectedBranch?.id && (
-        <SlotBookingDialog
-          isOpen={isBookingDialogOpen}
-          onClose={() => setIsBookingDialogOpen(false)}
-          branchId={selectedBranch.id}
-          selectedServices={[selectedServiceForBooking]}
-          initialStylistId={selectedStylist?.userId}
-          isCartMode={true}
-          onSelect={(data) => {
-            if (selectedServiceForBooking && selectedBranch?.id) {
-              dispatch(
-                addToCart({
-                  branchId: selectedBranch.id,
-                  item: {
-                    serviceId: selectedServiceForBooking.serviceId,
-                    name: selectedServiceForBooking.name,
-                    price: selectedServiceForBooking.price,
-                    duration: selectedServiceForBooking.duration,
-                    stylistId: data.stylistId,
-                    stylistName: data.stylistName,
-                    date: data.date,
-                    startTime: data.startTime,
-                    slotId: data.slotId,
-                  },
-                }),
-              );
-              navigate('/cart');
-            }
-          }}
-          availableStylists={stylistForDialog}
-        />
-      )}
     </div>
   );
 }

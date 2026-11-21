@@ -1,12 +1,8 @@
 import { bookingRef } from '@/common/utils/bookingRef';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import {
-  fetchMyBookings,
-  cancelBooking,
-  rescheduleBooking,
-} from '@/features/booking/booking.thunks';
+import { fetchMyBookings, cancelBooking } from '@/features/booking/booking.thunks';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,12 +10,10 @@ import { Icon } from '@iconify/react';
 import { LoadingGate } from '@/components/common/LoadingGate';
 import { format } from 'date-fns';
 import { showApiError, showSuccess, showCancellationConfirm } from '@/common/utils/swal.utils';
-import Swal from 'sweetalert2';
-import { SlotBookingDialog } from '@/components/booking/SlotBookingDialog';
 import { fetchUserRooms, initializeChatRoom } from '@/features/chat/chat.thunks';
 import type { ChatRoom } from '@/features/chat/chat.types';
 import type { RootState } from '@/app/store';
-import type { BookingItem, BookingDetailsItem } from '@/features/booking/booking.types';
+import type { BookingItem } from '@/features/booking/booking.types';
 import {
   BookingStatus,
   PaymentStatus,
@@ -34,21 +28,6 @@ export default function BookingsPage() {
   const { myBookings, loading, error } = useAppSelector((state) => state.booking);
   const { rooms } = useAppSelector((state: RootState) => state.chat);
   const [searchParams, setSearchParams] = useSearchParams();
-
-  // State for rescheduling
-  const [rescheduleData, setRescheduleData] = useState<{
-    isOpen: boolean;
-    bookingId: string | null;
-    branchId: string | null;
-    services: BookingDetailsItem[];
-    stylistId: string | null;
-  }>({
-    isOpen: false,
-    bookingId: null,
-    branchId: null,
-    services: [],
-    stylistId: null,
-  });
 
   useEffect(() => {
     dispatch(fetchMyBookings());
@@ -171,79 +150,11 @@ export default function BookingsPage() {
       return;
     }
 
-    setRescheduleData({
-      isOpen: true,
-      bookingId: booking.id,
-      branchId: booking.branchId,
-      services: booking.items,
-      stylistId: booking.stylistId,
-    });
-  };
-
-  const handleRescheduleSubmit = async (data: {
-    stylistId: string;
-    date: string;
-    startTime: string;
-    slotId: string;
-  }) => {
-    if (!rescheduleData.bookingId) return;
-
-    const { value: reason } = await Swal.fire({
-      title: 'Reschedule Reason',
-      text: 'Why are you rescheduling this appointment?',
-      input: 'text',
-      inputPlaceholder: 'e.g. Change in plans, Emergency...',
-      showCancelButton: true,
-      confirmButtonText: 'Confirm Reschedule',
-      preConfirm: (value) => {
-        if (!value || !value.trim()) {
-          Swal.showValidationMessage('Reason is required');
-        }
-        return value;
-      },
-    });
-
-    if (reason) {
-      // Calculate sequential timings for services
-      let currentStartTime = data.startTime;
-      const rescheduledItems = [];
-
-      for (const service of rescheduleData.services) {
-        rescheduledItems.push({
-          serviceId: service.serviceId,
-          stylistId: data.stylistId,
-          date: data.date,
-          startTime: currentStartTime,
-          slotId: data.slotId, // Slot ID reflects the block
-        });
-
-        // Calculate next start time (15m increments)
-        const [hrs, mins] = currentStartTime.split(':').map(Number);
-        const totalMins = hrs * 60 + mins + (service.duration || 30);
-        currentStartTime = `${Math.floor(totalMins / 60)
-          .toString()
-          .padStart(2, '0')}:${(totalMins % 60).toString().padStart(2, '0')}`;
-      }
-
-      const result = await dispatch(
-        rescheduleBooking({
-          bookingId: rescheduleData.bookingId,
-          data: {
-            reason,
-            items: rescheduledItems,
-          },
-        }),
-      );
-
-      if (rescheduleBooking.fulfilled.match(result)) {
-        showSuccess('Rescheduled!', BOOKING_MESSAGES.RESCHEDULE_SUCCESS);
-        setRescheduleData((prev) => ({ ...prev, isOpen: false }));
-      }
-    }
+    navigate(`/profile/bookings/${bookingRef(booking)}/reschedule`);
   };
 
   return (
-    <div className="space-y-6 p-8 text-foreground">
+    <div className="space-y-6 p-4 text-foreground sm:p-6 lg:p-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold font-heading">My Bookings</h1>
@@ -482,22 +393,6 @@ export default function BookingsPage() {
         </div>
       </LoadingGate>
 
-      {rescheduleData.isOpen && rescheduleData.branchId && (
-        <SlotBookingDialog
-          isOpen={rescheduleData.isOpen}
-          onClose={() => setRescheduleData((prev) => ({ ...prev, isOpen: false }))}
-          branchId={rescheduleData.branchId}
-          selectedServices={rescheduleData.services.map((s) => ({
-            serviceId: s.serviceId,
-            name: s.serviceName || 'Service',
-            price: s.price,
-            duration: s.duration,
-          }))}
-          initialStylistId={rescheduleData.stylistId || undefined}
-          isCartMode={true}
-          onSelect={handleRescheduleSubmit}
-        />
-      )}
     </div>
   );
 }

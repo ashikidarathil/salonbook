@@ -138,8 +138,7 @@ export default function BookingDetailPage() {
       showApiError(BOOKING_MESSAGES.RESCHEDULE_LIMIT_REACHED, 'Limit Reached');
       return;
     }
-    // Redirect to bookings page to initiate reschedule from the list where the dialog is available
-    navigate('/profile/bookings');
+    navigate(`/profile/bookings/${currentBooking.bookingNumber || currentBooking.id}/reschedule`);
   };
 
   const handlePayRemaining = async () => {
