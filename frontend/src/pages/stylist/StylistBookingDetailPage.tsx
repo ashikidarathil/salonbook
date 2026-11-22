@@ -99,15 +99,15 @@ export default function StylistBookingDetailPage() {
       backPath="/stylist/appointments"
       role="STYLIST"
     >
-      <div className="p-6 space-y-6 max-w-7xl mx-auto rounded-lg bg-muted/40 border border-border/40 transition-all hover:shadow-md text-foreground">
+      <div className="w-full space-y-6 text-foreground">
         {/* Header */}
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <Icon icon="solar:arrow-left-linear" className="size-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold font-heading">Appointment Details</h1>
-            <p className="text-muted-foreground text-sm">#{b?.bookingNumber}</p>
+            <h1 className="break-words text-2xl font-bold sm:text-3xl">Appointment Details</h1>
+            <p className="mt-1 text-sm text-muted-foreground">#{b?.bookingNumber}</p>
           </div>
           <div className="ml-auto flex items-center gap-3">
             <Badge className={getStatusColor(b?.status as BookingStatus)}>

@@ -163,7 +163,7 @@ export default function BookingDetailPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6 text-foreground">
+    <div className="w-full space-y-6 p-4 text-foreground sm:p-6 lg:p-8">
       <LoadingGate
         loading={loading || (!currentBooking && !error)}
         error={error}
@@ -179,8 +179,8 @@ export default function BookingDetailPage() {
                 <Icon icon="solar:arrow-left-linear" className="size-5" />
               </Button>
               <div>
-                <h1 className="text-2xl font-bold font-heading">Booking Details</h1>
-                <p className="text-muted-foreground text-sm">#{currentBooking.bookingNumber}</p>
+                <h1 className="break-words text-2xl font-bold sm:text-3xl">Booking Details</h1>
+                <p className="mt-1 text-sm text-muted-foreground">#{currentBooking.bookingNumber}</p>
               </div>
               <div className="ml-auto">
                 <Badge className={getStatusColor(currentBooking.status as BookingStatus)}>

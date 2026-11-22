@@ -89,6 +89,13 @@ export default function WalletPage() {
 
   return (
     <div className="w-full space-y-4 p-4 sm:space-y-6 sm:p-6 lg:p-8">
+      <div>
+        <h1 className="break-words text-2xl font-bold sm:text-3xl">My Wallet</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Your balance and recent transactions
+        </p>
+      </div>
+
       {/* Balance Card Section */}
       <div className="pt-1 sm:pt-2">
         <Card className="relative overflow-hidden border-none shadow-lg bg-primary text-primary-foreground min-w-0">

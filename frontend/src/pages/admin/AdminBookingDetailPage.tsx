@@ -100,14 +100,14 @@ export default function AdminBookingDetailPage() {
       resetError={() => ref && dispatch(fetchBookingDetails(ref))}
       backPath="/admin/bookings"
     >
-      <div className="p-6 mx-auto space-y-6 max-w-8xl rounded-lg bg-muted/40 border border-border/40 transition-all hover:shadow-md text-foreground">
+      <div className="w-full space-y-6 text-foreground">
         {/* Header */}
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <Icon icon="solar:arrow-left-linear" className="size-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold font-heading">Manage Booking</h1>
+            <h1 className="break-words text-2xl font-bold sm:text-3xl">Manage Booking</h1>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>#{b?.bookingNumber}</span>
               <span>·</span>

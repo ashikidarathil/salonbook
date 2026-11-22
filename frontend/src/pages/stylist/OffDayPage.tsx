@@ -98,15 +98,15 @@ export default function OffDayPage() {
   };
 
   return (
-    <div className="space-y-6 rounded-lg bg-muted/40 border border-border/40 transition-all hover:shadow-md">
+    <div className="space-y-6">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b pb-6">
         <div>
-          <h1 className="text-2xl font-semibold flex items-center gap-2 text-slate-800">
+          <h1 className="flex items-center gap-2 break-words text-2xl font-bold sm:text-3xl">
             <Icon icon="solar:tea-cup-bold" className="size-8 text-primary/80" />
             Time Off & Leave
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="mt-1 text-sm text-muted-foreground">
             Plan your breaks, holidays, or emergency leaves.
           </p>
         </div>

@@ -64,10 +64,12 @@ export default function OffDayManagement({ stylistId, onClose }: OffDayManagemen
 
   const pendingRequests = filteredOffDays.filter((o) => o.status === OffDayStatus.PENDING);
   const historyRequests = filteredOffDays.filter((o) => o.status !== OffDayStatus.PENDING);
+  // The page's title on its own route, a section heading inside stylist Manage
+  const Heading = stylistId ? 'h2' : 'h1';
 
   return (
     <div className="space-y-6">
-      <div className="space-y-6 bg-white p-10 border-2 rounded-2xl shadow-sm">
+      <div className="space-y-6 rounded-2xl border bg-white p-3 shadow-sm sm:p-6 lg:p-8">
         {/* Component Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
           <div className="flex items-center gap-4">
@@ -82,10 +84,16 @@ export default function OffDayManagement({ stylistId, onClose }: OffDayManagemen
               </Button>
             )}
             <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-slate-800 flex items-center gap-2">
+              <Heading
+                className={`flex items-center gap-2 ${
+                  stylistId
+                    ? 'text-xl font-semibold tracking-tight text-slate-800 sm:text-2xl'
+                    : 'break-words text-2xl font-bold sm:text-3xl'
+                }`}
+              >
                 <Icon icon="solar:shield-user-bold" className="size-8 text-primary/80" />
                 Off-Day Management
-              </h2>
+              </Heading>
               <p className="text-sm text-slate-500 mt-0.5">
                 Review and manage leave requests from the stylist team.
               </p>

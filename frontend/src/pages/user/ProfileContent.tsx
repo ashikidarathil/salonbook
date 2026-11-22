@@ -319,12 +319,12 @@ export default function ProfileContent() {
         dispatch(clearError());
       }}
     >
-      <form onSubmit={handleSave} className="max-w-6xl p-4 sm:p-6 mx-auto space-y-6 sm:space-y-8">
+      <form onSubmit={handleSave} className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
         <div className="space-y-1 sm:space-y-2">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight font-heading">
+          <h1 className="break-words text-2xl font-bold sm:text-3xl">
             Profile Settings
           </h1>
-          <p className="text-base sm:text-lg text-muted-foreground">
+          <p className="mt-1 text-sm text-muted-foreground">
             Manage your account information and preferences
           </p>
         </div>

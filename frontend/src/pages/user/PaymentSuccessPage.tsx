@@ -55,9 +55,7 @@ export default function PaymentSuccessPage() {
 
             {/* Refined Title Section */}
             <div className="space-y-2 text-center">
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
-                Booking Confirmed
-              </h1>
+              <h1 className="break-words text-2xl font-bold sm:text-3xl">Booking Confirmed</h1>
               <p className="text-slate-500 text-lg leading-relaxed">
                 Thank you! Your payment was successful and your appointment is scheduled.
               </p>

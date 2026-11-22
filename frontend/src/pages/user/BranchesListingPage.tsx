@@ -116,11 +116,11 @@ export default function BranchesListingPage() {
       <RouteBreadcrumbs className="w-full px-4 pt-4 sm:px-6 lg:px-8" />
 
       <main className="flex-1">
-        <div className="container px-4 py-8 mx-auto">
+        <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
           {/* Header Section */}
           <div className="mb-8">
-            <h1 className="mb-2 text-4xl font-bold">Find Our Branches</h1>
-            <p className="text-lg text-muted-foreground">
+            <h1 className="break-words text-2xl font-bold sm:text-3xl">Find Our Branches</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
               {hasLocation ? '📍 Showing branches nearest to you' : 'Browse our salons'}
             </p>
             {locationError && (

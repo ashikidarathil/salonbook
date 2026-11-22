@@ -63,10 +63,10 @@ export default function StylistDashboard() {
     <div className="space-y-6">
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold font-heading tracking-tight text-gray-900">
+          <h1 className="break-words text-2xl font-bold sm:text-3xl">
             Analytics Dashboard
           </h1>
-          <p className="mt-1 text-base text-muted-foreground font-normal">
+          <p className="mt-1 text-sm text-muted-foreground">
             Real-time performance metrics and booking analytics
           </p>
         </div>

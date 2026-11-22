@@ -97,6 +97,13 @@ export default function StylistReviewsPage() {
 
   return (
     <div className="space-y-6 font-sans">
+      <div>
+        <h1 className="break-words text-2xl font-bold sm:text-3xl">My Reviews</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          See what your customers say about your work
+        </p>
+      </div>
+
       <div className="flex flex-col md:flex-row gap-6 items-stretch">
         {/* Stats Summary */}
         <Card className="flex-1 shadow-none border-border/60">

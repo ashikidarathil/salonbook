@@ -150,7 +150,7 @@ export default function CartPage() {
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full">
             <Icon icon="solar:arrow-left-linear" className="size-6" />
           </Button>
-          <h1 className="text-2xl font-bold sm:text-3xl">Booking Cart</h1>
+          <h1 className="break-words text-2xl font-bold sm:text-3xl">Booking Cart</h1>
           <div className="ml-auto">
             <Button
               variant="outline"
