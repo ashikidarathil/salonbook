@@ -192,7 +192,30 @@ export default function BranchStylistsPage() {
               }
               emptyIcon="hugeicons:user-group"
             >
-              <div className="overflow-x-auto border rounded-lg">
+              <ul className="divide-y rounded-lg border lg:hidden">
+                {unassignedOptions.map((stylist) => (
+                  <li
+                    key={stylist.stylistId}
+                    className="flex items-center justify-between gap-3 p-4"
+                  >
+                    <div className="min-w-0">
+                      <p className="break-words font-medium">{stylist.name}</p>
+                      <p className="break-words text-sm text-muted-foreground">
+                        {stylist.specialization} · {stylist.experience} yrs
+                      </p>
+                    </div>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      className="shrink-0"
+                      onClick={() => handleAssignClick(stylist.stylistId, stylist.name)}
+                    >
+                      Assign
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+              <div className="hidden overflow-x-auto rounded-lg border lg:block">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -274,7 +297,30 @@ export default function BranchStylistsPage() {
               }
               emptyIcon="hugeicons:user-group"
             >
-              <div className="overflow-x-auto border rounded-lg">
+              <ul className="divide-y rounded-lg border lg:hidden">
+                {assignedStylists.map((stylist) => (
+                  <li
+                    key={stylist.stylistId}
+                    className="flex items-center justify-between gap-3 p-4"
+                  >
+                    <div className="min-w-0">
+                      <p className="break-words font-medium">{stylist.name}</p>
+                      <p className="break-words text-sm text-muted-foreground">
+                        {stylist.specialization} · {stylist.experience} yrs
+                      </p>
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="shrink-0"
+                      onClick={() => handleUnassignClick(stylist.stylistId, stylist.name)}
+                    >
+                      Unassign
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+              <div className="hidden overflow-x-auto rounded-lg border lg:block">
                 <Table>
                   <TableHeader>
                     <TableRow>

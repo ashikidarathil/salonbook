@@ -213,7 +213,47 @@ export default function OffDayManagement({ stylistId, onClose }: OffDayManagemen
 
           <Card className="border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
+              <ul className="divide-y lg:hidden">
+                {historyRequests.map((request) => (
+                  <li key={request.id} className="space-y-2 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        {!stylistId && (
+                          <p className="break-words font-semibold text-slate-700">
+                            {request.stylistName}
+                          </p>
+                        )}
+                        <p className="text-sm font-medium text-slate-600">
+                          {format(new Date(request.startDate), 'MMM d')} -{' '}
+                          {format(new Date(request.endDate), 'MMM d, yyyy')}
+                        </p>
+                      </div>
+                      <span
+                        className={cn(
+                          'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold',
+                          request.status === OffDayStatus.APPROVED
+                            ? 'bg-green-50 text-green-600'
+                            : request.status === OffDayStatus.REJECTED
+                              ? 'bg-red-50 text-red-600'
+                              : 'bg-amber-50 text-amber-600',
+                        )}
+                      >
+                        {request.status}
+                      </span>
+                    </div>
+                    {request.adminRemarks && (
+                      <p className="break-words text-xs italic text-slate-500">
+                        {request.adminRemarks}
+                      </p>
+                    )}
+                    <p className="text-xs text-slate-400">
+                      Processed{' '}
+                      {request.createdAt ? format(new Date(request.createdAt), 'MMM d, p') : '-'}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+              <div className="hidden overflow-x-auto lg:block">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-slate-50/50 border-b">

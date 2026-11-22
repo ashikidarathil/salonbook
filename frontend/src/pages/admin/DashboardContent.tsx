@@ -413,62 +413,88 @@ export default function DashboardContent() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="hover:bg-transparent border-b border-border/40">
-                        <TableHead className="w-[200px] text-xs font-semibold py-3">
-                          Stylist
-                        </TableHead>
-                        <TableHead className="text-xs font-semibold text-center py-3">
-                          Bookings
-                        </TableHead>
-                        <TableHead className="text-xs font-semibold text-right py-3">
-                          Revenue
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {stats.topStylists.map((stylist) => (
-                        <TableRow
-                          key={stylist.id}
-                          className="border-b border-border/40 hover:bg-muted/30 transition-colors"
-                        >
-                          <TableCell className="py-4">
-                            <div className="flex items-center gap-3">
-                              <Avatar className="size-8 border-2 border-primary/10">
-                                <AvatarImage src={stylist.avatar || ''} />
-                                <AvatarFallback className="bg-primary/5 text-primary text-[10px] uppercase">
-                                  {stylist.name.charAt(0)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <p className="text-sm font-semibold text-gray-900">
-                                  {stylist.name}
-                                </p>
-                                <div className="flex items-center gap-1">
-                                  <Icon icon="solar:star-bold" className="text-amber-400 size-3" />
-                                  <span className="text-[10px] font-medium text-muted-foreground">
-                                    {stylist.rating?.toFixed(1) || '0.0'}
-                                  </span>
+                  <ul className="divide-y border-t lg:hidden">
+                    {stats.topStylists.map((stylist) => (
+                      <li key={stylist.id} className="flex items-center gap-3 p-4">
+                        <Avatar className="size-9 shrink-0 border-2 border-primary/10">
+                          <AvatarImage src={stylist.avatar || ''} />
+                          <AvatarFallback className="bg-primary/5 text-[10px] uppercase text-primary">
+                            {stylist.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0 flex-1">
+                          <p className="break-words text-sm font-semibold">{stylist.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            ★ {stylist.rating?.toFixed(1) || '0.0'} · {stylist.bookings} bookings
+                          </p>
+                        </div>
+                        <p className="shrink-0 text-sm font-bold">
+                          ₹{stylist.revenue.toLocaleString('en-IN')}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="hidden overflow-x-auto lg:block">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="hover:bg-transparent border-b border-border/40">
+                          <TableHead className="w-[200px] text-xs font-semibold py-3">
+                            Stylist
+                          </TableHead>
+                          <TableHead className="text-xs font-semibold text-center py-3">
+                            Bookings
+                          </TableHead>
+                          <TableHead className="text-xs font-semibold text-right py-3">
+                            Revenue
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {stats.topStylists.map((stylist) => (
+                          <TableRow
+                            key={stylist.id}
+                            className="border-b border-border/40 hover:bg-muted/30 transition-colors"
+                          >
+                            <TableCell className="py-4">
+                              <div className="flex items-center gap-3">
+                                <Avatar className="size-8 border-2 border-primary/10">
+                                  <AvatarImage src={stylist.avatar || ''} />
+                                  <AvatarFallback className="bg-primary/5 text-primary text-[10px] uppercase">
+                                    {stylist.name.charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="text-sm font-semibold text-gray-900">
+                                    {stylist.name}
+                                  </p>
+                                  <div className="flex items-center gap-1">
+                                    <Icon
+                                      icon="solar:star-bold"
+                                      className="text-amber-400 size-3"
+                                    />
+                                    <span className="text-[10px] font-medium text-muted-foreground">
+                                      {stylist.rating?.toFixed(1) || '0.0'}
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-center py-4">
-                            <Badge
-                              variant="secondary"
-                              className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-none px-2 py-0.5 text-[10px] font-bold"
-                            >
-                              {stylist.bookings}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right py-4 font-bold text-gray-900 text-sm">
-                            ₹{stylist.revenue.toLocaleString()}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                            </TableCell>
+                            <TableCell className="text-center py-4">
+                              <Badge
+                                variant="secondary"
+                                className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-none px-2 py-0.5 text-[10px] font-bold"
+                              >
+                                {stylist.bookings}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right py-4 font-bold text-gray-900 text-sm">
+                              ₹{stylist.revenue.toLocaleString()}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </CardContent>
               </Card>
             </div>

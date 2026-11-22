@@ -114,3 +114,6 @@
 - 2026-11-21 — 5.6a uniform breadcrumbs: every admin, stylist and customer page now has one breadcrumb trail. Branch
   inner pages show the branch name, and stylist Manage shows its section and has one back arrow. Checked 53 pages at
   laptop, tablet and phone sizes (325 checks). Chat, login and home are left without breadcrumbs on purpose.
+- 2026-11-22 — 5.7 final responsive pass: the remaining admin tables become cards on phones and tablets. Checked
+  admin, stylist and customer pages with a real booking from 360 to 1920px (328 checks), including phone-card actions.
+  Still open: 5.8 on real devices.
