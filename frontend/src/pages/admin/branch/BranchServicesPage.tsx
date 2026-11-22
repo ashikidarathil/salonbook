@@ -253,7 +253,110 @@ export default function BranchServicesPage() {
             }
             emptyIcon="hugeicons:service"
           >
-            <div className="overflow-x-auto border rounded-lg">
+            <ul className="divide-y rounded-lg border lg:hidden">
+              {services.map((svc) => {
+                const isEditing = editingService?.serviceId === svc.serviceId;
+                const cleanNumber = (value: string) =>
+                  value.length > 1 && value.startsWith('0') && value[1] !== '.'
+                    ? value.substring(1)
+                    : value;
+                return (
+                  <li key={svc.serviceId} className="space-y-3 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="break-words font-medium">{svc.name}</p>
+                        <p className="text-sm text-muted-foreground">{svc.categoryName || '—'}</p>
+                      </div>
+                      {!svc.configured ? (
+                        <Badge
+                          variant="outline"
+                          className="shrink-0 border-yellow-200 bg-yellow-50 text-yellow-700"
+                        >
+                          Not Configured
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant={svc.isActive ? 'default' : 'destructive'}
+                          className="shrink-0"
+                        >
+                          {svc.isActive ? 'Active' : 'Disabled'}
+                        </Badge>
+                      )}
+                    </div>
+                    {isEditing ? (
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <Label htmlFor={`price-${svc.serviceId}`}>Price (₹)</Label>
+                          <Input
+                            id={`price-${svc.serviceId}`}
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={editPrice}
+                            onChange={(e) => setEditPrice(cleanNumber(e.target.value))}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor={`duration-${svc.serviceId}`}>Duration (min)</Label>
+                          <Input
+                            id={`duration-${svc.serviceId}`}
+                            type="number"
+                            min="1"
+                            value={editDuration}
+                            onChange={(e) => setEditDuration(cleanNumber(e.target.value))}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm">
+                        {svc.price === null ? '—' : `₹${svc.price.toLocaleString('en-IN')}`}
+                        {' · '}
+                        {svc.duration === null ? '—' : `${svc.duration} min`}
+                      </p>
+                    )}
+                    <div className="grid grid-cols-2 gap-2">
+                      {isEditing ? (
+                        <>
+                          <Button size="sm" onClick={() => handleSaveEdit(svc.serviceId, svc.name)}>
+                            Save
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setEditingService(null)}
+                          >
+                            Cancel
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button variant="outline" size="sm" onClick={() => handleEdit(svc)}>
+                            {svc.configured ? 'Edit' : 'Configure'}
+                          </Button>
+                          <Button
+                            variant={svc.isActive ? 'destructive' : 'default'}
+                            size="sm"
+                            disabled={!svc.configured}
+                            onClick={() =>
+                              handleToggleClick(
+                                svc.serviceId,
+                                svc.isActive,
+                                svc.name,
+                                svc.price,
+                                svc.duration,
+                              )
+                            }
+                          >
+                            {svc.isActive ? 'Disable' : 'Enable'}
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="hidden overflow-x-auto rounded-lg border lg:block">
               <Table>
                 <TableHeader>
                   <TableRow>

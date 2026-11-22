@@ -180,7 +180,29 @@ export default function BranchCategoriesPage() {
             }
             emptyIcon="hugeicons:service"
           >
-            <div className="overflow-x-auto border rounded-lg">
+            <ul className="divide-y rounded-lg border lg:hidden">
+              {categories.map((cat) => (
+                <li key={cat.categoryId} className="flex items-center justify-between gap-3 p-4">
+                  <div className="min-w-0 space-y-1">
+                    <p className="break-words font-medium">
+                      {cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}
+                    </p>
+                    <Badge variant={cat.isActive ? 'default' : 'destructive'}>
+                      {cat.isActive ? 'Active' : 'Disabled'}
+                    </Badge>
+                  </div>
+                  <Button
+                    variant={cat.isActive ? 'destructive' : 'default'}
+                    size="sm"
+                    className="shrink-0"
+                    onClick={() => handleToggleClick(cat.categoryId, cat.isActive, cat.name)}
+                  >
+                    {cat.isActive ? 'Disable' : 'Enable'}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+            <div className="hidden overflow-x-auto rounded-lg border lg:block">
               <Table>
                 <TableHeader>
                   <TableRow>

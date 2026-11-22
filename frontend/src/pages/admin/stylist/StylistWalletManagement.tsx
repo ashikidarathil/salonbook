@@ -177,7 +177,45 @@ export default function StylistWalletManagement({ stylistId }: StylistWalletMana
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
+          <div className="lg:hidden">
+            {escrowLoading && escrows.length === 0 ? (
+              <div className="flex justify-center py-8">
+                <Loader size="sm" label="Loading escrow" />
+              </div>
+            ) : escrows.length === 0 ? (
+              <p className="px-4 py-8 text-center text-sm italic text-muted-foreground">
+                No escrow transactions found.
+              </p>
+            ) : (
+              <ul className="divide-y">
+                {escrows.map((row) => (
+                  <li key={row.id} className="space-y-2 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-bold">#{row.bookingId?.bookingNumber || 'N/A'}</p>
+                        <p className="break-words text-xs text-muted-foreground">
+                          {row.bookingId?.items?.[0]?.serviceId?.name || 'Service'}
+                        </p>
+                      </div>
+                      <p className="shrink-0 font-semibold text-primary">
+                        ₹{row.amount.toLocaleString('en-IN')}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <Badge
+                        className={`${getStatusColor(row.status)} h-5 border text-[10px] shadow-none`}
+                      >
+                        {row.status}
+                      </Badge>
+                      <span>Release {row.releaseDate}</span>
+                      <span>· {format(new Date(row.createdAt), 'dd MMM yyyy')}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className="hidden overflow-x-auto lg:block">
             <table className="w-full text-xs text-left">
               <thead className="bg-muted/30 text-muted-foreground font-medium border-b">
                 <tr>

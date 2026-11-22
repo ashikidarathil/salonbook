@@ -214,7 +214,42 @@ export default function StylistServiceManagement({
               }
               emptyIcon="hugeicons:service"
             >
-              <div className="overflow-x-auto">
+              <ul className="divide-y lg:hidden">
+                {services.map((svc) => (
+                  <li key={svc.serviceId} className="flex items-center justify-between gap-3 p-4">
+                    <div className="min-w-0 space-y-1">
+                      <p className="break-words font-semibold text-slate-700">{svc.name}</p>
+                      <div className="flex flex-wrap gap-1">
+                        <Badge variant="outline" className="border-slate-200 text-slate-500">
+                          {svc.categoryName || 'General'}
+                        </Badge>
+                        <Badge
+                          className={cn(
+                            'rounded-full text-[10px] font-semibold',
+                            svc.isActive
+                              ? 'border-green-200 bg-green-100 text-green-700 hover:bg-green-100'
+                              : 'border-red-200 bg-red-100 text-red-700 hover:bg-red-100',
+                          )}
+                        >
+                          {svc.isActive ? 'Active' : 'Disabled'}
+                        </Badge>
+                      </div>
+                    </div>
+                    <Button
+                      variant={svc.isActive ? 'outline' : 'default'}
+                      size="sm"
+                      className={cn(
+                        'shrink-0',
+                        svc.isActive && 'border-red-100 text-red-500 hover:bg-red-50',
+                      )}
+                      onClick={() => handleToggleClick(svc.serviceId, svc.isActive, svc.name)}
+                    >
+                      {svc.isActive ? 'Disable' : 'Enable'}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+              <div className="hidden overflow-x-auto lg:block">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-slate-50/50 border-b hover:bg-transparent">
