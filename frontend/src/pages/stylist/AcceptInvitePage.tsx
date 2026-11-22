@@ -197,7 +197,6 @@ export default function AcceptInvitePage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <Loader size="md" className="mx-auto mb-4" />
-          <p className="text-lg">Validating invitation...</p>
         </div>
       </div>
     );

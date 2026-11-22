@@ -27,7 +27,6 @@ export default function App() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <Loader size="lg" className="mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading...</p>
         </div>
         <ServerWakeBanner />
       </div>

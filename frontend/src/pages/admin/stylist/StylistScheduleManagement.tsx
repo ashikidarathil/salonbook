@@ -78,9 +78,6 @@ export default function StylistScheduleManagement({
         {isBranchLoading ? (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
             <Loader size="md" />
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary/40">
-              Fetching Stylist Branch...
-            </p>
           </div>
         ) : !branchId ? (
           <div className="flex flex-col items-center justify-center py-20 text-center gap-4 bg-amber-50 rounded-[2.5rem] border border-amber-100 border-dashed">

@@ -78,7 +78,6 @@ export const NotificationCenter: React.FC = () => {
       return (
         <div className="flex flex-col items-center justify-center h-40 space-y-2">
           <Loader size="sm" />
-          <p className="text-xs text-muted-foreground">Loading...</p>
         </div>
       );
     }

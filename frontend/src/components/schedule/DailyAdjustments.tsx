@@ -19,9 +19,10 @@ import {
   startOfToday,
 } from 'date-fns';
 import { cn } from '@/lib/utils';
-import StylistBranchService from '@/services/stylistBranch.service';
+import { useStylistBranch } from '@/features/schedule/useStylistBranch';
+import { scheduleKey } from '@/features/schedule/schedule.slice';
+import { ScheduleLoadState } from './ScheduleLoadState';
 
-import type { BranchStylist } from '@/features/stylistBranch/stylistBranch.types';
 
 interface DailyAdjustmentsProps {
   stylistId?: string;
@@ -38,31 +39,21 @@ export default function DailyAdjustments({
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { user } = useAppSelector((state) => state.auth);
-  const { dailyOverrides } = useAppSelector((state) => state.schedule);
+  const {
+    dailyOverrides,
+    loadedFor,
+    error: scheduleError,
+  } = useAppSelector((state) => state.schedule);
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [fetchedBranchId, setFetchedBranchId] = useState<string | null>(null);
 
   const effectiveStylistId = propStylistId || user?.id;
-  const effectiveBranchId = propBranchId || user?.branchId || fetchedBranchId;
-
-  useEffect(() => {
-    const fetchStylistBranch = async () => {
-      if (!propBranchId && !user?.branchId && effectiveStylistId && user?.role === 'STYLIST') {
-        try {
-          const response = await StylistBranchService.getStylistBranches(effectiveStylistId);
-          const branches = response.data.data;
-          if (branches.length > 0) {
-            const activeBranch = branches.find((b: BranchStylist) => b.mappingId);
-            const branchId = activeBranch?.branchId || branches[0].branchId;
-            setFetchedBranchId(branchId);
-          }
-        } catch (error) {
-          console.error('Failed to fetch stylist branch:', error);
-        }
-      }
-    };
-    fetchStylistBranch();
-  }, [propBranchId, user?.branchId, effectiveStylistId, user?.role]);
+  const lookup = useStylistBranch(
+    effectiveStylistId,
+    !propBranchId && !user?.branchId && user?.role === 'STYLIST',
+  );
+  const effectiveBranchId = propBranchId || user?.branchId || lookup.branchId;
+  const key = scheduleKey(effectiveStylistId, effectiveBranchId);
+  const isLoaded = !!key && loadedFor.daily === key;
 
   useEffect(() => {
     if (effectiveStylistId && effectiveBranchId) {
@@ -127,6 +118,18 @@ export default function DailyAdjustments({
         </CardHeader>
 
         <CardContent className="p-2 !pt-3 sm:p-6 sm:!pt-6">
+          {!isLoaded ? (
+            <ScheduleLoadState
+              noBranch={!lookup.isLoading && !lookup.failed && !effectiveBranchId}
+              failed={lookup.failed || (!!key && !!scheduleError)}
+              onRetry={() => {
+                if (lookup.failed) lookup.retry();
+                else if (effectiveStylistId && effectiveBranchId) {
+                  dispatch(fetchDailyOverrides({ stylistId: effectiveStylistId, branchId: effectiveBranchId }));
+                }
+              }}
+            />
+          ) : (
           <div className="grid grid-cols-7 gap-1 sm:gap-4">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
               <div
@@ -213,6 +216,7 @@ export default function DailyAdjustments({
               );
             })}
           </div>
+          )}
         </CardContent>
       </Card>
     </div>

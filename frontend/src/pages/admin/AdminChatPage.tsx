@@ -102,7 +102,6 @@ export default function AdminChatPage() {
             {isLoadingRooms ? (
               <div className="p-8 text-center">
                 <Loader size="sm" className="mx-auto" />
-                <p className="mt-2 text-sm text-muted-foreground">Loading rooms...</p>
               </div>
             ) : rooms.length === 0 ? (
               <div className="p-8 text-center">

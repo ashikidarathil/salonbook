@@ -84,7 +84,6 @@ export default function StylistWalletManagement({ stylistId }: StylistWalletMana
     return (
       <div className="flex items-center justify-center py-16 text-muted-foreground">
         <Loader size="sm" className="mr-3" />
-        Loading wallet...
       </div>
     );
   }
@@ -231,7 +230,6 @@ export default function StylistWalletManagement({ stylistId }: StylistWalletMana
                   <tr>
                     <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground italic">
                       <Loader size="sm" className="mx-auto mb-2" />
-                      Loading...
                     </td>
                   </tr>
                 ) : escrows.length === 0 ? (

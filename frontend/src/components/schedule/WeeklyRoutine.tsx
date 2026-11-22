@@ -7,11 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@iconify/react';
-import StylistBranchService from '@/services/stylistBranch.service';
+import { useStylistBranch } from '@/features/schedule/useStylistBranch';
+import { scheduleKey } from '@/features/schedule/schedule.slice';
+import { ScheduleLoadState } from './ScheduleLoadState';
 import { showSuccess, showError, showLoading } from '@/common/utils/swal.utils';
 import { cn } from '@/lib/utils';
 import type { WeeklySchedule } from '@/features/schedule/schedule.types';
-import type { BranchStylist } from '@/features/stylistBranch/stylistBranch.types';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -26,32 +27,25 @@ export default function WeeklyRoutine({
 }: WeeklyRoutineProps) {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { weeklySchedule, loading } = useAppSelector((state) => state.schedule);
+  const {
+    weeklySchedule,
+    loadedFor,
+    loading,
+    error: scheduleError,
+  } = useAppSelector((state) => state.schedule);
   const [editedSchedule, setEditedSchedule] = useState<Record<number, WeeklySchedule>>({});
-  const [fetchedBranchId, setFetchedBranchId] = useState<string | null>(null);
-  const [prevWeeklySchedule, setPrevWeeklySchedule] = useState(weeklySchedule);
+  const [syncedSchedule, setSyncedSchedule] = useState<WeeklySchedule[] | null>(null);
+  // Days with unsaved time changes: a background refresh must not overwrite them
+  const [unsavedDays, setUnsavedDays] = useState<number[]>([]);
 
   const effectiveStylistId = propStylistId || user?.id;
-  const effectiveBranchId = propBranchId || user?.branchId || fetchedBranchId;
-
-  useEffect(() => {
-    const fetchStylistBranch = async () => {
-      if (!propBranchId && !user?.branchId && effectiveStylistId && user?.role === 'STYLIST') {
-        try {
-          const response = await StylistBranchService.getStylistBranches(effectiveStylistId);
-          const branches = response.data.data;
-          if (branches.length > 0) {
-            const activeBranch = branches.find((b: BranchStylist) => b.mappingId);
-            const branchId = activeBranch?.branchId || branches[0].branchId;
-            setFetchedBranchId(branchId);
-          }
-        } catch (error) {
-          console.error('Failed to fetch stylist branch:', error);
-        }
-      }
-    };
-    fetchStylistBranch();
-  }, [propBranchId, user?.branchId, effectiveStylistId, user?.role]);
+  const lookup = useStylistBranch(
+    effectiveStylistId,
+    !propBranchId && !user?.branchId && user?.role === 'STYLIST',
+  );
+  const effectiveBranchId = propBranchId || user?.branchId || lookup.branchId;
+  const key = scheduleKey(effectiveStylistId, effectiveBranchId);
+  const isLoaded = !!key && loadedFor.weekly === key;
 
   useEffect(() => {
     if (effectiveStylistId && effectiveBranchId) {
@@ -59,18 +53,19 @@ export default function WeeklyRoutine({
     }
   }, [dispatch, effectiveStylistId, effectiveBranchId]);
 
-  if (weeklySchedule !== prevWeeklySchedule) {
-    setPrevWeeklySchedule(weeklySchedule);
-    if (weeklySchedule.length > 0) {
-      const scheduleMap = weeklySchedule.reduce(
-        (acc, curr) => {
-          acc[curr.dayOfWeek] = curr;
-          return acc;
-        },
-        {} as Record<number, WeeklySchedule>,
-      );
-      setEditedSchedule(scheduleMap);
-    }
+  if (isLoaded && weeklySchedule !== syncedSchedule) {
+    setSyncedSchedule(weeklySchedule);
+    const scheduleMap = weeklySchedule.reduce(
+      (acc, curr) => {
+        acc[curr.dayOfWeek] = curr;
+        return acc;
+      },
+      {} as Record<number, WeeklySchedule>,
+    );
+    unsavedDays.forEach((day) => {
+      if (editedSchedule[day]) scheduleMap[day] = editedSchedule[day];
+    });
+    setEditedSchedule(scheduleMap);
   }
 
   const handleToggleWorkDay = async (day: number) => {
@@ -110,7 +105,7 @@ export default function WeeklyRoutine({
       } catch (error: unknown) {
         showError('Error', (error as string) || 'Failed to update schedule');
         // Revert local state on error
-        setEditedSchedule((prev) => ({ ...prev })); // or trigger a re-sync from Redux
+        setEditedSchedule((prev) => ({ ...prev, [day]: currentDay }));
       }
     }
   };
@@ -124,6 +119,7 @@ export default function WeeklyRoutine({
       newShifts.push({ startTime: '09:00', endTime: '18:00' });
     }
     newShifts[0] = { ...newShifts[0], [field]: value };
+    setUnsavedDays((days) => (days.includes(day) ? days : [...days, day]));
 
     setEditedSchedule((prev) => ({
       ...prev,
@@ -148,6 +144,7 @@ export default function WeeklyRoutine({
           },
         }),
       ).unwrap();
+      setUnsavedDays((days) => days.filter((item) => item !== day));
       showSuccess('Success', `${DAYS[day]} hours updated`);
     } catch (error: unknown) {
       showError('Error', (error as string) || 'Failed to update schedule');
@@ -177,6 +174,18 @@ export default function WeeklyRoutine({
         </CardHeader>
 
         <CardContent className="p-0">
+          {!isLoaded ? (
+            <ScheduleLoadState
+              noBranch={!lookup.isLoading && !lookup.failed && !effectiveBranchId}
+              failed={lookup.failed || (!!key && !!scheduleError)}
+              onRetry={() => {
+                if (lookup.failed) lookup.retry();
+                else if (effectiveStylistId && effectiveBranchId) {
+                  dispatch(fetchWeeklySchedule({ stylistId: effectiveStylistId, branchId: effectiveBranchId }));
+                }
+              }}
+            />
+          ) : (
           <div className="divide-y divide-border/30">
             {DAYS.map((dayName, index) => {
               const schedule = editedSchedule[index] || {
@@ -284,6 +293,7 @@ export default function WeeklyRoutine({
               );
             })}
           </div>
+          )}
         </CardContent>
       </Card>
     </div>

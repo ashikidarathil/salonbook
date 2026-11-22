@@ -217,7 +217,6 @@ export function SlotPicker({
             ) : isLoading ? (
               <div className="flex flex-col items-center gap-2 py-10 text-sm text-muted-foreground">
                 <Loader size="sm" label="Finding slots" />
-                Finding slots...
               </div>
             ) : failed ? (
               <p role="alert" className="py-10 text-center text-sm text-red-600">

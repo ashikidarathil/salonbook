@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchBreaks, deleteBreak } from '@/features/schedule/schedule.thunks';
@@ -8,8 +8,9 @@ import { Icon } from '@iconify/react';
 import { format, isBefore, isValid, startOfToday } from 'date-fns';
 
 import { showSuccess, showError, showLoading, showConfirm } from '@/common/utils/swal.utils';
-import StylistBranchService from '@/services/stylistBranch.service';
-import type { BranchStylist } from '@/features/stylistBranch/stylistBranch.types';
+import { useStylistBranch } from '@/features/schedule/useStylistBranch';
+import { scheduleKey } from '@/features/schedule/schedule.slice';
+import { ScheduleLoadState } from './ScheduleLoadState';
 
 interface BreakManagementProps {
   stylistId?: string;
@@ -24,34 +25,24 @@ export default function BreakManagement({
 }: BreakManagementProps) {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-  const { breaks } = useAppSelector((state) => state.schedule);
-  const [fetchedBranchId, setFetchedBranchId] = useState<string | null>(null);
+  const {
+    breaks,
+    loadedFor,
+    error: scheduleError,
+  } = useAppSelector((state) => state.schedule);
 
   const effectiveStylistId = propStylistId || user?.id;
-  const effectiveBranchId = propBranchId || user?.branchId || fetchedBranchId;
+  const lookup = useStylistBranch(
+    effectiveStylistId,
+    !propBranchId && !user?.branchId && user?.role === 'STYLIST',
+  );
+  const effectiveBranchId = propBranchId || user?.branchId || lookup.branchId;
+  const key = scheduleKey(effectiveStylistId, effectiveBranchId);
+  const isLoaded = !!key && loadedFor.breaks === key;
   const { pathname } = useLocation();
   const newBreakHref = pathname.startsWith('/admin')
     ? `/admin/stylists/${propStylistId}/schedule/breaks/new`
     : '/stylist/schedule/breaks/new';
-
-  useEffect(() => {
-    const fetchStylistBranch = async () => {
-      if (!propBranchId && !user?.branchId && effectiveStylistId && user?.role === 'STYLIST') {
-        try {
-          const response = await StylistBranchService.getStylistBranches(effectiveStylistId);
-          const branches = response.data.data;
-          if (branches.length > 0) {
-            const activeBranch = branches.find((b: BranchStylist) => b.mappingId);
-            const branchId = activeBranch?.branchId || branches[0].branchId;
-            setFetchedBranchId(branchId);
-          }
-        } catch (error) {
-          console.error('Failed to fetch stylist branch:', error);
-        }
-      }
-    };
-    fetchStylistBranch();
-  }, [propBranchId, user?.branchId, effectiveStylistId, user?.role]);
 
   useEffect(() => {
     if (effectiveStylistId && effectiveBranchId) {
@@ -114,6 +105,18 @@ export default function BreakManagement({
         </CardHeader>
 
         <CardContent className="p-3 !pt-3 sm:p-6 sm:!pt-6">
+          {!isLoaded ? (
+            <ScheduleLoadState
+              noBranch={!lookup.isLoading && !lookup.failed && !effectiveBranchId}
+              failed={lookup.failed || (!!key && !!scheduleError)}
+              onRetry={() => {
+                if (lookup.failed) lookup.retry();
+                else if (effectiveStylistId && effectiveBranchId) {
+                  dispatch(fetchBreaks({ stylistId: effectiveStylistId, branchId: effectiveBranchId }));
+                }
+              }}
+            />
+          ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {upcomingBreaks.length > 0 ? (
               upcomingBreaks.map((item) => (
@@ -197,6 +200,7 @@ export default function BreakManagement({
               </div>
             )}
           </div>
+          )}
         </CardContent>
       </Card>
     </div>

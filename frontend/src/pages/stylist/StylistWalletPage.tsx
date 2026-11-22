@@ -199,7 +199,6 @@ export default function StylistWalletPage() {
                   <tr>
                     <td colSpan={5} className="px-8 py-20 text-center text-muted-foreground">
                       <Loader size="md" className="mx-auto mb-4" />
-                      <span className="font-medium text-xs opacity-40">Syncing data...</span>
                     </td>
                   </tr>
                 ) : escrows.length === 0 ? (

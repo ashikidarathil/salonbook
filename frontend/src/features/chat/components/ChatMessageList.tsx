@@ -72,7 +72,6 @@ export function ChatMessageList({
     return (
       <div className="flex-1 flex flex-col items-center justify-center h-full gap-2">
         <Loader label="Loading chat history" />
-        <span className="text-sm text-muted-foreground">Loading chat history...</span>
       </div>
     );
   }

@@ -41,9 +41,11 @@ interface NavItem {
 function StylistSidebarContent({
   onLogout,
   onNavigate,
+  pathname,
 }: {
   onLogout: () => void;
   onNavigate: (path: string) => void;
+  pathname: string;
 }) {
   const navItems: NavItem[] = [
     { icon: 'solar:widget-bold', label: 'Dashboard', path: '/stylist' },
@@ -70,19 +72,30 @@ function StylistSidebarContent({
 
       <SidebarContent>
         <SidebarMenu className="px-2 py-4 space-y-1">
-          {navItems.map((item) => (
-            <SidebarMenuItem key={item.path}>
-              <SidebarMenuButton
-                onClick={() => onNavigate(item.path)}
-                className="hover:bg-accent/50"
-              >
-                <div className="flex items-center gap-2">
-                  <Icon icon={item.icon} className="size-4" />
-                  <span>{item.label}</span>
-                </div>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {navItems.map((item) => {
+            const isActive =
+              item.path === '/stylist'
+                ? pathname === item.path
+                : pathname === item.path || pathname.startsWith(`${item.path}/`);
+            return (
+              <SidebarMenuItem key={item.path}>
+                <SidebarMenuButton
+                  aria-current={isActive ? 'page' : undefined}
+                  onClick={() => onNavigate(item.path)}
+                  className={
+                    isActive
+                      ? 'relative min-h-11 bg-primary/10 font-semibold text-primary before:absolute before:inset-y-2 before:left-0 before:w-1 before:rounded-full before:bg-primary hover:bg-primary/10'
+                      : 'min-h-11 hover:bg-accent/50'
+                  }
+                >
+                  <div className="flex items-center gap-2">
+                    <Icon icon={item.icon} className="size-4" />
+                    <span>{item.label}</span>
+                  </div>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
 
           <SidebarMenuItem className="mt-4 pt-4 border-t border-border/50">
             <SidebarMenuButton
@@ -132,6 +145,7 @@ export function StylistLayout() {
           <StylistSidebarContent
             onLogout={handleLogout}
             onNavigate={handleNavigate}
+            pathname={location.pathname}
           />
         </Sidebar>
 
@@ -140,19 +154,24 @@ export function StylistLayout() {
             <div className="flex items-center gap-2 md:gap-4">
               <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
                 <SheetTrigger asChild>
-                  <Button size="icon" variant="ghost" className="md:hidden">
-                    <Icon icon="solar:menu-dots-bold" className="size-6" />
+                  <Button size="icon" variant="ghost" className="md:hidden" aria-label="Open menu">
+                    <Icon icon="solar:hamburger-menu-linear" className="size-6" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="p-0 w-72 theme-stylist">
+                <SheetContent
+                  side="left"
+                  className="p-0 w-72 theme-stylist"
+                  onOpenAutoFocus={(event) => event.preventDefault()}
+                >
                   <SheetHeader className="sr-only">
                     <SheetTitle>Stylist Navigation</SheetTitle>
                     <SheetDescription>Stylist portal navigation and menu</SheetDescription>
                   </SheetHeader>
-                  <div className="flex flex-col h-full bg-[var(--color-sidebar)]">
+                  <div className="flex h-full flex-col overflow-y-auto bg-[var(--color-sidebar)]">
                     <StylistSidebarContent
                       onLogout={handleLogout}
                       onNavigate={handleNavigate}
+                      pathname={location.pathname}
                     />
                   </div>
                 </SheetContent>
