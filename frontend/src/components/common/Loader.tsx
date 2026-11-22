@@ -1,5 +1,6 @@
 import { useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { loaderSide } from '@/common/utils/loaderSide';
 
 type LoaderSize = 'xs' | 'sm' | 'md' | 'lg';
 
@@ -12,13 +13,6 @@ interface LoaderProps {
   className?: string;
 }
 
-const sideFromPath = (pathname: string) => {
-  if (/^\/admin(\/|$)/.test(pathname)) return 'admin';
-  // Not /stylists/..., which is the customer's public stylist page
-  if (/^\/stylist(\/|$)/.test(pathname)) return 'stylist';
-  return 'user';
-};
-
 /** The one loading animation for the whole site, in shades of each side's primary color. */
 export function Loader({ size = 'md', label = 'Loading', inverse, className }: LoaderProps) {
   const { pathname } = useLocation();
@@ -27,7 +21,7 @@ export function Loader({ size = 'md', label = 'Loading', inverse, className }: L
     <span
       role="status"
       aria-label={label}
-      data-loader={sideFromPath(pathname)}
+      data-loader={loaderSide(pathname)}
       data-loader-size={size}
       data-loader-inverse={inverse ? 'true' : undefined}
       className={cn('sb-loader', className)}

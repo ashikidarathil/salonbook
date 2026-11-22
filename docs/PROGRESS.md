@@ -123,3 +123,5 @@
 - 2026-11-22 — 5.7a stylist portal: hamburger menu on phones with a clear active tab. My Schedule shows the loader
   instead of false Not Working days and reopens instantly from saved data. Removed loading text beside the loader
   across the site without changing the animation. Verified in Chrome with slowed requests (38/38).
+- 2026-11-22 — 9.9 follow-up: popup loading now uses the same site-wide loader, in each side's colours and with no
+  text. The old default spinner is gone. Verified in Chrome for admin and stylist at laptop and phone sizes.

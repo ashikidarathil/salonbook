@@ -1,5 +1,6 @@
 import Swal from 'sweetalert2';
 import type { SweetAlertOptions } from 'sweetalert2';
+import { loaderSide } from './loaderSide';
 
 const defaultConfig: SweetAlertOptions = {
   toast: false,
@@ -14,7 +15,7 @@ const defaultConfig: SweetAlertOptions = {
     htmlContainer: 'text-base',
     confirmButton: 'px-6 py-3 text-base font-medium rounded-lg',
   },
-  allowOutsideClick: () => !Swal.isLoading(),
+  allowOutsideClick: true,
 };
 
 // Helper to fix aria-hidden accessibility issue with modals
@@ -172,16 +173,22 @@ export const showCancellationConfirm = async (
   return result.isConfirmed ? result.value : null;
 };
 
-export const showLoading = (title: string) => {
+/** The site's one loader in a small popup. The label is for screen readers only. */
+export const showLoading = (label: string) => {
+  const boxes = '<span class="sb-loader__box"></span>'.repeat(5);
   return Swal.fire({
-    title,
+    html: `<span class="sb-loader" role="status" data-loader="${loaderSide(
+      window.location.pathname,
+    )}" data-loader-size="lg">${boxes}</span>`,
+    width: 'auto',
+    padding: '2rem 2.5rem',
+    background: '#fff',
+    customClass: { popup: 'rounded-lg shadow-xl', htmlContainer: '!m-0 !overflow-visible !p-0' },
     allowOutsideClick: false,
     allowEscapeKey: false,
     showConfirmButton: false,
-    willOpen: () => {
-      Swal.showLoading();
-    },
-    didOpen: () => {
+    didOpen: (popup) => {
+      popup.querySelector('.sb-loader')?.setAttribute('aria-label', label);
       ensureZIndex();
       removeAriaHiddenFromRoot();
     },
