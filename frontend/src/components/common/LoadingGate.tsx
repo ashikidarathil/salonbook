@@ -51,7 +51,6 @@ export function LoadingGate({
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px]">
         <Loader size="lg" className="mb-4" label={loadingMessage} />
-        <p className="font-medium text-muted-foreground">{loadingMessage}</p>
       </div>
     );
   }

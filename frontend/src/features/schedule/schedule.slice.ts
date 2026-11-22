@@ -11,10 +11,14 @@ import {
   deleteBreak,
 } from './schedule.thunks';
 
+export const scheduleKey = (stylistId?: string | null, branchId?: string | null) =>
+  stylistId && branchId ? `${stylistId}|${branchId}` : null;
+
 const initialState: ScheduleState = {
   weeklySchedule: [],
   dailyOverrides: [],
   breaks: [],
+  loadedFor: { weekly: null, daily: null, breaks: null },
   loading: false,
   error: null,
 };
@@ -30,9 +34,10 @@ const scheduleSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // ── Weekly Schedule ─────────────────────────────────
-      .addCase(fetchWeeklySchedule.fulfilled, (state, action: PayloadAction<WeeklySchedule[]>) => {
+      .addCase(fetchWeeklySchedule.fulfilled, (state, action) => {
         state.loading = false;
         state.weeklySchedule = action.payload;
+        state.loadedFor.weekly = scheduleKey(action.meta.arg.stylistId, action.meta.arg.branchId);
       })
       .addCase(updateWeeklySchedule.fulfilled, (state, action: PayloadAction<WeeklySchedule>) => {
         state.loading = false;
@@ -47,9 +52,10 @@ const scheduleSlice = createSlice({
       })
 
       // ── Daily Overrides ─────────────────────────────────
-      .addCase(fetchDailyOverrides.fulfilled, (state, action: PayloadAction<DailyOverride[]>) => {
+      .addCase(fetchDailyOverrides.fulfilled, (state, action) => {
         state.loading = false;
         state.dailyOverrides = action.payload;
+        state.loadedFor.daily = scheduleKey(action.meta.arg.stylistId, action.meta.arg.branchId);
       })
       .addCase(createDailyOverride.fulfilled, (state, action: PayloadAction<DailyOverride>) => {
         state.loading = false;
@@ -68,9 +74,10 @@ const scheduleSlice = createSlice({
       })
 
       // ── Breaks ──────────────────────────────────────────
-      .addCase(fetchBreaks.fulfilled, (state, action: PayloadAction<StylistBreak[]>) => {
+      .addCase(fetchBreaks.fulfilled, (state, action) => {
         state.loading = false;
         state.breaks = action.payload;
+        state.loadedFor.breaks = scheduleKey(action.meta.arg.stylistId, action.meta.arg.branchId);
       })
       .addCase(createBreak.fulfilled, (state, action: PayloadAction<StylistBreak>) => {
         state.loading = false;

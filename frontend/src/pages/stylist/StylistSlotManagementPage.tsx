@@ -378,7 +378,7 @@ export default function StylistSlotManagementPage() {
                               colSpan={3}
                               className="text-center py-8 text-muted-foreground"
                             >
-                              Loading slots...
+                              <Loader size="sm" className="mx-auto" label="Loading slots" />
                             </TableCell>
                           </TableRow>
                         ) : slots.filter(
@@ -452,7 +452,6 @@ export default function StylistSlotManagementPage() {
               {loading ? (
                 <div className="flex items-center justify-center py-10 text-muted-foreground gap-2">
                   <Loader size="xs" />
-                  <span>Loading special slots...</span>
                 </div>
               ) : specialSlots.length === 0 ? (
                 <div className="flex flex-col items-center py-10 text-center text-muted-foreground">
@@ -494,10 +493,6 @@ export default function StylistSlotManagementPage() {
                                   </span>
                                 ))}
                               </div>
-                            ) : slot.status === 'BOOKED' ? (
-                              <p className="text-[10px] text-muted-foreground italic">
-                                User services loading...
-                              </p>
                             ) : null}
                           </div>
                         </div>

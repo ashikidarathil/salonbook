@@ -432,7 +432,6 @@ export default function ServiceDetailsPage() {
                       ) : isLoadingReviews ? (
                         <div className="py-8 text-center text-muted-foreground">
                           <Loader size="md" className="mx-auto mb-3" />
-                          <p className="text-sm">Loading reviews...</p>
                         </div>
                       ) : (
                         <div className="py-8 text-center text-muted-foreground">

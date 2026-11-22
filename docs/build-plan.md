@@ -59,6 +59,7 @@ the image cropper, full-screen photo viewer, chat camera and photo preview, and 
 - [x] 5.6 Customer account: review, wallet top-up, become a stylist (home map stays a small popup)
 - [x] 5.6a Breadcrumbs on every page after login and every customer page (chat, login and home excluded)
 - [x] 5.7 Every remaining table becomes cards on phones; shared spacing on every page
+- [x] 5.7a Stylist mobile menu with active tab, faster schedule loading, loader without text
 - [ ] 5.8 Final pass on all sizes and on real devices (phone, tablet, laptop)
 
 ## Phase 6 — Code cleanup

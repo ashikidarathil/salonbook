@@ -487,7 +487,6 @@ export default function SlotManagementPage() {
                               className="py-12 text-center text-muted-foreground"
                             >
                               <Loader size="sm" className="mx-auto mb-2" />
-                              Loading slots...
                             </TableCell>
                           </TableRow>
                         ) : slots.filter(
@@ -571,7 +570,6 @@ export default function SlotManagementPage() {
               {loading ? (
                 <div className="flex items-center justify-center gap-2 py-10 text-muted-foreground">
                   <Loader size="xs" />
-                  <span>Loading special slots...</span>
                 </div>
               ) : specialSlots.length === 0 ? (
                 <div className="flex flex-col items-center py-10 text-center text-muted-foreground">
@@ -620,10 +618,6 @@ export default function SlotManagementPage() {
                                   </span>
                                 ))}
                               </div>
-                            ) : slot.status === 'BOOKED' ? (
-                              <p className="text-[10px] text-muted-foreground italic">
-                                User services loading...
-                              </p>
                             ) : null}
                           </div>
                         </div>

@@ -60,6 +60,8 @@ export interface ScheduleState {
   weeklySchedule: WeeklySchedule[];
   dailyOverrides: DailyOverride[];
   breaks: StylistBreak[];
+  /** Whose data is in the store, so one stylist's schedule never shows for another */
+  loadedFor: { weekly: string | null; daily: string | null; breaks: string | null };
   loading: boolean;
   error: string | null;
 }

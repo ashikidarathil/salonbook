@@ -280,7 +280,6 @@ export default function AdminWalletPage() {
               {loading && escrows.length === 0 ? (
                 <div className="py-12 text-center text-muted-foreground italic">
                   <Loader size="sm" className="mx-auto mb-3" />
-                  <p>Loading escrowed funds...</p>
                 </div>
               ) : escrows.length === 0 ? (
                 <div className="py-12 text-center text-muted-foreground">
@@ -351,7 +350,6 @@ export default function AdminWalletPage() {
               {loading && escrows.length === 0 ? (
                 <div className="py-12 text-center text-muted-foreground italic">
                   <Loader size="sm" className="mx-auto mb-3" />
-                  <p>Loading history...</p>
                 </div>
               ) : escrows.length === 0 ? (
                 <div className="py-12 text-center text-muted-foreground">
