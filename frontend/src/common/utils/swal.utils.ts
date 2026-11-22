@@ -173,7 +173,7 @@ export const showCancellationConfirm = async (
   return result.isConfirmed ? result.value : null;
 };
 
-/** The site's one loader on its own, with no box. The label is for screen readers only. */
+/** The site's one loader in a small popup. The label is for screen readers only. */
 export const showLoading = (label: string) => {
   const boxes = '<span class="sb-loader__box"></span>'.repeat(5);
   return Swal.fire({
@@ -181,12 +181,9 @@ export const showLoading = (label: string) => {
       window.location.pathname,
     )}" data-loader-size="lg">${boxes}</span>`,
     width: 'auto',
-    padding: 0,
-    background: 'transparent',
-    customClass: {
-      popup: '!bg-transparent !shadow-none',
-      htmlContainer: '!m-0 !overflow-visible !p-0',
-    },
+    padding: '2rem 2.5rem',
+    background: '#fff',
+    customClass: { popup: 'rounded-lg shadow-xl', htmlContainer: '!m-0 !overflow-visible !p-0' },
     allowOutsideClick: false,
     allowEscapeKey: false,
     showConfirmButton: false,
