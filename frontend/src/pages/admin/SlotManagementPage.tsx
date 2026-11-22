@@ -622,17 +622,18 @@ export default function SlotManagementPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-end">
                         {getStatusBadge(slot.status, 'special')}
                         {slot.status === 'AVAILABLE' && (
                           <Button
                             size="sm"
-                            variant="ghost"
-                            aria-label="Cancel special slot"
-                            className="w-8 h-8 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50"
+                            variant="destructive"
+                            aria-label={`Delete special slot ${slot.startTime} to ${slot.endTime}`}
+                            className="h-9 shrink-0 gap-1.5"
                             onClick={() => handleCancelSpecialSlot(slot.id)}
                           >
                             <Icon icon="solar:trash-bin-trash-bold" className="size-4" />
+                            Delete
                           </Button>
                         )}
                       </div>

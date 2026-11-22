@@ -126,3 +126,4 @@
 - 2026-11-22 — 9.9 follow-up: popup loading now uses the same site-wide loader, in each side's colours and with no
   text. The old default spinner is gone. Verified in Chrome for admin and stylist at laptop and phone sizes.
 - 2026-11-22 — 9.9 follow-up: restored the white container around the action loader at the user's request.
+- 2026-11-22 — 5.4 follow-up: the special slot delete action is now a full-size Delete button for admin and stylist.
