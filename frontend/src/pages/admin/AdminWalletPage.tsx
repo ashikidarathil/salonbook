@@ -113,8 +113,8 @@ export default function AdminWalletPage() {
     <div className="space-y-6">
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-heading">Financial Oversight</h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <h1 className="break-words text-2xl font-bold sm:text-3xl">Financial Oversight</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Monitor escrowed funds and daily releases
           </p>
         </div>

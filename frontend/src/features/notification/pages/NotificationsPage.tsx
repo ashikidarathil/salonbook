@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Icon } from '@iconify/react';
 import { LoadingGate } from '@/components/common/LoadingGate';
 import { cn } from '@/lib/utils';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -23,6 +23,7 @@ import { NotificationType } from '@/features/notification/types/notification.typ
 export default function NotificationsPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { notifications, isLoading, error, unreadCount } = useAppSelector(
     (state) => state.notification,
   );
@@ -82,11 +83,11 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="container max-w-7xl mx-auto py-8 px-4 mx-auto rounded-lg bg-muted/40 border border-border/40 transition-all hover:shadow-md">
-      <div className="flex items-center justify-between mb-8">
+    <div className={`w-full ${pathname.startsWith('/profile') ? 'p-4 sm:p-6 lg:p-8' : ''}`}>
+      <div className="mb-6 flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold">Notifications</h1>
-          <p className="text-muted-foreground mt-1">Stay updated with your latest activities</p>
+          <h1 className="break-words text-2xl font-bold sm:text-3xl">Notifications</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Stay updated with your latest activities</p>
         </div>
         {unreadCount > 0 && (
           <Button

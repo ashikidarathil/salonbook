@@ -62,12 +62,12 @@ export default function StylistWalletPage() {
   }
 
   return (
-    <div className="space-y-8 rounded-2xl bg-muted/30 border border-border/40 transition-all hover:shadow-md">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold font-heading tracking-tight text-foreground">My Wallet</h1>
-          <p className="text-muted-foreground text-sm mt-2 font-normal">
+          <h1 className="break-words text-2xl font-bold sm:text-3xl">My Wallet</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Track your earnings and automated payouts
           </p>
         </div>

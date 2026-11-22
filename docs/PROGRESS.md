@@ -117,3 +117,6 @@
 - 2026-11-22 — 5.7 final responsive pass: the remaining admin tables become cards on phones and tablets. Checked
   admin, stylist and customer pages with a real booking from 360 to 1920px (328 checks), including phone-card actions.
   Still open: 5.8 on real devices.
+- 2026-11-22 — 5.7 uniform pages: every admin, stylist and account page now has the same title, description, spacing
+  and full width. Removed empty border boxes that left content with no padding, including stylist Appointments.
+  Checked 48 pages from 360 to 1920px (961 checks). Still open: 5.8 on real devices.

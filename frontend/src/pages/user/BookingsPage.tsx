@@ -157,8 +157,8 @@ export default function BookingsPage() {
     <div className="space-y-6 p-4 text-foreground sm:p-6 lg:p-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold font-heading">My Bookings</h1>
-          <p className="text-muted-foreground">Manage and track your salon appointments</p>
+          <h1 className="break-words text-2xl font-bold sm:text-3xl">My Bookings</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Manage and track your salon appointments</p>
         </div>
       </div>
 

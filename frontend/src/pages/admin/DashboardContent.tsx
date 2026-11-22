@@ -73,10 +73,10 @@ export default function DashboardContent() {
     <div className="space-y-6">
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold font-heading tracking-tight text-gray-900">
+          <h1 className="break-words text-2xl font-bold sm:text-3xl">
             Platform Overview
           </h1>
-          <p className="mt-1 text-base text-muted-foreground font-normal">
+          <p className="mt-1 text-sm text-muted-foreground">
             Comprehensive business metrics and platform performance analytics
           </p>
         </div>
