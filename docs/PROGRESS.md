@@ -108,3 +108,9 @@
   inner pages. Fixed admin reschedule having no stylist or times, stale times after changing date, re-picking a
   service in the cart, and blank calendar arrows. Verified in Chrome from phone to 1920px (39/39), with the payment
   step simulated. Not tested on a physical device.
+- 2026-11-21 — 5.6 customer account: review, wallet top-up and become a stylist are inner pages. Application errors
+  now show on the form. Verified in Chrome from phone to 1920px (34/34), with Razorpay and the application request
+  simulated. Not tested on a physical device. The Contact page's Send Message form is still not connected.
+- 2026-11-21 — 5.6a uniform breadcrumbs: every admin, stylist and customer page now has one breadcrumb trail. Branch
+  inner pages show the branch name, and stylist Manage shows its section and has one back arrow. Checked 53 pages at
+  laptop, tablet and phone sizes (325 checks). Chat, login and home are left without breadcrumbs on purpose.

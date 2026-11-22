@@ -1,27 +1,12 @@
 import { Loader } from '@/components/common/Loader';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import {
-  fetchMyWallet,
-  fetchTransactionHistory,
-  topUpWallet,
-} from '@/features/wallet/wallet.thunks';
+import { fetchMyWallet, fetchTransactionHistory } from '@/features/wallet/wallet.thunks';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { showSuccess, showError } from '@/common/utils/swal.utils';
 import { type WalletTransaction, TransactionType } from '@/features/wallet/wallet.types';
-import { getThemeColorByRole } from '@/features/wallet/wallet.constants';
-import { Input } from '@/components/ui/input';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
-
-const QUICK_AMOUNTS = [100, 200, 500, 1000, 2000, 5000];
 
 const typeConfig: Record<
   TransactionType,
@@ -96,45 +81,14 @@ function TransactionRow({ tx }: { tx: WalletTransaction }) {
 
 export default function WalletPage() {
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((s) => s.auth);
   const { wallet, transactions, isLoading } = useAppSelector((s) => s.wallet);
-  const [topupAmount, setTopupAmount] = useState<number>(500);
-  const [customAmount, setCustomAmount] = useState('');
-  const [isTopupOpen, setIsTopupOpen] = useState(false);
-  const [topupLoading, setTopupLoading] = useState(false);
-
   useEffect(() => {
     dispatch(fetchMyWallet());
     dispatch(fetchTransactionHistory());
   }, [dispatch]);
 
-  const effectiveAmount = customAmount ? Number(customAmount) : topupAmount;
-
-  const handleTopup = async () => {
-    if (effectiveAmount < 100) {
-      showError('Invalid Amount', 'Minimum top-up is ₹100');
-      return;
-    }
-    setTopupLoading(true);
-    setIsTopupOpen(false);
-
-    const themeColor = getThemeColorByRole(user?.role);
-    const result = await dispatch(topUpWallet({ amount: effectiveAmount, themeColor }));
-
-    if (topUpWallet.fulfilled.match(result)) {
-      setCustomAmount('');
-      showSuccess('Top-Up Successful!', `₹${effectiveAmount} added to your wallet.`);
-      dispatch(fetchTransactionHistory());
-    } else if (topUpWallet.rejected.match(result)) {
-      if (result.payload !== 'DISMISSED') {
-        showError('Top-Up Failed', (result.payload as string) || 'Payment could not be processed');
-      }
-    }
-    setTopupLoading(false);
-  };
-
   return (
-    <div className="max-w-6xl mx-auto px-4 py-4 sm:px-6 space-y-4 sm:space-y-6 w-full">
+    <div className="w-full space-y-4 p-4 sm:space-y-6 sm:p-6 lg:p-8">
       {/* Balance Card Section */}
       <div className="pt-1 sm:pt-2">
         <Card className="relative overflow-hidden border-none shadow-lg bg-primary text-primary-foreground min-w-0">
@@ -173,83 +127,21 @@ export default function WalletPage() {
                 </p>
               </div>
               <Button
-                onClick={() => setIsTopupOpen(true)}
+                asChild
                 className="bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground font-bold px-3 sm:px-4 h-8 sm:h-9 text-[10px] sm:text-xs shadow-sm rounded-lg whitespace-nowrap transition-colors border border-primary-foreground/10"
               >
-                <Icon icon="solar:add-circle-bold" className="size-3.5 sm:size-4 mr-1 sm:mr-1.5" />
-                Add Money
+                <Link to="add">
+                  <Icon
+                    icon="solar:add-circle-bold"
+                    className="size-3.5 sm:size-4 mr-1 sm:mr-1.5"
+                  />
+                  Add Money
+                </Link>
               </Button>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      <Dialog open={isTopupOpen} onOpenChange={setIsTopupOpen}>
-        <DialogContent className="sm:max-w-md p-0 overflow-hidden border-none shadow-2xl">
-          <DialogHeader className="p-6 border-b bg-muted/30">
-            <DialogTitle className="text-xl font-bold font-heading">Add Money</DialogTitle>
-            <DialogDescription className="sr-only">Top up your wallet balance</DialogDescription>
-          </DialogHeader>
-
-          <div className="p-6 space-y-6">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground mb-3">Select Amount</p>
-              <div className="grid grid-cols-3 gap-2">
-                {QUICK_AMOUNTS.map((amt) => (
-                  <Button
-                    key={amt}
-                    variant={topupAmount === amt && !customAmount ? 'default' : 'outline'}
-                    className={`h-12 rounded-xl transition-all ${
-                      topupAmount === amt && !customAmount
-                        ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'hover:border-primary/50 hover:text-primary'
-                    }`}
-                    onClick={() => {
-                      setTopupAmount(amt);
-                      setCustomAmount('');
-                    }}
-                  >
-                    ₹{amt}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <p className="text-sm font-medium text-muted-foreground mb-2">
-                Or enter custom amount
-              </p>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">
-                  ₹
-                </span>
-                <Input
-                  type="number"
-                  className="pl-8 h-12 bg-muted/20 border-border rounded-xl font-semibold focus:ring-primary/20"
-                  value={customAmount}
-                  onChange={(e) => setCustomAmount(e.target.value)}
-                  placeholder="Minimum ₹100"
-                />
-              </div>
-            </div>
-
-            <Button
-              className="w-full h-14 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-bold shadow-md transition-all"
-              onClick={handleTopup}
-              disabled={topupLoading || effectiveAmount < 100}
-            >
-              {topupLoading ? (
-                <Loader size="sm" className="mr-2" />
-              ) : (
-                <Icon icon="solar:card-send-bold" className="size-6 mr-2" />
-              )}
-              {topupLoading
-                ? 'Processing...'
-                : `Top-Up ₹${effectiveAmount.toLocaleString('en-IN')}`}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Transaction History */}
       <div className="mt-4 sm:mt-6">

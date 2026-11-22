@@ -110,7 +110,7 @@ export default function AdminWalletPage() {
   const pageTotal = (escrows || []).reduce((s, e) => s + e.amount, 0);
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="space-y-6">
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold font-heading">Financial Oversight</h1>

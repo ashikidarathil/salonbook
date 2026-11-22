@@ -56,7 +56,8 @@ the image cropper, full-screen photo viewer, chat camera and photo preview, and 
 - [x] 5.3 Admin branches and stylists: branch form, map picker, branch breaks, stylist invite and invite details
 - [x] 5.4 Schedules and slots (admin + stylist): special slots, breaks, daily adjustments
 - [x] 5.5 Customer booking flow: choose service, slot picker (from stylist, cart, bookings and admin reschedule)
-- [ ] 5.6 Customer account: review, wallet top-up, become a stylist, home map
+- [x] 5.6 Customer account: review, wallet top-up, become a stylist (home map stays a small popup)
+- [x] 5.6a Breadcrumbs on every page after login and every customer page (chat, login and home excluded)
 - [ ] 5.7 Every remaining table becomes cards on phones; shared spacing on every page
 - [ ] 5.8 Final pass on all sizes and on real devices (phone, tablet, laptop)
 

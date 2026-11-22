@@ -22,6 +22,9 @@ import CheckoutPage from '@/pages/user/CheckoutPage';
 import BookingsPage from '@/pages/user/BookingsPage';
 import BookingDetailPage from '@/pages/user/BookingDetailPage';
 import WalletPage from '@/pages/user/WalletPage';
+import WalletTopupPage from '@/pages/user/WalletTopupPage';
+import BookingReviewPage from '@/pages/user/BookingReviewPage';
+import StylistApplyPage from '@/pages/user/StylistApplyPage';
 import PaymentSuccessPage from '@/pages/user/PaymentSuccessPage';
 import PaymentFailurePage from '@/pages/user/PaymentFailurePage';
 import NotFoundPage from '@/pages/error/NotFoundPage';
@@ -106,6 +109,7 @@ export default function AppRoutes() {
       <Route path={APP_ROUTES.PUBLIC.VERIFY_PHONE_OTP} element={<VerifyPhoneOtpPage />} />
       <Route path={APP_ROUTES.PUBLIC.HOME} element={<HomePage />} />
       <Route path={APP_ROUTES.PUBLIC.CONTACT} element={<ContactPage />} />
+      <Route path="/contact/apply" element={<StylistApplyPage />} />
       <Route path={APP_ROUTES.PUBLIC.VERIFY_RESET_OTP} element={<VerifyResetOtpPage />} />
       <Route path={APP_ROUTES.PUBLIC.NEW_PASSWORD} element={<NewPasswordPage />} />
       <Route path={APP_ROUTES.USER.STYLISTS} element={<StylistsListingPage />} />
@@ -136,7 +140,9 @@ export default function AppRoutes() {
           <Route path="bookings" element={<BookingsPage />} />
           <Route path="bookings/:id" element={<BookingDetailPage />} />
           <Route path="bookings/:id/reschedule" element={<RescheduleBookingPage />} />
+          <Route path="bookings/:id/review" element={<BookingReviewPage />} />
           <Route path="wallet" element={<WalletPage />} />
+          <Route path="wallet/add" element={<WalletTopupPage />} />
         </Route>
       </Route>
 

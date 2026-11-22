@@ -20,7 +20,15 @@ export default function StylistScheduleManagement({
 }: StylistScheduleManagementProps) {
   const [params, setParams] = useSearchParams();
   const activeTab = params.get('tab') || 'weekly';
-  const setActiveTab = (tab: string) => setParams({ tab }, { replace: true });
+  const setActiveTab = (tab: string) =>
+    setParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        next.set('tab', tab);
+        return next;
+      },
+      { replace: true },
+    );
   const [branchId, setBranchId] = useState<string | null>(null);
   const [isBranchLoading, setIsBranchLoading] = useState(true);
 

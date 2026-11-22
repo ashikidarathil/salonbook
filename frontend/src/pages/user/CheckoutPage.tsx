@@ -1,3 +1,4 @@
+import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
 import { Loader } from '@/components/common/Loader';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -153,6 +154,7 @@ export default function CheckoutPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
+      <RouteBreadcrumbs className="w-full px-4 pt-4 sm:px-6 lg:px-8" />
       <main className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold">Checkout</h1>

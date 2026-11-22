@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import { BranchPageHeader } from '@/components/branch/BranchPageHeader';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import {
   assignStylist,
@@ -30,18 +31,14 @@ import Pagination from '@/components/pagination/Pagination';
 import { LoadingGate } from '@/components/common/LoadingGate';
 import { clearError } from '@/features/stylistBranch/stylistBranch.slice';
 import { useDebounce } from '@/hooks/useDebounce';
-import { ArrowLeft, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 const ITEMS_PER_PAGE = 5;
 
 export default function BranchStylistsPage() {
   const { branchId } = useParams<{ branchId: string }>();
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
-
-  const { branches } = useAppSelector((state) => state.branch);
-  const branchName = branches.find((b) => b.id === branchId)?.name || 'Branch';
 
   const {
     assignedStylists,
@@ -155,16 +152,8 @@ export default function BranchStylistsPage() {
   };
 
   return (
-    <div className="p-8 space-y-8 theme-admin mx-auto rounded-lg bg-muted/40 border border-border/40 transition-all hover:shadow-md">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/admin/branches')}>
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold">Manage Stylists</h1>
-          <p className="text-muted-foreground">{branchName}</p>
-        </div>
-      </div>
+    <div className="w-full space-y-6 theme-admin">
+      <BranchPageHeader branchId={branchId} title="Manage Stylists" />
 
       <div className="grid grid-cols-1 gap-8">
         {/* Available Stylists Section */}
@@ -182,7 +171,7 @@ export default function BranchStylistsPage() {
                 placeholder="Search available stylists..."
                 value={searchUnassigned}
                 onChange={(e) => handleSearchUnassignedChange(e.target.value)}
-                className="max-w-xs"
+                className="w-full md:max-w-xs"
               />
             </div>
           </CardHeader>
@@ -266,7 +255,7 @@ export default function BranchStylistsPage() {
                 placeholder="Search assigned stylists..."
                 value={searchAssigned}
                 onChange={(e) => handleSearchAssignedChange(e.target.value)}
-                className="max-w-xs"
+                className="w-full md:max-w-xs"
               />
             </div>
           </CardHeader>

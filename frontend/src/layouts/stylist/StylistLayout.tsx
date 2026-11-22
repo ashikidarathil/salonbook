@@ -1,5 +1,6 @@
 'use client';
 
+import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
 import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -209,6 +210,7 @@ export function StylistLayout() {
               <Outlet />
             ) : (
               <div className="w-full">
+                <RouteBreadcrumbs className="mb-4" />
                 <Outlet />
               </div>
             )}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import type { StylistListItem } from '@/features/stylistInvite/stylistInvite.types';
 import { stylistInviteService } from '@/services/stylistInvite.service';
 import { Loader } from '@/components/common/Loader';
@@ -8,6 +8,12 @@ import { Button } from '@/components/ui/button';
 import StylistDetailsView from './StylistDetailsView';
 
 const LIST_PATH = '/admin/stylists';
+const SECTIONS: Record<string, string> = {
+  schedule: 'Schedule',
+  services: 'Services',
+  'off-days': 'Off-Days',
+  wallet: 'Wallet',
+};
 
 /** The paginated list is the one that includes the stylist's public URL name. */
 async function findStylist(id?: string): Promise<StylistListItem | null> {
@@ -22,7 +28,7 @@ async function findStylist(id?: string): Promise<StylistListItem | null> {
 
 export default function StylistDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const [params] = useSearchParams();
   const location = useLocation();
   const [stylist, setStylist] = useState<StylistListItem | null>(null);
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'missing'>('loading');
@@ -51,7 +57,11 @@ export default function StylistDetailPage() {
       <PageHeader
         title={title}
         description={stylist?.specialization}
-        breadcrumbs={[{ label: 'Stylists', href: backTo }, { label: title }]}
+        breadcrumbs={[
+          { label: 'Stylists', href: backTo },
+          { label: title, href: location.pathname },
+          { label: SECTIONS[params.get('section') ?? 'schedule'] ?? 'Schedule' },
+        ]}
         backTo={backTo}
       />
       {loadState === 'loading' && (
@@ -67,9 +77,7 @@ export default function StylistDetailPage() {
           </Button>
         </div>
       )}
-      {loadState === 'ready' && stylist && (
-        <StylistDetailsView stylist={stylist} onClose={() => navigate(backTo)} />
-      )}
+      {loadState === 'ready' && stylist && <StylistDetailsView stylist={stylist} />}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { useNavigate } from 'react-router-dom';
@@ -97,6 +98,7 @@ export default function ServicesListingPage() {
   return (
     <div className="flex flex-col min-h-screen font-sans bg-background text-foreground">
       <Header />
+      <RouteBreadcrumbs className="w-full px-4 pt-4 sm:px-6 lg:px-8" />
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative py-16 overflow-hidden text-center  bg-gradient-to-b from-primary/10 via-primary/5 to-background md:py-20 ">

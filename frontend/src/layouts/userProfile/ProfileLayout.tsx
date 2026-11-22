@@ -1,5 +1,6 @@
 'use client';
 
+import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
 import { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -199,7 +200,7 @@ export default function ProfileLayout() {
                       ? 'My Favorites'
                       : location.pathname === '/profile/notifications'
                         ? 'Notifications'
-                        : location.pathname === '/profile/wallet'
+                        : location.pathname.startsWith('/profile/wallet')
                           ? 'My Wallet'
                           : 'Profile Settings'}
               </h1>
@@ -209,6 +210,7 @@ export default function ProfileLayout() {
           </header>
 
           <main className="flex-1 overflow-x-hidden overflow-y-auto w-full">
+            <RouteBreadcrumbs className="px-4 pt-4 sm:px-6 lg:px-8" />
             <Outlet />
           </main>
         </SidebarInset>
