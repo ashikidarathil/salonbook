@@ -119,21 +119,21 @@ export default function AdminWalletPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="bg-muted/40 p-1 rounded-xl border border-border/30 inline-flex items-center">
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="flex w-full items-center rounded-xl border border-border/30 bg-muted/40 p-1 sm:inline-flex sm:w-auto">
             <Tabs
               value={period !== 'custom' ? period : ''}
               onValueChange={setPeriod}
               className="w-full"
             >
-              <TabsList className="bg-transparent h-9 gap-1">
+              <TabsList className="grid h-9 w-full grid-cols-5 gap-1 bg-transparent sm:inline-flex sm:w-auto">
                 {PERIODS.map((p) => (
                   <TabsTrigger
                     key={p.value}
                     value={p.value}
-                    className="rounded-lg px-4 py-1.5 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary font-medium transition-all text-sm"
+                    className="min-w-0 rounded-lg px-1 py-1.5 sm:px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary font-medium transition-all text-xs sm:text-sm"
                   >
-                    <Icon icon={p.icon} className="mr-2 size-4" />
+                    <Icon icon={p.icon} className="mr-2 hidden size-4 sm:block" />
                     {p.label}
                   </TabsTrigger>
                 ))}
@@ -145,7 +145,7 @@ export default function AdminWalletPage() {
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className={`rounded-xl h-[40px] px-4 font-medium border-border/30 bg-muted/40 hover:bg-white transition-all shadow-sm text-sm ${period === 'custom' ? 'border-primary text-primary bg-white' : ''}`}
+                className={`h-[40px] w-full rounded-xl px-4 font-medium sm:w-auto border-border/30 bg-muted/40 hover:bg-white transition-all shadow-sm text-sm ${period === 'custom' ? 'border-primary text-primary bg-white' : ''}`}
               >
                 <Icon icon="solar:calendar-add-bold-duotone" className="mr-2 size-4" />
                 {period === 'custom' && selectedDate

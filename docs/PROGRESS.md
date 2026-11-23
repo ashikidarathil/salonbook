@@ -129,3 +129,5 @@
 - 2026-11-22 — 5.4 follow-up: the special slot delete action is now a full-size Delete button for admin and stylist.
 - 2026-11-23 — 5.4 follow-up: removed the lightning emoji from special slot and special booking labels.
   Slot and special slot lists now use the standard loader size.
+- 2026-11-23 — 5.7 follow-up: dashboard and wallet period filters fit phones, with equal tabs in one row and a full-width
+  Specific Date button, for admin and stylist.
