@@ -144,3 +144,5 @@
   and Wallet tabs inside Manage.
 - 2026-11-23 — Admin responsive pass, Categories: category cards below laptop width, fixed-width table from laptop
   width, search icon, soft status badges, and a one-column form on tablets.
+- 2026-11-23 — Admin responsive pass, Services: service cards below laptop width, fixed-width table from laptop
+  width, compact filters, and a one-column form on tablets.
