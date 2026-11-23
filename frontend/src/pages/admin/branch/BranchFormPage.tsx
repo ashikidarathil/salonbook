@@ -175,7 +175,7 @@ export default function BranchFormPage() {
       isSubmitting={isSubmitting}
       onSubmit={submit}
     >
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 xl:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="branch-name">Branch Name *</Label>
           <Input id="branch-name" placeholder="Main Salon Branch" {...register('name')} />
@@ -192,7 +192,7 @@ export default function BranchFormPage() {
         />
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="grid gap-6 xl:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="branch-address">Address *</Label>
           <Input id="branch-address" placeholder="123 Main Street, City" {...register('address')} />

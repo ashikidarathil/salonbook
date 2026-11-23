@@ -135,7 +135,7 @@ export default function BranchBreaksPage() {
       onSubmit={save}
     >
       <div className="flex flex-col gap-3 rounded-lg border border-dashed bg-muted/50 p-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="flex items-center gap-2 text-sm">
+        <p className="flex flex-wrap items-center gap-2 text-sm">
           <Clock className="size-4 text-primary" />
           <span className="font-medium">Total Duration:</span>
           <span
@@ -146,8 +146,7 @@ export default function BranchBreaksPage() {
         </p>
         <Button
           type="button"
-          size="sm"
-          className="gap-2"
+          className="h-10 gap-2"
           onClick={() =>
             setBreaks((current) => [
               ...current,
@@ -163,9 +162,9 @@ export default function BranchBreaksPage() {
       {breaks.length === 0 ? (
         <p className="py-8 text-center text-muted-foreground">No global breaks defined.</p>
       ) : (
-        <ul className="grid gap-3 lg:grid-cols-2">
+        <ul className="grid gap-3 xl:grid-cols-2">
           {breaks.map((item, index) => (
-            <li key={index} className="space-y-3 rounded-lg border p-3 sm:p-4">
+            <li key={index} className="min-w-0 space-y-3 rounded-2xl border p-4">
               <div className="flex items-end gap-2">
                 <div className="min-w-0 flex-1 space-y-2">
                   <Label htmlFor={`break-name-${index}`}>Description</Label>

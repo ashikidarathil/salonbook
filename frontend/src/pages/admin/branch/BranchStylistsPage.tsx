@@ -155,11 +155,11 @@ export default function BranchStylistsPage() {
     <div className="w-full space-y-6 theme-admin">
       <BranchPageHeader branchId={branchId} title="Manage Stylists" />
 
-      <div className="grid grid-cols-1 gap-8">
+      <div className="grid grid-cols-1 gap-6">
         {/* Available Stylists Section */}
-        <Card className="shadow-none border-border/60">
-          <CardHeader>
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <Card className="border-0 bg-transparent shadow-none sm:border sm:border-border/60 sm:bg-white">
+          <CardHeader className="p-0 sm:p-6">
+            <div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
               <div>
                 <CardTitle className="text-xl flex items-center gap-2 mb-2">
                   <Users className="w-5 h-5" />
@@ -171,11 +171,11 @@ export default function BranchStylistsPage() {
                 placeholder="Search available stylists..."
                 value={searchUnassigned}
                 onChange={(e) => handleSearchUnassignedChange(e.target.value)}
-                className="w-full md:max-w-xs"
+                className="h-10 w-full xl:max-w-xs"
               />
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0 pt-4 sm:p-6 sm:pt-0">
             <LoadingGate
               loading={loading}
               error={error}
@@ -192,11 +192,11 @@ export default function BranchStylistsPage() {
               }
               emptyIcon="hugeicons:user-group"
             >
-              <ul className="divide-y rounded-lg border lg:hidden">
+              <ul className="grid gap-3 lg:grid-cols-2 xl:hidden [&_a]:h-10 [&_button]:h-10">
                 {unassignedOptions.map((stylist) => (
                   <li
                     key={stylist.stylistId}
-                    className="flex items-center justify-between gap-3 p-4"
+                    className="flex min-w-0 items-center justify-between gap-3 rounded-2xl border bg-white p-4 shadow-sm"
                   >
                     <div className="min-w-0">
                       <p className="break-words font-medium">{stylist.name}</p>
@@ -205,8 +205,6 @@ export default function BranchStylistsPage() {
                       </p>
                     </div>
                     <Button
-                      variant="default"
-                      size="sm"
                       className="shrink-0"
                       onClick={() => handleAssignClick(stylist.stylistId, stylist.name)}
                     >
@@ -215,21 +213,21 @@ export default function BranchStylistsPage() {
                   </li>
                 ))}
               </ul>
-              <div className="hidden overflow-x-auto rounded-lg border lg:block">
-                <Table>
+              <div className="hidden overflow-hidden rounded-2xl border xl:block">
+                <Table className="table-fixed">
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
+                      <TableHead className="w-[30%]">Name</TableHead>
                       <TableHead>Specialization</TableHead>
-                      <TableHead>Experience</TableHead>
-                      <TableHead className="text-right">Action</TableHead>
+                      <TableHead className="w-[120px]">Experience</TableHead>
+                      <TableHead className="w-[130px] text-right">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {unassignedOptions.map((stylist) => (
                       <TableRow key={stylist.stylistId}>
-                        <TableCell className="font-medium">{stylist.name}</TableCell>
-                        <TableCell>{stylist.specialization}</TableCell>
+                        <TableCell className="truncate font-medium">{stylist.name}</TableCell>
+                        <TableCell className="truncate">{stylist.specialization}</TableCell>
                         <TableCell>{stylist.experience} yrs</TableCell>
                         <TableCell className="text-right">
                           <Button
@@ -264,9 +262,9 @@ export default function BranchStylistsPage() {
         </Card>
 
         {/* Assigned Stylists Section */}
-        <Card className="shadow-none border-border/60">
-          <CardHeader>
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <Card className="border-0 bg-transparent shadow-none sm:border sm:border-border/60 sm:bg-white">
+          <CardHeader className="p-0 sm:p-6">
+            <div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
               <div>
                 <CardTitle className="text-xl flex items-center gap-2 mb-2">
                   <Users className="w-5 h-5 text-primary" />
@@ -278,11 +276,11 @@ export default function BranchStylistsPage() {
                 placeholder="Search assigned stylists..."
                 value={searchAssigned}
                 onChange={(e) => handleSearchAssignedChange(e.target.value)}
-                className="w-full md:max-w-xs"
+                className="h-10 w-full xl:max-w-xs"
               />
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0 pt-4 sm:p-6 sm:pt-0">
             <LoadingGate
               loading={loading}
               error={error}
@@ -297,11 +295,11 @@ export default function BranchStylistsPage() {
               }
               emptyIcon="hugeicons:user-group"
             >
-              <ul className="divide-y rounded-lg border lg:hidden">
+              <ul className="grid gap-3 lg:grid-cols-2 xl:hidden [&_a]:h-10 [&_button]:h-10">
                 {assignedStylists.map((stylist) => (
                   <li
                     key={stylist.stylistId}
-                    className="flex items-center justify-between gap-3 p-4"
+                    className="flex min-w-0 items-center justify-between gap-3 rounded-2xl border bg-white p-4 shadow-sm"
                   >
                     <div className="min-w-0">
                       <p className="break-words font-medium">{stylist.name}</p>
@@ -310,9 +308,8 @@ export default function BranchStylistsPage() {
                       </p>
                     </div>
                     <Button
-                      variant="destructive"
-                      size="sm"
-                      className="shrink-0"
+                      variant="outline"
+                      className="shrink-0 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-600"
                       onClick={() => handleUnassignClick(stylist.stylistId, stylist.name)}
                     >
                       Unassign
@@ -320,26 +317,27 @@ export default function BranchStylistsPage() {
                   </li>
                 ))}
               </ul>
-              <div className="hidden overflow-x-auto rounded-lg border lg:block">
-                <Table>
+              <div className="hidden overflow-hidden rounded-2xl border xl:block">
+                <Table className="table-fixed">
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
+                      <TableHead className="w-[30%]">Name</TableHead>
                       <TableHead>Specialization</TableHead>
-                      <TableHead>Experience</TableHead>
-                      <TableHead className="text-right">Action</TableHead>
+                      <TableHead className="w-[120px]">Experience</TableHead>
+                      <TableHead className="w-[130px] text-right">Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {assignedStylists.map((stylist) => (
                       <TableRow key={stylist.stylistId}>
-                        <TableCell className="font-medium">{stylist.name}</TableCell>
-                        <TableCell>{stylist.specialization}</TableCell>
+                        <TableCell className="truncate font-medium">{stylist.name}</TableCell>
+                        <TableCell className="truncate">{stylist.specialization}</TableCell>
                         <TableCell>{stylist.experience} yrs</TableCell>
                         <TableCell className="text-right">
                           <Button
-                            variant="destructive"
+                            variant="outline"
                             size="sm"
+                            className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-600"
                             onClick={() => handleUnassignClick(stylist.stylistId, stylist.name)}
                           >
                             Unassign

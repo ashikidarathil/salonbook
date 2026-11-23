@@ -42,6 +42,7 @@ import { LoadingGate } from '@/components/common/LoadingGate';
 import { clearError } from '@/features/branchService/branchService.slice';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Scissors } from 'lucide-react';
+import { BranchStatusBadge } from '@/components/branch/BranchStatusBadge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 const ITEMS_PER_PAGE = 5;
@@ -185,8 +186,8 @@ export default function BranchServicesPage() {
     <div className="w-full space-y-6 theme-admin">
       <BranchPageHeader branchId={branchId} title="Manage Services" />
 
-      <Card className="shadow-none border-border/60">
-        <CardHeader>
+      <Card className="border-0 bg-transparent shadow-none sm:border sm:border-border/60 sm:bg-white">
+        <CardHeader className="p-0 sm:p-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="flex-1 space-y-4">
               <CardTitle className="text-xl flex items-center gap-2">
@@ -197,11 +198,12 @@ export default function BranchServicesPage() {
                 Update price, duration, and status for services at this branch.
               </CardDescription>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="space-y-2 sm:col-span-2 xl:col-span-1">
                   <Label htmlFor="search-services">Search</Label>
                   <Input
                     id="search-services"
+                    className="h-10"
                     placeholder="Search services..."
                     value={search}
                     onChange={(e) => handleSearchChange(e.target.value)}
@@ -210,7 +212,7 @@ export default function BranchServicesPage() {
                 <div className="space-y-2">
                   <Label htmlFor="filter-configured">Configuration</Label>
                   <Select value={filterConfigured} onValueChange={handleConfiguredFilterChange}>
-                    <SelectTrigger id="filter-configured">
+                    <SelectTrigger id="filter-configured" className="h-10">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
@@ -223,7 +225,7 @@ export default function BranchServicesPage() {
                 <div className="space-y-2">
                   <Label htmlFor="filter-active">Status</Label>
                   <Select value={filterActive} onValueChange={handleActiveFilterChange}>
-                    <SelectTrigger id="filter-active">
+                    <SelectTrigger id="filter-active" className="h-10">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-white">
@@ -237,7 +239,7 @@ export default function BranchServicesPage() {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0 pt-4 sm:p-6 sm:pt-0">
           <LoadingGate
             loading={loading}
             error={error}
@@ -253,7 +255,7 @@ export default function BranchServicesPage() {
             }
             emptyIcon="hugeicons:service"
           >
-            <ul className="divide-y rounded-lg border lg:hidden">
+            <ul className="grid gap-3 lg:grid-cols-2 xl:hidden [&_a]:h-10 [&_button]:h-10">
               {services.map((svc) => {
                 const isEditing = editingService?.serviceId === svc.serviceId;
                 const cleanNumber = (value: string) =>
@@ -261,7 +263,10 @@ export default function BranchServicesPage() {
                     ? value.substring(1)
                     : value;
                 return (
-                  <li key={svc.serviceId} className="space-y-3 p-4">
+                  <li
+                    key={svc.serviceId}
+                    className="flex min-w-0 flex-col gap-3 rounded-2xl border bg-white p-4 shadow-sm"
+                  >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="break-words font-medium">{svc.name}</p>
@@ -275,12 +280,7 @@ export default function BranchServicesPage() {
                           Not Configured
                         </Badge>
                       ) : (
-                        <Badge
-                          variant={svc.isActive ? 'default' : 'destructive'}
-                          className="shrink-0"
-                        >
-                          {svc.isActive ? 'Active' : 'Disabled'}
-                        </Badge>
+                        <BranchStatusBadge active={svc.isActive} />
                       )}
                     </div>
                     {isEditing ? (
@@ -314,7 +314,7 @@ export default function BranchServicesPage() {
                         {svc.duration === null ? '—' : `${svc.duration} min`}
                       </p>
                     )}
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="mt-auto grid grid-cols-2 gap-2">
                       {isEditing ? (
                         <>
                           <Button size="sm" onClick={() => handleSaveEdit(svc.serviceId, svc.name)}>
@@ -334,8 +334,12 @@ export default function BranchServicesPage() {
                             {svc.configured ? 'Edit' : 'Configure'}
                           </Button>
                           <Button
-                            variant={svc.isActive ? 'destructive' : 'default'}
-                            size="sm"
+                            variant={svc.isActive ? 'outline' : 'default'}
+                            className={
+                              svc.isActive
+                                ? 'border-red-200 text-red-600 hover:bg-red-50 hover:text-red-600'
+                                : undefined
+                            }
                             disabled={!svc.configured}
                             onClick={() =>
                               handleToggleClick(
@@ -356,23 +360,25 @@ export default function BranchServicesPage() {
                 );
               })}
             </ul>
-            <div className="hidden overflow-x-auto rounded-lg border lg:block">
-              <Table>
+            <div className="hidden overflow-hidden rounded-2xl border xl:block">
+              <Table className="table-fixed">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Service Name</TableHead>
+                    <TableHead className="w-[22%]">Service Name</TableHead>
                     <TableHead>Category</TableHead>
-                    <TableHead>Price (₹)</TableHead>
-                    <TableHead>Duration (min)</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="w-[100px]">Price (₹)</TableHead>
+                    <TableHead className="w-[125px] whitespace-nowrap">Duration (min)</TableHead>
+                    <TableHead className="w-[125px]">Status</TableHead>
+                    <TableHead className="w-[190px] text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {services.map((svc) => (
                     <TableRow key={svc.serviceId}>
-                      <TableCell className="font-medium">{svc.name}</TableCell>
-                      <TableCell>{svc.categoryName || '—'}</TableCell>
+                      <TableCell className="truncate font-medium" title={svc.name}>
+                        {svc.name}
+                      </TableCell>
+                      <TableCell className="truncate">{svc.categoryName || '—'}</TableCell>
                       <TableCell>
                         {editingService?.serviceId === svc.serviceId ? (
                           <Input
@@ -385,7 +391,7 @@ export default function BranchServicesPage() {
                               }
                               setEditPrice(val);
                             }}
-                            className="w-24 h-8"
+                            className="h-8 w-full"
                             min="0"
                             step="0.01"
                           />
@@ -407,7 +413,7 @@ export default function BranchServicesPage() {
                               }
                               setEditDuration(val);
                             }}
-                            className="w-24 h-8"
+                            className="h-8 w-full"
                             min="1"
                           />
                         ) : svc.duration === null ? (
@@ -425,12 +431,7 @@ export default function BranchServicesPage() {
                             Not Configured
                           </Badge>
                         ) : (
-                          <Badge
-                            variant={svc.isActive ? 'default' : 'destructive'}
-                            className="px-3"
-                          >
-                            {svc.isActive ? 'Active' : 'Disabled'}
-                          </Badge>
+                          <BranchStatusBadge active={svc.isActive} />
                         )}
                       </TableCell>
                       <TableCell className="space-x-2 text-right whitespace-nowrap">
@@ -456,8 +457,13 @@ export default function BranchServicesPage() {
                               {svc.configured ? 'Edit' : 'Configure'}
                             </Button>
                             <Button
-                              variant={svc.isActive ? 'destructive' : 'default'}
+                              variant={svc.isActive ? 'outline' : 'default'}
                               size="sm"
+                              className={
+                                svc.isActive
+                                  ? 'border-red-200 text-red-600 hover:bg-red-50 hover:text-red-600'
+                                  : undefined
+                              }
                               disabled={!svc.configured}
                               onClick={() =>
                                 handleToggleClick(
@@ -481,7 +487,7 @@ export default function BranchServicesPage() {
             </div>
 
             {pagination.totalPages > 1 && (
-              <div className="pt-6 flex justify-center">
+              <div className="flex justify-center pt-4">
                 <Pagination
                   currentPage={pagination.currentPage}
                   totalPages={pagination.totalPages}
