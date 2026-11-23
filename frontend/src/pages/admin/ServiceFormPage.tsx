@@ -240,7 +240,7 @@ export default function ServiceFormPage() {
         isSubmitting={isSubmitting}
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
+        <div className="grid gap-6 xl:grid-cols-2 xl:gap-8">
           <div className="min-w-0 space-y-6">
             <div className="space-y-2">
               <Label htmlFor="service-name">Service Name *</Label>
@@ -293,7 +293,7 @@ export default function ServiceFormPage() {
             </div>
           </div>
           <div className="min-w-0 space-y-6">
-            <div className="space-y-3 border-t pt-6 lg:border-t-0 lg:pt-0">
+            <div className="space-y-3 border-t pt-6 xl:border-t-0 xl:pt-0">
               <div>
                 <Label htmlFor="service-included" className="text-base font-semibold">
                   What's Included (optional)
@@ -317,7 +317,7 @@ export default function ServiceFormPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="shrink-0 gap-2"
+                  className="h-10 shrink-0 gap-2"
                   disabled={whatIncluded.length >= MAX_INCLUDED}
                   onClick={addIncluded}
                 >
@@ -377,7 +377,7 @@ export default function ServiceFormPage() {
                   className="hidden"
                   onChange={onPickImage}
                 />
-                <div className="flex flex-col gap-2 sm:flex-row">
+                <div className="grid gap-2 sm:grid-cols-2 [&>button]:h-10">
                   {pendingFile ? (
                     <>
                       <Button type="button" disabled={imageLoading} onClick={uploadPhoto}>

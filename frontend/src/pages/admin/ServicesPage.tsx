@@ -10,7 +10,6 @@ import {
   softDeleteService,
   restoreService,
 } from '@/features/service/serviceThunks';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -22,7 +21,6 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import Pagination from '@/components/pagination/Pagination';
 import { ERROR_MESSAGES } from '@/common/constants/error.messages';
 import {
@@ -34,7 +32,7 @@ import {
 } from '@/common/utils/swal.utils';
 import { fetchCategories } from '@/features/category/categoryThunks';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Trash2, Edit, Power, Ban, RotateCcw, ImagePlus, Eye } from 'lucide-react';
+import { Trash2, Edit, Power, Ban, RotateCcw, ImagePlus, Eye, Search } from 'lucide-react';
 
 import { LoadingGate } from '@/components/common/LoadingGate';
 import { clearError } from '@/features/service/service.slice';
@@ -173,12 +171,17 @@ export default function ServicesPage() {
   };
 
   const getStatusBadge = (status: 'ACTIVE' | 'INACTIVE', isDeleted: boolean) => {
-    if (isDeleted) {
-      return <Badge className="bg-yellow-500 text-white">DELETED</Badge>;
-    }
+    if (isDeleted) return <Badge variant="destructive">Deleted</Badge>;
     return (
-      <Badge className={status === 'ACTIVE' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}>
-        {status}
+      <Badge
+        variant="outline"
+        className={
+          status === 'ACTIVE'
+            ? 'border-green-200 bg-green-50 text-green-700'
+            : 'border-red-200 bg-red-50 text-red-700'
+        }
+      >
+        {status === 'ACTIVE' ? 'Active' : 'Inactive'}
       </Badge>
     );
   };
@@ -197,75 +200,46 @@ export default function ServicesPage() {
         description="Manage services with search, filters, and detailed information"
         breadcrumbs={[{ label: 'Services' }]}
         actions={
-          <Button asChild className="w-full sm:w-auto">
+          <Button asChild className="h-10 w-full sm:w-auto">
             <Link to="new">Add New Service</Link>
           </Button>
         }
       />
 
-      {/* Search & Filters - UPDATED WITH DROPDOWNS */}
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-end gap-4">
-          {/* Search Input */}
-          <div className="w-full flex-1 sm:min-w-[200px]">
-            <Label htmlFor="search" className="block mb-2 text-sm font-medium">
-              Search
-            </Label>
-            <Input
-              id="search"
-              placeholder="Search by name or description..."
-              value={searchTerm}
-              onChange={(e) => list.update({ q: e.target.value })}
-            />
-          </div>
-
-          {/* Category Filter Dropdown */}
-          <div className="w-full sm:w-auto sm:min-w-[180px]">
-            <Label htmlFor="category-filter" className="block mb-2 text-sm font-medium">
-              Category
-            </Label>
-            <div className="relative">
-              <Select
-                value={categoryFilter}
-                onValueChange={(value) => list.update({ category: value })}
-              >
-                <SelectTrigger id="category-filter">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent className="bg-white">
-                  <SelectItem value="ALL">All Categories</SelectItem>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {capitalizeFirst(cat.name)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Status Filter Dropdown */}
-          <div className="w-full sm:w-auto sm:min-w-[150px]">
-            <Label htmlFor="status-filter" className="block mb-2 text-sm font-medium">
-              Status
-            </Label>
-            <div className="relative">
-              <Select
-                value={statusFilter}
-                onValueChange={(value) => list.update({ status: value })}
-              >
-                <SelectTrigger id="status-filter">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent className="bg-white">
-                  <SelectItem value="ALL">All Status</SelectItem>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="INACTIVE">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+      <div className="grid gap-3 sm:grid-cols-2 xl:flex">
+        <div className="relative min-w-0 sm:col-span-2 xl:max-w-md xl:flex-1">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            aria-label="Search services"
+            className="h-10 pl-9"
+            placeholder="Search services..."
+            value={searchTerm}
+            onChange={(e) => list.update({ q: e.target.value })}
+          />
         </div>
+        <Select value={categoryFilter} onValueChange={(value) => list.update({ category: value })}>
+          <SelectTrigger aria-label="Filter by category" className="h-10 min-w-0 xl:w-52">
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent className="bg-white">
+            <SelectItem value="ALL">All Categories</SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat.id} value={cat.id}>
+                {capitalizeFirst(cat.name)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={statusFilter} onValueChange={(value) => list.update({ status: value })}>
+          <SelectTrigger aria-label="Filter by status" className="h-10 min-w-0 xl:w-40">
+            <SelectValue placeholder="Select status" />
+          </SelectTrigger>
+          <SelectContent className="bg-white">
+            <SelectItem value="ALL">All Status</SelectItem>
+            <SelectItem value="ACTIVE">Active</SelectItem>
+            <SelectItem value="INACTIVE">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <LoadingGate
@@ -279,85 +253,96 @@ export default function ServicesPage() {
         emptyMessage={searchTerm ? 'No matches for your search' : 'Add your first service above'}
         emptyIcon="hugeicons:service"
       >
-        {/* Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>All Services ({pagination.totalItems})</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <ul className="divide-y lg:hidden">
-              {services.map((svc) => (
-                <li key={svc.id} className={`space-y-3 p-4 ${svc.isDeleted ? 'bg-red-50/40' : ''}`}>
-                  <div className="flex items-start gap-3">
-                    {svc.imageUrl ? (
-                      <img
-                        src={svc.imageUrl}
-                        alt=""
-                        className="size-14 shrink-0 rounded-md object-cover"
-                      />
-                    ) : (
-                      <div className="flex size-14 shrink-0 items-center justify-center rounded-md bg-muted">
-                        <ImagePlus className="size-5 text-muted-foreground" />
-                      </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <p className="break-words font-medium">{capitalizeFirst(svc.name)}</p>
-                      <p className="mt-0.5 text-sm text-muted-foreground">
-                        {capitalizeFirst(getCategoryName(svc.categoryId))}
-                        {' · '}
-                        {svc.whatIncluded?.length ?? 0} included
-                      </p>
-                    </div>
-                    <div className="shrink-0">{getStatusBadge(svc.status, svc.isDeleted)}</div>
-                  </div>
-                  {svc.isDeleted ? (
-                    <Button
-                      size="sm"
-                      className="w-full bg-green-600 text-white hover:bg-green-700"
-                      onClick={() => handleRestore(svc.id)}
-                    >
-                      <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-                      Restore
-                    </Button>
-                  ) : (
-                    <div className="grid grid-cols-3 gap-2">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link to={`${svc.id}/edit`} state={{ from: location.search }}>
-                          <Edit className="mr-1 h-3.5 w-3.5" />
-                          Edit
-                        </Link>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleToggleStatus(svc.id, svc.status)}
-                      >
-                        {svc.status === 'ACTIVE' ? 'Disable' : 'Enable'}
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="bg-red-600 text-white hover:bg-red-700"
-                        onClick={() => handleSoftDelete(svc.id)}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold">
+            All Services <span className="text-muted-foreground">({pagination.totalItems})</span>
+          </h2>
 
-            <div className="hidden overflow-x-auto lg:block">
-              <Table>
+          {/* Phones, tablets and small laptops */}
+          <ul className="grid gap-3 lg:grid-cols-2 xl:hidden">
+            {services.map((svc) => (
+              <li
+                key={svc.id}
+                className="flex min-w-0 flex-col gap-4 rounded-2xl border bg-white p-4 shadow-sm"
+              >
+                <div className="flex items-start gap-3">
+                  {svc.imageUrl ? (
+                    <img
+                      src={svc.imageUrl}
+                      alt=""
+                      className="size-16 shrink-0 rounded-xl object-cover"
+                    />
+                  ) : (
+                    <Link
+                      to={`${svc.id}/edit#photo`}
+                      state={{ from: location.search }}
+                      aria-label={`Add photo to ${svc.name}`}
+                      className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-muted"
+                    >
+                      <ImagePlus className="size-5 text-muted-foreground" />
+                    </Link>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="min-w-0 break-words font-semibold">
+                        {capitalizeFirst(svc.name)}
+                      </p>
+                      <div className="shrink-0">{getStatusBadge(svc.status, svc.isDeleted)}</div>
+                    </div>
+                    <p className="mt-1 break-words text-sm text-muted-foreground">
+                      {capitalizeFirst(getCategoryName(svc.categoryId))}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {svc.whatIncluded?.length ?? 0} included
+                    </p>
+                  </div>
+                </div>
+                {svc.isDeleted ? (
+                  <Button
+                    variant="outline"
+                    className="mt-auto h-10 w-full border-green-200 text-green-700 hover:bg-green-50 hover:text-green-700"
+                    onClick={() => handleRestore(svc.id)}
+                  >
+                    <RotateCcw className="mr-1.5 size-3.5" />
+                    Restore
+                  </Button>
+                ) : (
+                  <div className="mt-auto grid grid-cols-3 gap-2">
+                    <Button variant="outline" className="h-10 min-w-0 px-2" asChild>
+                      <Link to={`${svc.id}/edit`} state={{ from: location.search }}>
+                        Edit
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="h-10 min-w-0 px-2"
+                      onClick={() => handleToggleStatus(svc.id, svc.status)}
+                    >
+                      {svc.status === 'ACTIVE' ? 'Disable' : 'Enable'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="h-10 min-w-0 border-red-200 px-2 text-red-600 hover:bg-red-50 hover:text-red-600"
+                      onClick={() => handleSoftDelete(svc.id)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+
+            <div className="hidden overflow-hidden rounded-2xl border bg-white shadow-sm xl:block">
+              <Table className="table-fixed">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Image</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Category</TableHead>
+                    <TableHead className="w-[76px] pl-4">Image</TableHead>
+                    <TableHead className="w-[24%]">Name</TableHead>
+                    <TableHead className="w-[15%]">Category</TableHead>
                     <TableHead>What's Included</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Deleted</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="w-[100px]">Status</TableHead>
+                    <TableHead className="w-[240px] pr-4 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -366,7 +351,7 @@ export default function ServicesPage() {
                       key={svc.id}
                       className={svc.isDeleted ? 'bg-red-50/40 opacity-80' : ''}
                     >
-                      <TableCell>
+                      <TableCell className="pl-4">
                         {svc.imageUrl ? (
                           <div className="relative group">
                             <img
@@ -422,10 +407,10 @@ export default function ServicesPage() {
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="font-medium">
-                        {svc.name.charAt(0).toUpperCase() + svc.name.slice(1).toLowerCase()}
+                      <TableCell className="truncate font-medium" title={svc.name}>
+                        {capitalizeFirst(svc.name)}
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell className="truncate text-sm">
                         {capitalizeFirst(getCategoryName(svc.categoryId))}
                       </TableCell>
                       <TableCell className="text-sm">
@@ -433,9 +418,9 @@ export default function ServicesPage() {
                           <div className="space-y-2">
                             {/* Show first 2 items only */}
                             {svc.whatIncluded.slice(0, 2).map((item, idx) => (
-                              <div key={idx} className="flex items-start gap-1">
+                              <div key={idx} className="flex min-w-0 items-start gap-1">
                                 <span className="text-gray-400">•</span>
-                                <span className="text-xs truncate">{item.split(':')[0]}</span>
+                                <span className="min-w-0 truncate text-xs">{item.split(':')[0]}</span>
                               </div>
                             ))}
                             {/* Show More Button */}
@@ -458,14 +443,7 @@ export default function ServicesPage() {
                         )}
                       </TableCell>
                       <TableCell>{getStatusBadge(svc.status, svc.isDeleted)}</TableCell>
-                      <TableCell>
-                        {svc.isDeleted ? (
-                          <Badge variant="destructive">Yes</Badge>
-                        ) : (
-                          <Badge variant="outline">No</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right whitespace-nowrap">
+                      <TableCell className="whitespace-nowrap pr-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           {!svc.isDeleted && (
                             <TooltipProvider>
@@ -509,6 +487,7 @@ export default function ServicesPage() {
                                     variant="ghost"
                                     size="icon"
                                     className="w-8 h-8"
+                                    aria-label={`${svc.status === 'ACTIVE' ? 'Deactivate' : 'Activate'} ${svc.name}`}
                                     onClick={() => handleToggleStatus(svc.id, svc.status)}
                                   >
                                     {svc.status === 'ACTIVE' ? (
@@ -527,9 +506,8 @@ export default function ServicesPage() {
 
                           {svc.isDeleted ? (
                             <Button
-                              variant="default"
-                              size="sm"
-                              className="ml-2 text-white bg-green-600 hover:bg-green-700"
+                              variant="outline"
+                              className="ml-1 h-9 border-green-200 text-green-700 hover:bg-green-50 hover:text-green-700"
                               onClick={() => handleRestore(svc.id)}
                             >
                               <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
@@ -537,12 +515,11 @@ export default function ServicesPage() {
                             </Button>
                           ) : (
                             <Button
-                              variant="destructive"
-                              size="sm"
-                              className="ml-2 text-white bg-red-600 hover:bg-red-700"
+                              variant="outline"
+                              className="ml-1 h-9 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-600"
                               onClick={() => handleSoftDelete(svc.id)}
                             >
-                              <Ban className="mr-1.5 h-3.5 w-3.5" />
+                              <Trash2 className="mr-1.5 h-3.5 w-3.5" />
                               Delete
                             </Button>
                           )}
@@ -554,15 +531,13 @@ export default function ServicesPage() {
               </Table>
             </div>
 
-            <div className="p-4 border-t">
-              <Pagination
-                currentPage={pagination.currentPage}
-                totalPages={pagination.totalPages}
-                onPageChange={(page) => list.update({}, page)}
-              />
-            </div>
-          </CardContent>
-        </Card>
+          <Pagination
+            className="mt-2"
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            onPageChange={(page) => list.update({}, page)}
+          />
+        </div>
       </LoadingGate>
     </div>
   );
