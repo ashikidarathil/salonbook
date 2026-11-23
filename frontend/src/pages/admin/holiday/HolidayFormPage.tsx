@@ -80,7 +80,7 @@ export default function HolidayFormPage() {
       isSubmitting={isSubmitting}
       onSubmit={handleSubmit(onSubmit)}
     >
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="grid gap-6 xl:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="holiday-name">Holiday Name *</Label>
           <Input id="holiday-name" placeholder="e.g., Independence Day" {...register('name')} />
@@ -109,7 +109,7 @@ export default function HolidayFormPage() {
             name="branchIds"
             control={control}
             render={({ field }) => (
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
                 {branches.map((branch) => (
                   <label
                     key={branch.id}
