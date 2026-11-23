@@ -102,36 +102,40 @@ export default function AdminBookingDetailPage() {
     >
       <div className="w-full space-y-6 text-foreground">
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+        <div className="flex items-start gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Go back"
+            className="-ml-2 shrink-0"
+            onClick={() => navigate(-1)}
+          >
             <Icon icon="solar:arrow-left-linear" className="size-5" />
           </Button>
-          <div>
+          <div className="min-w-0 flex-1">
             <h1 className="break-words text-2xl font-bold sm:text-3xl">Manage Booking</h1>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>#{b?.bookingNumber}</span>
-              <span>·</span>
-              <span>Customer: {b?.userName}</span>
-            </div>
+            <p className="mt-1 break-words text-sm text-muted-foreground">
+              #{b?.bookingNumber} · {b?.userName}
+            </p>
           </div>
-          <div className="flex items-center gap-3 ml-auto">
-            <Badge className={getStatusColor(b?.status as BookingStatus)}>
-              {b?.status.replace('_', ' ')}
-            </Badge>
-          </div>
+          <Badge
+            className={`mt-1 max-w-[40%] shrink-0 whitespace-normal text-center text-[10px] leading-tight ${getStatusColor(b?.status as BookingStatus)}`}
+          >
+            {b?.status.replace(/_/g, ' ')}
+          </Badge>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-3">
           {/* Main Details */}
-          <div className="space-y-6 xl:col-span-2">
+          <div className="min-w-0 space-y-4 sm:space-y-6 xl:col-span-2">
             <Card>
-              <CardHeader>
+              <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="flex items-center gap-2 text-sm font-medium">
                   <Icon icon="solar:clipboard-list-bold-duotone" className="size-5 text-primary" />
                   Appointment Info
                 </CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-4">
+              <CardContent className="grid grid-cols-2 gap-4 p-4 pt-0 sm:p-6 sm:pt-0">
                 <div>
                   <p className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-1">
                     Date
@@ -152,7 +156,7 @@ export default function AdminBookingDetailPage() {
                   <p className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground mb-3">
                     Financial Breakdown
                   </p>
-                  <div className="space-y-2 bg-muted/30 p-4 rounded-xl border border-border/50">
+                  <div className="space-y-2 rounded-xl border border-border/50 bg-muted/30 p-3 sm:p-4">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Service Amount</span>
                       <span className="font-semibold">
@@ -183,26 +187,28 @@ export default function AdminBookingDetailPage() {
             </Card>
 
             <Card>
-              <CardHeader>
+              <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="flex items-center gap-2 text-sm font-medium">
                   <Icon icon="solar:scissors-square-bold-duotone" className="size-5 text-primary" />
                   Services & Stylists
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3 p-4 pt-0 sm:p-6 sm:pt-0">
                 {b?.items.map((item, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-3 border rounded-lg bg-muted/30"
+                    className="flex items-center justify-between gap-3 rounded-lg border bg-muted/30 p-3"
                   >
-                    <div>
-                      <p className="font-medium">{item.serviceName || 'Service'}</p>
-                      <p className="text-xs text-muted-foreground">Stylist: {item.stylistName}</p>
+                    <div className="min-w-0">
+                      <p className="break-words font-medium">{item.serviceName || 'Service'}</p>
+                      <p className="break-words text-xs text-muted-foreground">
+                        Stylist: {item.stylistName}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {item.startTime} - {item.endTime}
                       </p>
                     </div>
-                    <div className="text-right">
+                    <div className="shrink-0 text-right">
                       <p className="font-semibold">₹{item.price.toLocaleString('en-IN')}</p>
                       <p className="text-xs text-muted-foreground">{item.duration} min</p>
                     </div>
@@ -213,49 +219,53 @@ export default function AdminBookingDetailPage() {
           </div>
 
           {/* Sidebar Actions */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-2">
-                {b?.status === BookingStatus.CONFIRMED && (
-                  <Button
-                    className="w-full bg-purple-600 hover:bg-purple-700"
-                    onClick={() => handleStatusUpdate(BookingStatus.COMPLETED, 'Completed')}
-                  >
-                    <Icon icon="solar:check-circle-linear" className="mr-2" /> Mark Completed
-                  </Button>
-                )}
-                {b?.status === BookingStatus.CONFIRMED && (
-                  <>
+          <div className="grid min-w-0 content-start gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-1">
+            {b?.status === BookingStatus.CONFIRMED && (
+              <Card>
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-2 p-4 pt-0 sm:p-6 sm:pt-0">
+                  {b?.status === BookingStatus.CONFIRMED && (
                     <Button
-                      variant="outline"
-                      className="w-full text-gray-600"
-                      onClick={() => handleStatusUpdate(BookingStatus.NO_SHOW, 'No Show')}
+                      className="w-full bg-purple-600 hover:bg-purple-700"
+                      onClick={() => handleStatusUpdate(BookingStatus.COMPLETED, 'Completed')}
                     >
-                      <Icon icon="solar:ghost-linear" className="mr-2" /> Mark No Show
+                      <Icon icon="solar:check-circle-linear" className="mr-2" /> Mark Completed
                     </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full text-red-600 hover:bg-red-50"
-                      onClick={handleCancel}
-                    >
-                      <Icon icon="solar:close-circle-linear" className="mr-2" /> Cancel Booking
-                    </Button>
-                  </>
-                )}
-              </CardContent>
-            </Card>
+                  )}
+                  {b?.status === BookingStatus.CONFIRMED && (
+                    <>
+                      <Button
+                        variant="outline"
+                        className="w-full text-gray-600"
+                        onClick={() => handleStatusUpdate(BookingStatus.NO_SHOW, 'No Show')}
+                      >
+                        <Icon icon="solar:ghost-linear" className="mr-2" /> Mark No Show
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full text-red-600 hover:bg-red-50"
+                        onClick={handleCancel}
+                      >
+                        <Icon icon="solar:close-circle-linear" className="mr-2" /> Cancel Booking
+                      </Button>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             <Card>
-              <CardHeader>
+              <CardHeader className="p-4 sm:p-6">
                 <CardTitle className="text-sm font-medium">Meta Info</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <div className="flex justify-between">
+              <CardContent className="space-y-3 p-4 pt-0 text-sm sm:p-6 sm:pt-0">
+                <div className="flex items-center justify-between gap-2">
                   <span className="text-muted-foreground">Payment</span>
-                  <Badge variant="outline">{b?.paymentStatus}</Badge>
+                  <Badge variant="outline" className="whitespace-normal text-right text-[10px]">
+                    {b?.paymentStatus.replace(/_/g, ' ')}
+                  </Badge>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Rescheduled</span>
@@ -265,7 +275,7 @@ export default function AdminBookingDetailPage() {
                   <div className="pt-2 border-t">
                     <p className="text-xs font-semibold text-muted-foreground">CANCELLED DETAILS</p>
                     <p className="mt-1 text-xs text-red-600">By: {b.cancelledBy}</p>
-                    <p className="pb-1 mt-1 text-xs italic text-muted-foreground">
+                    <p className="mt-1 break-words pb-1 text-xs italic text-muted-foreground">
                       "{b.cancelledReason}"
                     </p>
                     <p className="text-[10px] text-muted-foreground">

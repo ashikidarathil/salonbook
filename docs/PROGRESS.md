@@ -136,3 +136,5 @@
   state, and layouts for phone, tablet and laptop. Checked with empty and large data at nine widths (91 checks).
 - 2026-11-23 — Admin responsive pass, shared fix: page-level card and button styles now override the defaults, so
   smaller phone padding works everywhere. Checked 60 admin, stylist and customer pages at phone, tablet and laptop.
+- 2026-11-23 — Admin responsive pass, Bookings: compact booking cards, tidy filters, side-by-side phone actions and a
+  responsive details page.

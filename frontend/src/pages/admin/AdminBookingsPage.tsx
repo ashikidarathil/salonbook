@@ -25,6 +25,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+const money = (value: number) => `₹${value.toLocaleString('en-IN')}`;
+const statusLabel = (status: string) => status.replace(/_/g, ' ');
+
 export default function AdminBookingsPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -89,14 +92,17 @@ export default function AdminBookingsPage() {
         description="Monitor and manage all salon appointments"
         breadcrumbs={[{ label: 'Bookings' }]}
       />
-      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end lg:max-w-2xl">
-        <div className="flex min-w-0 flex-col gap-1.5">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 rounded-xl border bg-card p-3 shadow-sm sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end sm:p-4">
+        <div className="col-span-2 flex min-w-0 flex-col gap-1.5 sm:col-span-1">
           <span className="ml-1 text-xs font-bold uppercase text-muted-foreground">Branch</span>
           <Select
             value={selectedBranch}
             onValueChange={(value) => list.update({ branch: value === 'all' ? undefined : value })}
           >
-            <SelectTrigger aria-label="Filter by branch" className="border-border/60 bg-background">
+            <SelectTrigger
+              aria-label="Filter by branch"
+              className="h-10 border-border/60 bg-background"
+            >
               <SelectValue placeholder="All Branches" />
             </SelectTrigger>
             <SelectContent>
@@ -121,7 +127,7 @@ export default function AdminBookingsPage() {
         </div>
         <Button
           variant="outline"
-          className="h-10"
+          className="h-10 self-end"
           aria-label="Refresh bookings"
           onClick={() =>
             dispatch(
@@ -142,134 +148,123 @@ export default function AdminBookingsPage() {
         data={bookings}
         emptyMessage="No bookings found for the selected criteria."
       >
-        <div className="grid gap-4">
+        <div className="grid gap-4 2xl:grid-cols-2">
           {bookings.map((booking) => (
-            <Card
-              key={booking.id}
-              className="overflow-hidden transition-all border-border/60 hover:shadow-md"
-            >
-              <div className="flex flex-col lg:flex-row">
-                <div className="min-w-0 flex-1 p-4 sm:p-6">
-                  <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="space-y-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Icon icon="solar:hashtag-bold" className="size-4 text-primary" />
-                        <span className="text-lg font-bold">{booking.bookingNumber}</span>
-                        <Badge className={getStatusColor(booking.status)}>
-                          {booking.status === BookingStatus.SPECIAL ? 'Special' : booking.status}
-                        </Badge>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                        <div className="relative flex items-center gap-1 group">
-                          <Icon icon="solar:user-bold" className="size-3.5 text-blue-500" />
-                          <span className="font-medium text-foreground">
-                            {booking.userName || `User ${booking.userId.slice(-6)}`}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Icon icon="solar:buildings-bold" className="size-3" />
-                          <span>
-                            Branch:{' '}
-                            {branches.find((b) => b.id === booking.branchId)?.name || 'Unknown'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="sm:text-right">
-                      <p className="text-xs font-bold tracking-wider uppercase text-muted-foreground">
-                        Appointment Time
+            <Card key={booking.id} className="min-w-0 overflow-hidden border-border/60 shadow-sm">
+              <div className="flex h-full flex-col lg:flex-row">
+                <div className="min-w-0 flex-1 space-y-3 p-4 sm:p-5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="break-all text-base font-bold sm:text-lg">
+                        #{booking.bookingNumber}
                       </p>
-                      <p className="text-lg font-bold">
-                        {booking.startTime} - {booking.endTime}
+                      <p className="mt-0.5 break-words text-sm font-medium">
+                        {booking.userName || `User ${booking.userId.slice(-6)}`}
                       </p>
                     </div>
+                    <Badge
+                      className={`max-w-[55%] shrink-0 whitespace-normal text-center text-[10px] leading-tight ${getStatusColor(booking.status)}`}
+                    >
+                      {statusLabel(booking.status)}
+                    </Badge>
                   </div>
 
-                  <div className="space-y-3">
-                    {booking.items.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between p-3 border rounded-lg bg-muted/30 border-border/40"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center justify-center rounded-lg size-8 bg-primary/10">
-                            <Icon
-                              icon="solar:scissors-square-bold"
-                              className="size-4 text-primary"
-                            />
-                          </div>
-                          <div>
-                            <p className="text-sm font-semibold">{item.serviceName}</p>
-                            <p className="text-xs text-muted-foreground">
-                              Stylist: {item.stylistName}
-                            </p>
-                          </div>
-                        </div>
-                        <p className="text-sm font-bold">₹{item.price}</p>
-                      </div>
-                    ))}
+                  <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                    <span className="inline-flex min-w-0 items-center gap-1 rounded-md bg-muted/50 px-2 py-1">
+                      <Icon
+                        icon="solar:clock-circle-bold"
+                        className="size-3.5 shrink-0 text-primary"
+                      />
+                      <span className="font-semibold text-foreground">
+                        {booking.startTime} - {booking.endTime}
+                      </span>
+                    </span>
+                    <span className="inline-flex min-w-0 items-center gap-1 rounded-md bg-muted/50 px-2 py-1">
+                      <Icon icon="solar:buildings-bold" className="size-3.5 shrink-0" />
+                      <span className="break-words">
+                        {branches.find((b) => b.id === booking.branchId)?.name || 'Unknown'}
+                      </span>
+                    </span>
                   </div>
+
+                  <ul className="divide-y rounded-lg border border-border/40 bg-muted/20">
+                    {booking.items.map((item, idx) => (
+                      <li key={idx} className="flex items-center justify-between gap-3 p-3">
+                        <div className="min-w-0">
+                          <p className="break-words text-sm font-semibold">{item.serviceName}</p>
+                          <p className="break-words text-xs text-muted-foreground">
+                            {item.stylistName}
+                          </p>
+                        </div>
+                        <p className="shrink-0 text-sm font-bold">{money(item.price)}</p>
+                      </li>
+                    ))}
+                  </ul>
 
                   {booking.notes && (
-                    <div className="p-3 mt-4 border border-yellow-100 rounded-lg bg-yellow-50/50">
-                      <p className="text-[10px] font-bold uppercase text-yellow-700 mb-1">
+                    <div className="rounded-lg border border-yellow-100 bg-yellow-50/50 p-3">
+                      <p className="mb-1 text-[10px] font-bold uppercase text-yellow-700">
                         Customer Notes
                       </p>
-                      <p className="text-sm text-yellow-800">{booking.notes}</p>
+                      <p className="break-words text-sm text-yellow-800">{booking.notes}</p>
                     </div>
                   )}
                 </div>
 
-                <div className="flex flex-col justify-between gap-4 border-t bg-muted/10 p-4 sm:p-6 lg:w-72 lg:border-t-0 lg:border-l border-border/40">
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-xs font-bold tracking-wider uppercase text-muted-foreground">
+                <div className="flex shrink-0 flex-col justify-between gap-3 border-t border-border/40 bg-muted/10 p-4 sm:p-5 lg:w-60 lg:border-l lg:border-t-0">
+                  <div className="flex items-end justify-between gap-3 lg:flex-col lg:items-start">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                         Payment
                       </p>
-                      <Badge variant="outline" className="mt-1">
-                        {booking.paymentStatus}
+                      <Badge
+                        variant="outline"
+                        className="mt-1 whitespace-normal text-[10px] leading-tight"
+                      >
+                        {statusLabel(booking.paymentStatus)}
                       </Badge>
                     </div>
-                    <div>
-                      <p className="text-xs font-bold tracking-wider uppercase text-muted-foreground">
-                        Total Price
+                    <div className="shrink-0 text-right lg:text-left">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                        Total
                       </p>
-                      <p className="text-2xl font-black text-primary">₹{booking.totalPrice}</p>
+                      <p className="text-xl font-black text-primary">{money(booking.totalPrice)}</p>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2">
+                  <div className="grid grid-cols-2 gap-2 lg:grid-cols-1">
                     {booking.status === BookingStatus.CONFIRMED && (
                       <>
                         <Button
                           size="sm"
                           variant="outline"
+                          className="h-10 px-2"
                           onClick={() =>
                             navigate(`/admin/bookings/${bookingRef(booking)}/reschedule`, {
                               state: { from: location.search },
                             })
                           }
                         >
-                          <Icon icon="solar:calendar-rotate-bold" className="mr-2 size-4" />
+                          <Icon icon="solar:calendar-mark-bold" className="mr-1.5 size-4" />
                           Reschedule
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-red-600 border-red-100 hover:bg-red-50"
+                          className="h-10 border-red-100 px-2 text-red-600 hover:bg-red-50 hover:text-red-700"
                           onClick={() => handleCancel(booking)}
                         >
-                          <Icon icon="solar:close-circle-bold" className="mr-2 size-4" />
-                          Cancel Booking
+                          <Icon icon="solar:close-circle-bold" className="mr-1.5 size-4" />
+                          Cancel
                         </Button>
                       </>
                     )}
                     <Button
                       size="sm"
-                      variant="outline"
+                      className="col-span-2 h-10 lg:col-span-1"
                       onClick={() => navigate(`/admin/bookings/${bookingRef(booking)}`)}
                     >
-                      <Icon icon="solar:document-text-bold" className="mr-2 size-4" />
+                      <Icon icon="solar:document-text-bold" className="mr-1.5 size-4" />
                       Full Details
                     </Button>
                   </div>
