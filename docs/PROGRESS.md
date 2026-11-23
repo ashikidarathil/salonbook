@@ -131,3 +131,4 @@
   Slot and special slot lists now use the standard loader size.
 - 2026-11-23 — 5.7 follow-up: dashboard and wallet period filters fit phones, with equal tabs in one row and a full-width
   Specific Date button, for admin and stylist.
+- 2026-11-23 — 5.7 follow-up: admin mobile menu now opens, shows the active tab, and closes after navigating.
