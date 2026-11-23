@@ -5,7 +5,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchAllCoupons, toggleCouponStatus, deleteCoupon } from '@/features/coupon/coupon.thunks';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -33,6 +32,38 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { useListParams } from '@/hooks/useListParams';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Loader } from '@/components/common/Loader';
+
+const rupees = (amount: number) => `₹${amount.toLocaleString('en-IN')}`;
+
+const discountLabel = (coupon: Coupon) =>
+  coupon.discountType === DiscountType.PERCENTAGE
+    ? `${coupon.discountValue}%`
+    : rupees(coupon.discountValue);
+
+function CouponStatus({ coupon }: { coupon: Coupon }) {
+  if (coupon.isDeleted) return <Badge variant="destructive">Deleted</Badge>;
+  return (
+    <Badge
+      variant="outline"
+      className={
+        coupon.isActive
+          ? 'border-green-200 bg-green-50 text-green-700'
+          : 'border-red-200 bg-red-50 text-red-700'
+      }
+    >
+      {coupon.isActive ? 'Active' : 'Inactive'}
+    </Badge>
+  );
+}
+
+function UsageBar({ coupon }: { coupon: Coupon }) {
+  const percent = coupon.maxUsage ? Math.min(100, (coupon.usedCount / coupon.maxUsage) * 100) : 0;
+  return (
+    <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+      <div className="h-full bg-primary" style={{ width: `${percent}%` }} />
+    </div>
+  );
+}
 
 export default function CouponManagementPage() {
   const dispatch = useAppDispatch();
@@ -114,7 +145,7 @@ export default function CouponManagementPage() {
         description="Create and manage discount coupons for your customers."
         breadcrumbs={[{ label: 'Coupons' }]}
         actions={
-          <Button asChild className="w-full gap-2 sm:w-auto">
+          <Button asChild className="h-10 w-full gap-2 sm:w-auto">
             <Link to="new">
               <Icon icon="solar:add-circle-bold" className="size-5" />
               Create Coupon
@@ -123,25 +154,25 @@ export default function CouponManagementPage() {
         }
       />
 
-      {/* Filters Row */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="relative md:col-span-2">
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="relative min-w-0 flex-1 sm:max-w-md">
           <Icon
             icon="solar:magnifer-linear"
-            className="absolute -translate-y-1/2 left-3 top-1/2 size-4 text-slate-400"
+            className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
           />
           <Input
-            placeholder="Search by coupon code..."
+            aria-label="Search coupons"
+            placeholder="Search by code..."
             value={searchTerm}
             onChange={(e) => list.update({ q: e.target.value })}
-            className="pl-9"
+            className="h-10 pl-9"
           />
         </div>
         <Select
           value={statusFilter}
           onValueChange={(value: string) => list.update({ status: value })}
         >
-          <SelectTrigger className="bg-white">
+          <SelectTrigger aria-label="Filter by status" className="h-10 bg-white sm:w-44">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent className="bg-white">
@@ -153,101 +184,100 @@ export default function CouponManagementPage() {
         </Select>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Coupons List</CardTitle>
-          <CardDescription>
-            Manage all your discount coupons, include active, inactive and archived ones.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-0 lg:p-6 lg:pt-0">
-          {loading && coupons.length === 0 && (
-            <div className="flex justify-center py-10 lg:hidden">
-              <Loader label="Loading coupons" />
-            </div>
-          )}
-          {!loading && coupons.length === 0 && (
-            <p className="py-10 text-center text-muted-foreground lg:hidden">No coupons found.</p>
-          )}
-          <ul className="divide-y border-t lg:hidden">
+      {loading && coupons.length === 0 ? (
+        <div className="flex justify-center py-16">
+          <Loader label="Loading coupons" />
+        </div>
+      ) : coupons.length === 0 ? (
+        <p className="rounded-2xl border bg-white px-6 py-12 text-center text-muted-foreground shadow-sm">
+          No coupons found.
+        </p>
+      ) : (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold">
+            All Coupons{' '}
+            <span className="text-muted-foreground">
+              ({pagination?.totalItems ?? coupons.length})
+            </span>
+          </h2>
+
+          {/* Phones, tablets and small laptops */}
+          <ul className="grid gap-3 lg:grid-cols-2 xl:hidden">
             {coupons.map((coupon) => (
-              <li key={coupon.id} className="space-y-3 p-4">
+              <li
+                key={coupon.id}
+                className="flex min-w-0 flex-col gap-4 rounded-2xl border bg-white p-4 shadow-sm"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p
                       className={cn(
-                        'break-all font-bold',
-                        coupon.isDeleted && 'text-slate-400 line-through',
+                        'break-all font-bold tracking-wide',
+                        coupon.isDeleted && 'text-muted-foreground line-through',
                       )}
                     >
                       {coupon.code}
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {coupon.discountType === DiscountType.PERCENTAGE
-                        ? `${coupon.discountValue}% off`
-                        : `₹${coupon.discountValue} off`}
-                      {' · '}Min ₹{coupon.minBookingAmount}
+                      <span className="font-semibold text-primary">
+                        {discountLabel(coupon)} off
+                      </span>
+                      {' · '}Min {rupees(coupon.minBookingAmount)}
                     </p>
                   </div>
-                  <Badge
-                    className={cn(
-                      'shrink-0 cursor-default text-white',
-                      coupon.isDeleted
-                        ? 'bg-yellow-500 hover:bg-yellow-500'
-                        : coupon.isActive
-                          ? 'bg-green-500 hover:bg-green-500'
-                          : 'bg-red-500 hover:bg-red-500',
-                    )}
-                  >
-                    {coupon.isDeleted ? 'DELETED' : coupon.isActive ? 'ACTIVE' : 'INACTIVE'}
-                  </Badge>
+                  <div className="shrink-0">
+                    <CouponStatus coupon={coupon} />
+                  </div>
                 </div>
-                <dl className="grid grid-cols-3 gap-2 text-xs">
-                  <div>
+                <dl className="grid grid-cols-3 gap-2 rounded-xl bg-muted/50 p-3 text-xs">
+                  <div className="min-w-0">
                     <dt className="text-muted-foreground">Used</dt>
-                    <dd className="font-medium">
-                      {coupon.usedCount} / {coupon.maxUsage}
+                    <dd className="mt-0.5 break-words font-semibold">
+                      {coupon.usedCount.toLocaleString('en-IN')} /{' '}
+                      {coupon.maxUsage.toLocaleString('en-IN')}
                     </dd>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <dt className="text-muted-foreground">Max off</dt>
-                    <dd className="font-medium">
-                      {coupon.maxDiscountAmount ? `₹${coupon.maxDiscountAmount}` : '—'}
+                    <dd className="mt-0.5 break-words font-semibold">
+                      {coupon.maxDiscountAmount ? rupees(coupon.maxDiscountAmount) : '—'}
                     </dd>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <dt className="text-muted-foreground">Expires</dt>
-                    <dd className="font-medium">
-                      {format(new Date(coupon.expiryDate), 'MMM dd, yyyy')}
+                    <dd className="mt-0.5 break-words font-semibold">
+                      {format(new Date(coupon.expiryDate), 'd MMM yyyy')}
                     </dd>
+                  </div>
+                  <div className="col-span-3">
+                    <UsageBar coupon={coupon} />
                   </div>
                 </dl>
                 {coupon.isDeleted ? (
                   <Button
                     variant="outline"
-                    size="sm"
-                    className="w-full"
+                    className="mt-auto h-10 w-full border-green-200 text-green-700 hover:bg-green-50 hover:text-green-700"
                     onClick={() => handleToggleDelete(coupon)}
                   >
                     Restore
                   </Button>
                 ) : (
-                  <div className="grid grid-cols-3 gap-2">
-                    <Button variant="outline" size="sm" asChild>
+                  <div className="mt-auto grid grid-cols-3 gap-2">
+                    <Button variant="outline" className="h-10 min-w-0 px-2" asChild>
                       <Link to={`${coupon.id}/edit`} state={{ from: location.search }}>
                         Edit
                       </Link>
                     </Button>
                     <Button
                       variant="outline"
-                      size="sm"
+                      className="h-10 min-w-0 px-2"
                       onClick={() => handleToggleStatus(coupon.id, coupon.isActive)}
                     >
                       {coupon.isActive ? 'Disable' : 'Enable'}
                     </Button>
                     <Button
-                      size="sm"
-                      className="bg-red-600 text-white hover:bg-red-700"
+                      variant="outline"
+                      className="h-10 min-w-0 border-red-200 px-2 text-red-600 hover:bg-red-50 hover:text-red-600"
                       onClick={() => handleToggleDelete(coupon)}
                     >
                       Delete
@@ -257,96 +287,56 @@ export default function CouponManagementPage() {
               </li>
             ))}
           </ul>
-          <div className="hidden overflow-x-auto lg:block">
-            <Table>
+
+          {/* Laptops and desktops */}
+          <div className="hidden overflow-hidden rounded-2xl border bg-white shadow-sm xl:block">
+            <Table className="table-fixed">
               <TableHeader>
                 <TableRow>
-                  <TableHead>Code</TableHead>
-                  <TableHead>Discount</TableHead>
-                  <TableHead>Min. Amount</TableHead>
-                  <TableHead>Max Discount</TableHead>
-                  <TableHead>Usage</TableHead>
-                  <TableHead>Expiry</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Deleted</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="pl-4">Code</TableHead>
+                  <TableHead className="w-[90px]">Discount</TableHead>
+                  <TableHead className="w-[100px]">Min. Amount</TableHead>
+                  <TableHead className="w-[105px]">Max Discount</TableHead>
+                  <TableHead className="w-[120px]">Usage</TableHead>
+                  <TableHead className="w-[115px]">Expiry</TableHead>
+                  <TableHead className="w-[95px]">Status</TableHead>
+                  <TableHead className="w-[160px] pr-4 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {coupons.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={9} className="py-10 text-center text-muted-foreground">
-                      No coupons found.
+                {coupons.map((coupon) => (
+                  <TableRow key={coupon.id} className={coupon.isDeleted ? 'bg-muted/30' : ''}>
+                    <TableCell
+                      className={cn(
+                        'truncate pl-4 font-bold',
+                        coupon.isDeleted && 'text-muted-foreground line-through',
+                      )}
+                      title={coupon.code}
+                    >
+                      {coupon.code}
                     </TableCell>
-                  </TableRow>
-                ) : (
-                  coupons.map((coupon) => (
-                    <TableRow key={coupon.id} className={coupon.isDeleted ? 'bg-slate-50/50' : ''}>
-                      <TableCell className="font-bold">
-                        <div className="flex flex-col">
-                          <span className={coupon.isDeleted ? 'text-slate-400 line-through' : ''}>
-                            {coupon.code}
-                          </span>
-                          {coupon.isDeleted && (
-                            <span className="text-[10px] text-destructive font-normal italic">
-                              Archived
-                            </span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {coupon.discountType === DiscountType.PERCENTAGE
-                          ? `${coupon.discountValue}%`
-                          : `₹${coupon.discountValue}`}
-                      </TableCell>
-                      <TableCell>₹{coupon.minBookingAmount}</TableCell>
-                      <TableCell>
-                        {coupon.maxDiscountAmount ? `₹${coupon.maxDiscountAmount}` : '—'}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-xs">
-                            {coupon.usedCount} / {coupon.maxUsage}
-                          </span>
-                          <div className="w-24 h-1.5 bg-secondary rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-primary"
-                              style={{
-                                width: `${Math.min(100, (coupon.usedCount / coupon.maxUsage) * 100)}%`,
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{format(new Date(coupon.expiryDate), 'MMM dd, yyyy')}</TableCell>
-                      <TableCell>
-                        {coupon.isDeleted ? (
-                          <Badge className="text-white bg-yellow-500 cursor-default hover:bg-yellow-500">
-                            DELETED
-                          </Badge>
-                        ) : (
-                          <Badge
-                            className={cn(
-                              'cursor-default',
-                              coupon.isActive
-                                ? 'bg-green-500 text-white hover:bg-green-500'
-                                : 'bg-red-500 text-white hover:bg-red-500',
-                            )}
-                          >
-                            {coupon.isActive ? 'ACTIVE' : 'INACTIVE'}
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {coupon.isDeleted ? (
-                          <Badge variant="destructive">Yes</Badge>
-                        ) : (
-                          <Badge variant="outline">No</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          {!coupon.isDeleted && (
+                    <TableCell>{discountLabel(coupon)}</TableCell>
+                    <TableCell>{rupees(coupon.minBookingAmount)}</TableCell>
+                    <TableCell>
+                      {coupon.maxDiscountAmount ? rupees(coupon.maxDiscountAmount) : '—'}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs">
+                          {coupon.usedCount.toLocaleString('en-IN')} /{' '}
+                          {coupon.maxUsage.toLocaleString('en-IN')}
+                        </span>
+                        <UsageBar coupon={coupon} />
+                      </div>
+                    </TableCell>
+                    <TableCell>{format(new Date(coupon.expiryDate), 'd MMM yyyy')}</TableCell>
+                    <TableCell>
+                      <CouponStatus coupon={coupon} />
+                    </TableCell>
+                    <TableCell className="pr-4 text-right">
+                      <div className="flex justify-end gap-1">
+                        {!coupon.isDeleted && (
+                          <>
                             <Button
                               variant="ghost"
                               size="icon"
@@ -356,6 +346,7 @@ export default function CouponManagementPage() {
                                   : 'text-green-500 hover:bg-green-500/10'
                               }
                               onClick={() => handleToggleStatus(coupon.id, coupon.isActive)}
+                              aria-label={`${coupon.isActive ? 'Deactivate' : 'Activate'} ${coupon.code}`}
                               title={coupon.isActive ? 'Deactivate Coupon' : 'Activate Coupon'}
                             >
                               <Icon
@@ -367,12 +358,10 @@ export default function CouponManagementPage() {
                                 className="size-5"
                               />
                             </Button>
-                          )}
-                          {!coupon.isDeleted && (
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="hover:text-primary hover:bg-primary/10"
+                              className="hover:bg-primary/10 hover:text-primary"
                               title="Edit Coupon"
                               asChild
                             >
@@ -384,40 +373,40 @@ export default function CouponManagementPage() {
                                 <Icon icon="solar:pen-bold" className="size-5" />
                               </Link>
                             </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className={
-                              coupon.isDeleted
-                                ? 'text-primary hover:bg-primary/10'
-                                : 'text-destructive hover:bg-destructive/10'
+                          </>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className={
+                            coupon.isDeleted
+                              ? 'text-primary hover:bg-primary/10'
+                              : 'text-destructive hover:bg-destructive/10'
+                          }
+                          onClick={() => handleToggleDelete(coupon)}
+                          aria-label={`${coupon.isDeleted ? 'Restore' : 'Delete'} ${coupon.code}`}
+                          title={coupon.isDeleted ? 'Restore Coupon' : 'Delete Coupon'}
+                        >
+                          <Icon
+                            icon={
+                              coupon.isDeleted ? 'solar:refresh-bold' : 'solar:trash-bin-trash-bold'
                             }
-                            onClick={() => handleToggleDelete(coupon)}
-                            title={coupon.isDeleted ? 'Restore Coupon' : 'Delete Coupon'}
-                          >
-                            <Icon
-                              icon={
-                                coupon.isDeleted
-                                  ? 'solar:refresh-bold'
-                                  : 'solar:trash-bin-trash-bold'
-                              }
-                              className="size-5"
-                            />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
+                            className="size-5"
+                          />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      )}
 
       {pagination && pagination.totalPages > 1 && (
         <Pagination
+          className="mt-2"
           currentPage={currentPage}
           totalPages={pagination.totalPages}
           onPageChange={(page) => list.update({}, page)}
