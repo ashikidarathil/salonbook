@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   SidebarProvider,
   Sidebar,
@@ -11,9 +12,16 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarInset,
-  SidebarTrigger,
 } from '@/components/ui/sidebar';
-
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Icon } from '@iconify/react';
 import { useAppDispatch } from '@/app/hooks';
@@ -21,152 +29,141 @@ import { logout } from '@/features/auth/authThunks';
 import { APP_ROUTES } from '@/common/constants/app.routes';
 import { NotificationCenter } from '@/features/notification/components/NotificationCenter';
 
+const NAV_ITEMS = [
+  { icon: 'solar:widget-bold', label: 'Dashboard', path: '/admin' },
+  { icon: 'solar:calendar-bold', label: 'Bookings', path: '/admin/bookings' },
+  { icon: 'solar:users-group-rounded-bold', label: 'Customers', path: '/admin/users' },
+  { icon: 'solar:user-bold', label: 'Stylists', path: '/admin/stylists' },
+  { icon: 'solar:folder-bold', label: 'Categories', path: APP_ROUTES.ADMIN.CATEGORIES },
+  { icon: 'solar:scissors-square-bold', label: 'Services', path: APP_ROUTES.ADMIN.SERVICES },
+  { icon: 'solar:buildings-bold', label: 'Branches', path: APP_ROUTES.ADMIN.BRANCHES },
+  { icon: 'solar:calendar-date-bold', label: 'Slots', path: APP_ROUTES.ADMIN.SLOTS },
+  {
+    icon: 'solar:calendar-minimalistic-broken',
+    label: 'Holidays',
+    path: APP_ROUTES.ADMIN.HOLIDAYS,
+  },
+  { icon: 'solar:ticket-bold', label: 'Coupons', path: APP_ROUTES.ADMIN.COUPONS },
+  { icon: 'solar:chat-round-bold', label: 'Dispute Chats', path: APP_ROUTES.ADMIN.CHAT },
+  { icon: 'solar:star-bold', label: 'Reviews', path: APP_ROUTES.ADMIN.REVIEWS },
+  { icon: 'solar:wallet-bold', label: 'Platform Wallet', path: '/admin/wallet' },
+  { icon: 'solar:bell-bold', label: 'Notifications', path: '/admin/notifications' },
+];
+
+function AdminSidebarContent({
+  pathname,
+  onNavigate,
+  onLogout,
+}: {
+  pathname: string;
+  onNavigate: (path: string) => void;
+  onLogout: () => void;
+}) {
+  return (
+    <>
+      <SidebarHeader>
+        <div className="flex items-center gap-2 px-4 py-4">
+          <div className="flex items-center justify-center rounded-lg size-8 bg-primary">
+            <Icon icon="solar:scissors-bold" className="size-5 text-primary-foreground" />
+          </div>
+          <span className="text-lg font-semibold">Salon Admin</span>
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent>
+        <SidebarMenu className="px-2 py-2">
+          {NAV_ITEMS.map((item) => {
+            const isActive =
+              item.path === '/admin'
+                ? pathname === item.path
+                : pathname === item.path || pathname.startsWith(`${item.path}/`);
+            return (
+              <SidebarMenuItem key={item.path}>
+                <SidebarMenuButton
+                  aria-current={isActive ? 'page' : undefined}
+                  onClick={() => onNavigate(item.path)}
+                  className={
+                    isActive
+                      ? 'relative min-h-10 bg-primary/10 font-semibold text-primary before:absolute before:inset-y-2 before:left-0 before:w-1 before:rounded-full before:bg-primary hover:bg-primary/10'
+                      : 'min-h-10 hover:bg-accent/50'
+                  }
+                >
+                  <Icon icon={item.icon} className="size-4" />
+                  <span>{item.label}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              onClick={onLogout}
+              className="min-h-10 text-destructive hover:bg-destructive/10"
+            >
+              <Icon icon="solar:logout-bold" className="size-4" />
+              <span>Logout</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarContent>
+    </>
+  );
+}
+
 export function SalonAdminLayout() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const handleLogout = async () => {
+    setIsMobileOpen(false);
     await dispatch(logout());
     navigate('/admin/login', { replace: true });
+  };
+
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    setIsMobileOpen(false);
   };
 
   return (
     <div className="flex min-h-screen theme-admin">
       <SidebarProvider>
         <Sidebar className="border-r">
-          <SidebarHeader>
-            <div className="flex items-center gap-2 px-4 py-4">
-              <div className="flex items-center justify-center rounded-lg size-8 bg-primary">
-                <Icon icon="solar:scissors-bold" className="size-5 text-primary-foreground" />
-              </div>
-              <span className="text-lg font-semibold">Salon Admin</span>
-            </div>
-          </SidebarHeader>
-
-          <SidebarContent>
-            <SidebarMenu className="px-2">
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate('/admin')}>
-                  <Icon icon="solar:widget-bold" className="size-4" />
-                  <span>Dashboard</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate('/admin/bookings')}>
-                  <Icon icon="solar:calendar-bold" className="size-4" />
-                  <span>Bookings</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate('/admin/users')}>
-                  <Icon icon="solar:users-group-rounded-bold" className="size-4" />
-                  <span>Customers</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate('/admin/stylists')}>
-                  <Icon icon="solar:user-bold" className="size-4" />
-                  <span>Stylists</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate(APP_ROUTES.ADMIN.CATEGORIES)}>
-                  <Icon icon="solar:folder-bold" className="size-4" />
-                  <span>Categories</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate(APP_ROUTES.ADMIN.SERVICES)}>
-                  <Icon icon="solar:scissors-square-bold" className="size-4" />
-                  <span>Services</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate(APP_ROUTES.ADMIN.BRANCHES)}>
-                  <Icon icon="solar:buildings-bold" className="size-4" />
-                  <span>Branches</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate(APP_ROUTES.ADMIN.SLOTS)}>
-                  <Icon icon="solar:calendar-date-bold" className="size-4" />
-                  <span>Slots</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate(APP_ROUTES.ADMIN.HOLIDAYS)}>
-                  <Icon icon="solar:calendar-minimalistic-broken" className="size-4" />
-                  <span>Holidays</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate(APP_ROUTES.ADMIN.COUPONS)}>
-                  <Icon icon="solar:ticket-bold" className="size-4" />
-                  <span>Coupons</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate(APP_ROUTES.ADMIN.CHAT)}>
-                  <Icon icon="solar:chat-round-bold" className="size-4" />
-                  <span>Dispute Chats</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate(APP_ROUTES.ADMIN.REVIEWS)}>
-                  <Icon icon="solar:star-bold" className="size-4" />
-                  <span>Reviews</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate('/admin/wallet')}>
-                  <Icon icon="solar:wallet-bold" className="size-4" />
-                  <span>Platform Wallet</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate('/admin/notifications')}>
-                  <Icon icon="solar:bell-bold" className="size-4" />
-                  <span>Notifications</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              {/* <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => navigate('/admin/settings')}>
-                  <Icon icon="solar:settings-bold" className="size-4" />
-                  <span>Settings</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem> */}
-
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={handleLogout}
-                  className="text-destructive hover:bg-destructive/10"
-                >
-                  <Icon icon="solar:logout-bold" className="size-4" />
-                  <span>Logout</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarContent>
+          <AdminSidebarContent
+            pathname={pathname}
+            onNavigate={handleNavigate}
+            onLogout={handleLogout}
+          />
         </Sidebar>
         <SidebarInset>
-          <header className="flex items-center justify-between h-16 px-6 border-b bg-background">
+          <header className="flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
             <div className="flex items-center gap-4">
-              <SidebarTrigger />
-              <div className="w-px h-6 bg-border" />
+              <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
+                <SheetTrigger asChild>
+                  <Button size="icon" variant="ghost" className="md:hidden" aria-label="Open menu">
+                    <Icon icon="solar:hamburger-menu-linear" className="size-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent
+                  side="left"
+                  className="w-72 p-0 theme-admin"
+                  onOpenAutoFocus={(event) => event.preventDefault()}
+                >
+                  <SheetHeader className="sr-only">
+                    <SheetTitle>Admin Navigation</SheetTitle>
+                    <SheetDescription>Admin panel navigation and menu</SheetDescription>
+                  </SheetHeader>
+                  <div className="flex h-full flex-col overflow-y-auto bg-[var(--color-sidebar)]">
+                    <AdminSidebarContent
+                      pathname={pathname}
+                      onNavigate={handleNavigate}
+                      onLogout={handleLogout}
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
             <div className="flex items-center gap-4">
               <NotificationCenter />
