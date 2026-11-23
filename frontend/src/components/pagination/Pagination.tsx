@@ -1,15 +1,22 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  className?: string;
 }
 
-export default function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+export default function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+  className,
+}: PaginationProps) {
   if (totalPages <= 1) return null;
 
   const getPageNumbers = () => {
@@ -31,15 +38,20 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
   };
 
   return (
-    <div className="flex items-center justify-center gap-2 mt-8">
+    <nav
+      aria-label="Pagination"
+      className={cn('mt-8 flex items-center justify-center gap-1 sm:gap-2', className)}
+    >
       <Button
         variant="outline"
         size="sm"
+        aria-label="Previous page"
+        className="size-9 shrink-0 p-0 sm:h-9 sm:w-auto sm:px-3"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
       >
-        <ChevronLeft className="w-4 h-4" />
-        Previous
+        <ChevronLeft className="size-4" />
+        <span className="hidden sm:inline">Previous</span>
       </Button>
 
       {getPageNumbers().map((page) => (
@@ -47,6 +59,9 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
           key={page}
           variant={currentPage === page ? 'default' : 'outline'}
           size="sm"
+          aria-label={`Page ${page}`}
+          aria-current={currentPage === page ? 'page' : undefined}
+          className="size-9 shrink-0 p-0"
           onClick={() => onPageChange(page)}
         >
           {page}
@@ -56,12 +71,14 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
       <Button
         variant="outline"
         size="sm"
+        aria-label="Next page"
+        className="size-9 shrink-0 p-0 sm:h-9 sm:w-auto sm:px-3"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
       >
-        Next
-        <ChevronRight className="w-4 h-4" />
+        <span className="hidden sm:inline">Next</span>
+        <ChevronRight className="size-4" />
       </Button>
-    </div>
+    </nav>
   );
 }

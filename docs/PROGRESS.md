@@ -138,3 +138,5 @@
   smaller phone padding works everywhere. Checked 60 admin, stylist and customer pages at phone, tablet and laptop.
 - 2026-11-23 — Admin responsive pass, Bookings: compact booking cards, tidy filters, side-by-side phone actions and a
   responsive details page.
+- 2026-11-23 — Admin responsive pass, Customers: customer cards, a search that survives refresh, and page numbers that
+  fit small phones across the site.
