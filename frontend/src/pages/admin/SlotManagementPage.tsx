@@ -486,7 +486,7 @@ export default function SlotManagementPage() {
                               colSpan={4}
                               className="py-12 text-center text-muted-foreground"
                             >
-                              <Loader size="sm" className="mx-auto mb-2" />
+                              <Loader className="mx-auto" label="Loading slots" />
                             </TableCell>
                           </TableRow>
                         ) : slots.filter(
@@ -569,7 +569,7 @@ export default function SlotManagementPage() {
             <div className="p-4">
               {loading ? (
                 <div className="flex items-center justify-center gap-2 py-10 text-muted-foreground">
-                  <Loader size="xs" />
+                  <Loader label="Loading special slots" />
                 </div>
               ) : specialSlots.length === 0 ? (
                 <div className="flex flex-col items-center py-10 text-center text-muted-foreground">

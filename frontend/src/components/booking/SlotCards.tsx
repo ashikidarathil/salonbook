@@ -24,7 +24,7 @@ export function SlotCards({
   if (loading) {
     return (
       <div className="flex justify-center py-12 lg:hidden">
-        <Loader size="sm" label="Loading slots" />
+        <Loader label="Loading slots" />
       </div>
     );
   }
