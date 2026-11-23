@@ -191,7 +191,7 @@ export default function StylistSlotManagementPage() {
     };
     const label =
       status === 'AVAILABLE' && type === 'special'
-        ? '⚡ Special (Available)'
+        ? 'Special (Available)'
         : status.replace('_', ' ').toLowerCase();
     return (
       <Badge
@@ -378,7 +378,7 @@ export default function StylistSlotManagementPage() {
                               colSpan={3}
                               className="text-center py-8 text-muted-foreground"
                             >
-                              <Loader size="sm" className="mx-auto" label="Loading slots" />
+                              <Loader className="mx-auto" label="Loading slots" />
                             </TableCell>
                           </TableRow>
                         ) : slots.filter(
@@ -451,7 +451,7 @@ export default function StylistSlotManagementPage() {
             <div className="p-4">
               {loading ? (
                 <div className="flex items-center justify-center py-10 text-muted-foreground gap-2">
-                  <Loader size="xs" />
+                  <Loader label="Loading special slots" />
                 </div>
               ) : specialSlots.length === 0 ? (
                 <div className="flex flex-col items-center py-10 text-center text-muted-foreground">

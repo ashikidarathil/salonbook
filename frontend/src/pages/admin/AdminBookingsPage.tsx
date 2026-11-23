@@ -156,7 +156,7 @@ export default function AdminBookingsPage() {
                         <Icon icon="solar:hashtag-bold" className="size-4 text-primary" />
                         <span className="text-lg font-bold">{booking.bookingNumber}</span>
                         <Badge className={getStatusColor(booking.status)}>
-                          {booking.status === BookingStatus.SPECIAL ? '⚡ Special' : booking.status}
+                          {booking.status === BookingStatus.SPECIAL ? 'Special' : booking.status}
                         </Badge>
                       </div>
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
