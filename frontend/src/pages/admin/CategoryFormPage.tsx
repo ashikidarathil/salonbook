@@ -115,7 +115,7 @@ export default function CategoryFormPage() {
       isSubmitting={isSubmitting}
       onSubmit={handleSubmit(onSubmit)}
     >
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 xl:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="category-name">Category Name *</Label>
           <Input
