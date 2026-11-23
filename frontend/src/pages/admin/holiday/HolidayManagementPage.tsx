@@ -4,7 +4,6 @@ import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchHolidays, deleteHoliday } from '@/features/holiday/holiday.thunks';
 import { clearError } from '@/features/holiday/holiday.slice';
 import { fetchBranches } from '@/features/branch/branch.thunks';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -65,7 +64,7 @@ export default function HolidayManagementPage() {
         description="Manage salon-wide and branch-specific holidays"
         breadcrumbs={[{ label: 'Holidays' }]}
         actions={
-          <Button asChild className="w-full gap-2 sm:w-auto">
+          <Button asChild className="h-10 w-full gap-2 sm:w-auto">
             <Link to="new">
               <Icon icon="solar:calendar-add-bold-duotone" className="size-5" />
               Add Holiday
@@ -82,112 +81,132 @@ export default function HolidayManagementPage() {
         emptyMessage="No holidays found. Add one to get started."
         emptyIcon="solar:calendar-minimalistic-broken"
       >
-        <Card>
-          <CardHeader>
-            <CardTitle>Existing Holidays</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <ul className="divide-y lg:hidden">
-              {holidays.map((holiday) => (
-                <li key={holiday.id} className="flex items-start justify-between gap-3 p-4">
-                  <div className="min-w-0 space-y-2">
-                    <p className="break-words font-medium">{holiday.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {format(new Date(holiday.date), 'MMMM do, yyyy')}
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      {holiday.isAllBranches ? (
-                        <Badge
-                          variant="outline"
-                          className="border-primary/20 bg-primary/5 text-primary"
-                        >
-                          All Branches
-                        </Badge>
-                      ) : (
-                        getBranchData(holiday.branchIds).map((branch) => (
-                          <Badge key={branch.id} variant="secondary">
-                            {branch.name}
-                          </Badge>
-                        ))
-                      )}
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold">
+            Existing Holidays <span className="text-muted-foreground">({holidays.length})</span>
+          </h2>
+
+          {/* Phones, tablets and small laptops */}
+          <ul className="grid gap-3 lg:grid-cols-2 xl:hidden">
+            {holidays.map((holiday) => {
+              const date = new Date(holiday.date);
+              return (
+                <li
+                  key={holiday.id}
+                  className="flex min-w-0 flex-col gap-4 rounded-2xl border bg-white p-4 shadow-sm"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex size-14 shrink-0 flex-col items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <span className="text-lg font-bold leading-5">{format(date, 'd')}</span>
+                      <span className="text-[11px] font-medium">{format(date, 'MMM')}</span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="break-words font-semibold">{holiday.name}</p>
+                      <p className="mt-0.5 text-sm text-muted-foreground">
+                        {format(date, 'EEEE, d MMMM yyyy')}
+                      </p>
                     </div>
                   </div>
+                  <div className="flex flex-wrap gap-1">
+                    {holiday.isAllBranches ? (
+                      <Badge
+                        variant="outline"
+                        className="border-primary/20 bg-primary/5 text-primary"
+                      >
+                        All Branches
+                      </Badge>
+                    ) : (
+                      getBranchData(holiday.branchIds).map((branch) => (
+                        <Badge
+                          key={branch.id}
+                          variant="outline"
+                          className="max-w-full break-words bg-muted"
+                        >
+                          {branch.name}
+                        </Badge>
+                      ))
+                    )}
+                  </div>
                   <Button
-                    variant="ghost"
-                    size="icon"
+                    variant="outline"
                     aria-label={`Delete ${holiday.name}`}
-                    className="shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    className="mt-auto h-10 w-full gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-600"
                     onClick={() => handleDelete(holiday.id)}
                   >
-                    <Icon icon="solar:trash-bin-trash-bold-duotone" className="size-5" />
+                    <Icon icon="solar:trash-bin-trash-bold-duotone" className="size-4" />
+                    Delete
                   </Button>
                 </li>
-              ))}
-            </ul>
-            <div className="hidden overflow-x-auto lg:block">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Holiday Name</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Branch</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {holidays.map((holiday) => (
+              );
+            })}
+          </ul>
+
+          {/* Laptops and desktops */}
+          <div className="hidden overflow-hidden rounded-2xl border bg-white shadow-sm xl:block">
+            <Table className="table-fixed">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[32%] pl-4">Holiday Name</TableHead>
+                  <TableHead className="w-[210px]">Date</TableHead>
+                  <TableHead>Branch</TableHead>
+                  <TableHead className="w-[130px] pr-4 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {holidays.map((holiday) => {
+                  const holidayBranches = getBranchData(holiday.branchIds);
+                  return (
                     <TableRow key={holiday.id}>
-                      <TableCell className="font-medium">{holiday.name}</TableCell>
-                      <TableCell>{format(new Date(holiday.date), 'MMMM do, yyyy')}</TableCell>
+                      <TableCell className="truncate pl-4 font-medium" title={holiday.name}>
+                        {holiday.name}
+                      </TableCell>
+                      <TableCell>{format(new Date(holiday.date), 'EEE, d MMM yyyy')}</TableCell>
                       <TableCell>
                         {holiday.isAllBranches ? (
                           <Badge
                             variant="outline"
-                            className="bg-primary/5 text-primary border-primary/20"
+                            className="border-primary/20 bg-primary/5 text-primary"
                           >
                             All Branches
                           </Badge>
                         ) : (
-                          <div className="flex flex-wrap gap-1 max-w-[250px]">
-                            {getBranchData(holiday.branchIds)
-                              .slice(0, 2)
-                              .map((branch) => (
-                                <Badge
-                                  key={branch.id}
-                                  variant="secondary"
-                                  className="whitespace-nowrap"
-                                >
-                                  {branch.name}
-                                </Badge>
-                              ))}
-                            {holiday.branchIds.length > 2 && (
+                          <div
+                            className="flex min-w-0 flex-wrap gap-1"
+                            title={holidayBranches.map((branch) => branch.name).join(', ')}
+                          >
+                            {holidayBranches.slice(0, 2).map((branch) => (
                               <Badge
-                                variant="default"
-                                className="text-[10px] px-1.5 py-0 bg-orange-500 hover:bg-orange-600 border-none text-white"
+                                key={branch.id}
+                                variant="outline"
+                                className="max-w-full truncate bg-muted"
                               >
-                                +{holiday.branchIds.length - 2} more
+                                {branch.name}
                               </Badge>
+                            ))}
+                            {holidayBranches.length > 2 && (
+                              <Badge variant="outline">+{holidayBranches.length - 2} more</Badge>
                             )}
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="pr-4 text-right">
                         <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          variant="outline"
+                          aria-label={`Delete ${holiday.name}`}
+                          className="h-9 gap-1.5 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-600"
                           onClick={() => handleDelete(holiday.id)}
                         >
-                          <Icon icon="solar:trash-bin-trash-bold-duotone" className="size-5" />
+                          <Icon icon="solar:trash-bin-trash-bold-duotone" className="size-4" />
+                          Delete
                         </Button>
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
       </LoadingGate>
     </div>
   );

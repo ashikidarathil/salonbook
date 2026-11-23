@@ -150,3 +150,5 @@
   Services, Breaks and branch form pages.
 - 2026-11-23 — Slots redesign: admin filters, status chips, laptop day board and phone day list; stylist week strip.
   Fixed blocked time being offered as special slots, unblock creating special slots, and delete blocking time.
+- 2026-11-23 — Admin responsive pass, Holidays: holiday cards with date tile, fixed-width table from laptop width,
+  and a one-column form on tablets.
