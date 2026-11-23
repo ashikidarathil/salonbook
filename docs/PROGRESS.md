@@ -146,3 +146,5 @@
   width, search icon, soft status badges, and a one-column form on tablets.
 - 2026-11-23 — Admin responsive pass, Services: service cards below laptop width, fixed-width table from laptop
   width, compact filters, and a one-column form on tablets.
+- 2026-11-23 — Admin responsive pass, Branches: branch cards and table, plus responsive Stylists, Categories,
+  Services, Breaks and branch form pages.
