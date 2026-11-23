@@ -95,24 +95,24 @@ export class SlotService implements ISlotService {
         [stylistId],
         new Date(date),
       );
-      const blocked = allCancelled.find(
+      const blocked = allCancelled.filter(
         (ss) =>
           ss.status === SpecialSlotStatus.CANCELLED &&
-          ss.startTime === startTime &&
-          ss.endTime === endTime,
+          ss.startTime < endTime &&
+          ss.endTime > startTime,
       );
 
-      if (!blocked) {
+      if (!blocked.length) {
         throw new AppError(SLOT_MESSAGES.NOT_FOUND, HttpStatus.NOT_FOUND);
       }
 
-      // Delete the CANCELLED special slot record — restores dynamic slot to AVAILABLE
-      await this.slotRepo.updateSpecialSlot(blocked._id.toString(), {
+      // Removing the block record restores the dynamic slot to AVAILABLE
+      await Promise.all(blocked.map((ss) => this.slotRepo.deleteSpecialSlot(ss._id.toString())));
+      return SlotMapper.toResponse({
+        ...blocked[0],
         status: SpecialSlotStatus.AVAILABLE,
         note: undefined,
-      });
-      const updated = await this.slotRepo.findSpecialSlotById(blocked._id.toString());
-      return SlotMapper.toResponse((updated ?? blocked) as unknown as SlotLike);
+      } as unknown as SlotLike);
     }
 
     // Real/persisted slot — original flow

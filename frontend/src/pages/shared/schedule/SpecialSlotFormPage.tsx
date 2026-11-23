@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
+import { lastBookableDate } from '@/features/slot/slotBoard';
 import { useScheduleTarget } from '@/features/schedule/useScheduleTarget';
 import { slotService } from '@/services/slot.service';
 import { showApiError, showSuccess } from '@/common/utils/swal.utils';
@@ -20,6 +21,7 @@ export default function SpecialSlotFormPage() {
   const isAdmin = pathname.startsWith('/admin');
   const self = useScheduleTarget(!isAdmin);
   const today = format(new Date(), 'yyyy-MM-dd');
+  const lastDate = lastBookableDate();
 
   const stylistId = isAdmin ? params.get('stylist') : self.stylistId;
   const branchId = isAdmin ? params.get('branch') : self.branchId;
@@ -32,7 +34,7 @@ export default function SpecialSlotFormPage() {
 
   const listPath = isAdmin ? '/admin/slots' : '/stylist/slots';
   const listQuery = (slotDate: string | null) => {
-    const query = new URLSearchParams({ view: 'special' });
+    const query = new URLSearchParams({ status: 'SPECIAL' });
     if (isAdmin && branchId) query.set('branch', branchId);
     if (isAdmin && stylistId) query.set('stylist', stylistId);
     if (slotDate) query.set('date', slotDate);
@@ -44,8 +46,8 @@ export default function SpecialSlotFormPage() {
   const save = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!stylistId || !branchId) return;
-    if (!date || date < today) {
-      setFormError('Choose today or a future date');
+    if (!date || date < today || date > lastDate) {
+      setFormError('Choose a date within the next 14 days');
       return;
     }
     if (!startTime || !endTime) {
@@ -102,13 +104,14 @@ export default function SpecialSlotFormPage() {
       isSubmitting={isSaving}
       onSubmit={save}
     >
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         <div className="min-w-0 space-y-2">
           <Label htmlFor="special-date">Date *</Label>
           <Input
             id="special-date"
             type="date"
             min={today}
+            max={lastDate}
             value={date}
             onChange={(event) => setDate(event.target.value)}
           />

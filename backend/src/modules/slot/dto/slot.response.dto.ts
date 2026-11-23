@@ -16,6 +16,8 @@ export interface SlotResponseDto {
   note?: string;
   price?: number;
   bookedServices?: string[];
+  /** Only for admin and stylist views of a booked slot */
+  bookingId?: string;
   createdAt: string;
   updatedAt: string;
 }
