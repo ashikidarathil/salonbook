@@ -14,7 +14,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
       classNames={{
         months: 'relative',
         month: 'space-y-4',
-        month_caption: 'flex justify-center pt-1 relative items-center mb-4',
+        month_caption: 'relative mb-4 flex h-8 items-center justify-center',
         caption_label: 'text-sm font-medium',
         nav: 'flex items-center',
         button_previous: cn(
@@ -53,7 +53,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
             className={cn(
               buttonVariants({ variant: 'ghost' }),
               className,
-              'h-8 w-8 !p-0 absolute left-1 z-20 flex items-center justify-center text-primary transition-opacity hover:text-primary hover:opacity-70',
+              'h-8 w-8 !p-0 absolute left-1 top-0 z-20 flex items-center justify-center text-primary transition-opacity hover:text-primary hover:opacity-70',
             )}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 shrink-0"><path d="m15 18-6-6 6-6"/></svg>
@@ -66,7 +66,7 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
             className={cn(
               buttonVariants({ variant: 'ghost' }),
               className,
-              'h-8 w-8 !p-0 absolute right-1 z-20 flex items-center justify-center text-primary transition-opacity hover:text-primary hover:opacity-70',
+              'h-8 w-8 !p-0 absolute right-1 top-0 z-20 flex items-center justify-center text-primary transition-opacity hover:text-primary hover:opacity-70',
             )}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 shrink-0"><path d="m9 18 6-6-6-6"/></svg>

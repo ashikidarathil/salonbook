@@ -134,3 +134,5 @@
 - 2026-11-23 — 5.7 follow-up: admin mobile menu now opens, shows the active tab, and closes after navigating.
 - 2026-11-23 — Admin responsive pass, Dashboard: compact stat cards, readable charts with short dates, a proper empty
   state, and layouts for phone, tablet and laptop. Checked with empty and large data at nine widths (91 checks).
+- 2026-11-23 — Admin responsive pass, shared fix: page-level card and button styles now override the defaults, so
+  smaller phone padding works everywhere. Checked 60 admin, stylist and customer pages at phone, tablet and laptop.

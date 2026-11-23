@@ -121,9 +121,9 @@ export default function AdminBookingDetailPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
           {/* Main Details */}
-          <div className="space-y-6 md:col-span-2">
+          <div className="space-y-6 xl:col-span-2">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-sm font-medium">

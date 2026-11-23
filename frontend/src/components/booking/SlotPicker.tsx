@@ -124,7 +124,7 @@ export function SlotPicker({
             <Icon icon="solar:calendar-bold" className="text-primary" />
             1. Choose Date
           </h2>
-          <div className="flex justify-center overflow-x-auto">
+          <div className="flex justify-center">
             <Calendar
               mode="single"
               selected={date}
