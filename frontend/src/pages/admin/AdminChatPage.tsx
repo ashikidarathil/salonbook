@@ -134,9 +134,9 @@ export default function AdminChatPage() {
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold text-sm truncate">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <p className="min-w-0 truncate text-sm font-semibold">
                             {room.user?.name} & {room.stylist?.name}
                           </p>
                           {isChatExpired(room) && (
