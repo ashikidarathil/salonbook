@@ -140,3 +140,5 @@
   responsive details page.
 - 2026-11-23 — Admin responsive pass, Customers: customer cards, a search that survives refresh, and page numbers that
   fit small phones across the site.
+- 2026-11-23 — Admin responsive pass, Stylists: stylist cards and table, plus responsive Schedule, Services, Off-Days
+  and Wallet tabs inside Manage.

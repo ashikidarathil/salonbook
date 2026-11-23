@@ -18,7 +18,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { useListParams } from '@/hooks/useListParams';
 import { PageHeader } from '@/components/common/PageHeader';
 
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -63,6 +63,28 @@ import type {
 const ITEMS_PER_PAGE = 5;
 
 const ADMIN_COLOR = '#10B981';
+
+const initials = (name?: string) =>
+  (name || 'Stylist')
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('');
+
+function StylistAvatar({ stylist }: { stylist: StylistListItem }) {
+  return stylist.profilePicture ? (
+    <img
+      src={stylist.profilePicture}
+      alt=""
+      className="size-10 shrink-0 rounded-full object-cover"
+    />
+  ) : (
+    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+      {initials(stylist.name)}
+    </span>
+  );
+}
 
 export default function StylistManagementPage() {
   const dispatch = useAppDispatch();
@@ -210,29 +232,43 @@ export default function StylistManagementPage() {
   };
 
   const getStatusBadge = (stylist: StylistListItem) => {
+    const styles: Record<string, [string, string]> = {
+      ACTIVE: ['Active', 'border-emerald-200 bg-emerald-50 text-emerald-700'],
+      APPLIED: ['Applied', 'border-amber-200 bg-amber-50 text-amber-700'],
+      PENDING: ['Invite Sent', 'border-blue-200 bg-blue-50 text-blue-700'],
+      EXPIRED: ['Expired', 'border-red-200 bg-red-50 text-red-700'],
+      ACCEPTED: ['Registered', 'border-purple-200 bg-purple-50 text-purple-700'],
+    };
     const flowStatus = getFlowStatus(stylist);
-
-    if (flowStatus === 'ACTIVE') return <Badge className="bg-green-500">ACTIVE</Badge>;
-    if (flowStatus === 'APPLIED')
-      return (
-        <Badge variant="secondary" className="bg-yellow-300">
-          APPLIED
-        </Badge>
-      );
-    if (flowStatus === 'PENDING') return <Badge className="bg-blue-500">INVITE SENT</Badge>;
-    if (flowStatus === 'EXPIRED')
-      return (
-        <Badge variant="destructive" className="bg-red-500">
-          EXPIRED
-        </Badge>
-      );
-    if (flowStatus === 'ACCEPTED') return <Badge className="bg-purple-500">REGISTERED</Badge>;
-    return <Badge variant="outline">{flowStatus}</Badge>;
+    const [label, style] = styles[flowStatus] ?? [flowStatus, ''];
+    return (
+      <Badge variant="outline" className={`shrink-0 whitespace-nowrap ${style}`}>
+        {label}
+      </Badge>
+    );
   };
+
+  const positionSelect = (stylist: StylistListItem, className: string) => (
+    <Select
+      value={stylist.position || 'TRAINEE'}
+      onValueChange={(val) => handleUpdatePosition(stylist.id, val as StylistPosition)}
+      disabled={stylist.status !== 'ACTIVE'}
+    >
+      <SelectTrigger aria-label={`Position of ${stylist.name || 'stylist'}`} className={className}>
+        <SelectValue placeholder="Position" />
+      </SelectTrigger>
+      <SelectContent className="theme-admin">
+        <SelectItem value="TRAINEE">Trainee</SelectItem>
+        <SelectItem value="JUNIOR">Junior</SelectItem>
+        <SelectItem value="SENIOR">Senior</SelectItem>
+      </SelectContent>
+    </Select>
+  );
 
   const getActionButtons = (stylist: StylistListItem) => {
     const { userId, isBlocked, name = 'Stylist' } = stylist;
     const flowStatus = getFlowStatus(stylist);
+    const size = 'h-10 min-w-0 flex-1 px-3 xl:flex-none';
 
     if (flowStatus === 'APPLIED') {
       return (
@@ -240,7 +276,7 @@ export default function StylistManagementPage() {
           size="sm"
           onClick={() => handleSendInviteToApplied(userId, name)}
           style={{ backgroundColor: ADMIN_COLOR }}
-          className="text-white hover:opacity-90"
+          className={`${size} text-white hover:opacity-90`}
         >
           Send Invite
         </Button>
@@ -249,7 +285,12 @@ export default function StylistManagementPage() {
 
     if (flowStatus === 'PENDING') {
       return (
-        <Button size="sm" variant="outline" onClick={() => setViewInviteDialog(stylist)}>
+        <Button
+          size="sm"
+          variant="outline"
+          className={size}
+          onClick={() => setViewInviteDialog(stylist)}
+        >
           View Link
         </Button>
       );
@@ -257,47 +298,54 @@ export default function StylistManagementPage() {
 
     if (flowStatus === 'ACCEPTED') {
       return (
-        <div className="flex gap-2">
+        <>
           <Button
             size="sm"
             onClick={() => handleApprove(userId, name)}
             style={{ backgroundColor: ADMIN_COLOR }}
-            className="text-white hover:opacity-90"
+            className={`${size} text-white hover:opacity-90`}
           >
             Approve
           </Button>
-          <Button size="sm" variant="destructive" onClick={() => handleReject(userId, name)}>
+          <Button
+            size="sm"
+            variant="outline"
+            className={`${size} border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700`}
+            onClick={() => handleReject(userId, name)}
+          >
             Reject
           </Button>
-        </div>
+        </>
       );
     }
 
     if (flowStatus === 'ACTIVE') {
       return (
-        <div className="flex items-center justify-end gap-1.5">
+        <>
           <Button
             size="sm"
             variant="outline"
-            className="font-bold border-primary/20 text-primary hover:bg-primary/5 shadow-sm"
+            className={`${size} border-primary/30 font-semibold text-primary hover:bg-primary/5 hover:text-primary`}
             asChild
           >
             <Link to={stylist.id} state={{ from: location.search }}>
-              <Icon icon="solar:settings-bold" className="mr-2 size-4" />
+              <Icon icon="solar:settings-bold" className="mr-1.5 size-4" />
               Manage
             </Link>
           </Button>
-
           <Button
             size="sm"
-            variant={isBlocked ? 'default' : 'destructive'}
+            variant="outline"
+            className={`${size} ${
+              isBlocked
+                ? 'border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800'
+                : 'border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700'
+            }`}
             onClick={() => handleToggleBlock(stylist.id, stylist.name, stylist.isBlocked)}
-            style={isBlocked ? { backgroundColor: ADMIN_COLOR } : {}}
-            className={isBlocked ? 'text-white hover:opacity-90' : ''}
           >
             {isBlocked ? 'Unblock' : 'Block'}
           </Button>
-        </div>
+        </>
       );
     }
 
@@ -321,12 +369,17 @@ export default function StylistManagementPage() {
         }
       />
 
-      <div className="sm:max-w-md">
+      <div className="relative sm:max-w-md">
+        <Icon
+          icon="solar:magnifer-linear"
+          className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+        />
         <Input
+          aria-label="Search stylists"
           placeholder="Search by name, email, specialization..."
           value={searchTerm}
           onChange={(e) => list.update({ q: e.target.value })}
-          className="w-full"
+          className="h-10 w-full bg-background pl-9"
         />
       </div>
 
@@ -341,121 +394,122 @@ export default function StylistManagementPage() {
         emptyMessage={searchTerm ? 'No matches' : 'No applications or team members yet'}
         emptyIcon="hugeicons:user-group"
       >
-        {/* Stylists Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>All Stylists ({pagination?.totalItems || 0})</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <ul className="divide-y lg:hidden">
-              {stylists.map((stylist) => (
-                <li key={stylist.userId} className="space-y-3 p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="break-words font-medium">
-                        {stylist.name || 'Pending Registration'}
-                      </p>
+        <div className="space-y-4">
+          <p className="text-sm font-semibold">
+            All Stylists{' '}
+            <span className="text-muted-foreground">({pagination?.totalItems || 0})</span>
+          </p>
+
+          {/* Phones and tablets */}
+          <ul className="grid gap-3 lg:grid-cols-2 xl:hidden">
+            {stylists.map((stylist) => (
+              <li key={stylist.userId}>
+                <Card className="flex h-full flex-col gap-3 p-4 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <StylistAvatar stylist={stylist} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="min-w-0 break-words font-semibold leading-snug">
+                          {stylist.name || 'Pending Registration'}
+                        </p>
+                        <div className="flex shrink-0 flex-col items-end gap-1">
+                          {getStatusBadge(stylist)}
+                          {stylist.isBlocked && (
+                            <Badge
+                              variant="outline"
+                              className="border-red-200 bg-red-50 text-red-700"
+                            >
+                              Blocked
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
                       <p className="mt-0.5 break-all text-sm text-muted-foreground">
                         {stylist.email || '—'}
                       </p>
-                      <p className="mt-1 break-words text-sm">
-                        {stylist.specialization} · {stylist.experience} years
-                      </p>
-                    </div>
-                    <div className="flex shrink-0 flex-col items-end gap-1">
-                      {getStatusBadge(stylist)}
-                      {stylist.isBlocked && <Badge variant="destructive">BLOCKED</Badge>}
                     </div>
                   </div>
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <Select
-                      value={stylist.position || 'TRAINEE'}
-                      onValueChange={(val) =>
-                        handleUpdatePosition(stylist.id, val as StylistPosition)
-                      }
-                      disabled={stylist.status !== 'ACTIVE'}
-                    >
-                      <SelectTrigger
-                        aria-label={`Position of ${stylist.name || 'stylist'}`}
-                        className="w-full sm:w-36"
-                      >
-                        <SelectValue placeholder="Position" />
-                      </SelectTrigger>
-                      <SelectContent className="theme-admin">
-                        <SelectItem value="TRAINEE">Trainee</SelectItem>
-                        <SelectItem value="JUNIOR">Junior</SelectItem>
-                        <SelectItem value="SENIOR">Senior</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {getActionButtons(stylist)}
+                  <dl className="grid grid-cols-2 gap-2 rounded-lg bg-muted/40 p-3 text-xs">
+                    <div className="min-w-0">
+                      <dt className="text-muted-foreground">Specialization</dt>
+                      <dd className="mt-0.5 break-words font-medium">{stylist.specialization}</dd>
+                    </div>
+                    <div className="min-w-0">
+                      <dt className="text-muted-foreground">Experience</dt>
+                      <dd className="mt-0.5 font-medium">{stylist.experience} years</dd>
+                    </div>
+                  </dl>
+                  <div className="mt-auto space-y-2">
+                    {positionSelect(stylist, 'h-10 w-full')}
+                    <div className="flex gap-2">{getActionButtons(stylist)}</div>
                   </div>
-                </li>
-              ))}
-            </ul>
+                </Card>
+              </li>
+            ))}
+          </ul>
 
-            <div className="hidden overflow-x-auto lg:block">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Specialization</TableHead>
-                    <TableHead>Experience</TableHead>
-                    <TableHead>Position</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Blocked</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+          {/* Large screens */}
+          <Card className="hidden overflow-hidden shadow-sm xl:block">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/30 hover:bg-muted/30">
+                  <TableHead>Stylist</TableHead>
+                  <TableHead>Specialization</TableHead>
+                  <TableHead>Position</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {stylists.map((stylist) => (
+                  <TableRow key={stylist.userId}>
+                    <TableCell className="max-w-xs">
+                      <div className="flex items-center gap-3">
+                        <StylistAvatar stylist={stylist} />
+                        <div className="min-w-0">
+                          <p className="truncate font-medium">
+                            {stylist.name || 'Pending Registration'}
+                          </p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {stylist.email || '—'}
+                          </p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="max-w-[180px]">
+                      <p className="truncate">{stylist.specialization}</p>
+                      <p className="text-xs text-muted-foreground">{stylist.experience} years</p>
+                    </TableCell>
+                    <TableCell>{positionSelect(stylist, 'h-10 w-32')}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {getStatusBadge(stylist)}
+                        {stylist.isBlocked && (
+                          <Badge
+                            variant="outline"
+                            className="border-red-200 bg-red-50 text-red-700"
+                          >
+                            Blocked
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-end gap-2">{getActionButtons(stylist)}</div>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {stylists.map((stylist) => (
-                    <TableRow key={stylist.userId}>
-                      <TableCell className="font-medium">
-                        {stylist.name || 'Pending Registration'}
-                      </TableCell>
-                      <TableCell>{stylist.email || '—'}</TableCell>
-                      <TableCell>{stylist.specialization}</TableCell>
-                      <TableCell>{stylist.experience} years</TableCell>
-                      <TableCell>
-                        <Select
-                          value={stylist.position || 'TRAINEE'}
-                          onValueChange={(val) =>
-                            handleUpdatePosition(stylist.id, val as StylistPosition)
-                          }
-                          disabled={stylist.status !== 'ACTIVE'}
-                        >
-                          <SelectTrigger className="w-[120px]">
-                            <SelectValue placeholder="Position" />
-                          </SelectTrigger>
-                          <SelectContent className="theme-admin">
-                            <SelectItem value="TRAINEE">Trainee</SelectItem>
-                            <SelectItem value="JUNIOR">Junior</SelectItem>
-                            <SelectItem value="SENIOR">Senior</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(stylist)}</TableCell>
-                      <TableCell>
-                        <Badge variant={stylist.isBlocked ? 'destructive' : 'secondary'}>
-                          {stylist.isBlocked ? 'YES' : 'NO'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">{getActionButtons(stylist)}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
 
-            <div className="p-4 border-t">
-              <Pagination
-                currentPage={pagination?.currentPage || 1}
-                totalPages={pagination?.totalPages || 1}
-                onPageChange={(page) => list.update({}, page)}
-              />
-            </div>
-          </CardContent>
-        </Card>
+          <Pagination
+            className="mt-2"
+            currentPage={pagination?.currentPage || 1}
+            totalPages={pagination?.totalPages || 1}
+            onPageChange={(page) => list.update({}, page)}
+          />
+        </div>
       </LoadingGate>
       {/* View Invite Link Dialog */}
       <Dialog open={!!viewInviteDialog} onOpenChange={() => setViewInviteDialog(null)}>
@@ -476,7 +530,7 @@ export default function StylistManagementPage() {
                 {viewInviteDialog.inviteExpiresAt && (
                   <div className="p-3 text-sm border border-blue-200 rounded-lg bg-blue-50">
                     <p className="text-blue-800">
-                      ⏰ Expires: {new Date(viewInviteDialog.inviteExpiresAt).toLocaleString()}
+                      Expires: {new Date(viewInviteDialog.inviteExpiresAt).toLocaleString()}
                     </p>
                   </div>
                 )}
