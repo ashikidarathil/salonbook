@@ -142,3 +142,5 @@
   fit small phones across the site.
 - 2026-11-23 — Admin responsive pass, Stylists: stylist cards and table, plus responsive Schedule, Services, Off-Days
   and Wallet tabs inside Manage.
+- 2026-11-23 — Admin responsive pass, Categories: category cards below laptop width, fixed-width table from laptop
+  width, search icon, soft status badges, and a one-column form on tablets.
