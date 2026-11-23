@@ -125,21 +125,21 @@ export default function StylistServiceManagement({
   };
 
   return (
-    <div className="space-y-6 rounded-2xl border bg-white p-3 shadow-sm sm:p-6 lg:p-8">
+    <div className="space-y-4 sm:space-y-6 sm:rounded-2xl sm:border sm:bg-white sm:p-6 sm:shadow-sm lg:p-8">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
-        <div className="flex items-center gap-4">
-          <div>
-            <h2 className="flex items-center gap-2 text-xl font-semibold tracking-tight text-slate-800 sm:text-2xl">
-              <Icon icon="solar:scissors-square-bold" className="size-8 text-primary/80" />
-              Manage Services - {stylistName || 'Stylist'}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b pb-4 sm:pb-6">
+        <div className="flex min-w-0 items-center gap-4">
+          <div className="min-w-0">
+            <h2 className="flex items-start gap-2 break-words text-xl font-semibold tracking-tight text-slate-800 sm:text-2xl">
+              <Icon icon="solar:scissors-square-bold" className="size-7 shrink-0 text-primary/80" />
+              <span className="min-w-0">Manage Services</span>
             </h2>
             <p className="text-sm text-slate-500 mt-0.5">
-              Enable or disable services that this stylist can perform.
+              Enable or disable services that {stylistName || 'this stylist'} can perform.
             </p>
           </div>
         </div>
-        <Badge variant="secondary" className="font-semibold px-4 py-1.5 rounded-full text-xs">
+        <Badge variant="secondary" className="w-fit rounded-full px-4 py-1.5 text-xs font-semibold">
           {pagination.totalItems} Total Services
         </Badge>
       </div>
@@ -214,7 +214,7 @@ export default function StylistServiceManagement({
               }
               emptyIcon="hugeicons:service"
             >
-              <ul className="divide-y lg:hidden">
+              <ul className="divide-y xl:hidden">
                 {services.map((svc) => (
                   <li key={svc.serviceId} className="flex items-center justify-between gap-3 p-4">
                     <div className="min-w-0 space-y-1">
@@ -239,7 +239,7 @@ export default function StylistServiceManagement({
                       variant={svc.isActive ? 'outline' : 'default'}
                       size="sm"
                       className={cn(
-                        'shrink-0',
+                        'h-10 shrink-0',
                         svc.isActive && 'border-red-100 text-red-500 hover:bg-red-50',
                       )}
                       onClick={() => handleToggleClick(svc.serviceId, svc.isActive, svc.name)}
@@ -249,7 +249,7 @@ export default function StylistServiceManagement({
                   </li>
                 ))}
               </ul>
-              <div className="hidden overflow-x-auto lg:block">
+              <div className="hidden overflow-x-auto xl:block">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-slate-50/50 border-b hover:bg-transparent">

@@ -203,8 +203,8 @@ export default function WeeklyRoutine({
                     schedule.isWorkingDay ? 'bg-background' : 'bg-muted/10 opacity-70'
                   )}
                 >
-                  <div className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                    <div className="flex items-center gap-6 sm:w-64">
+                  <div className="flex flex-col justify-between gap-4 p-4 sm:p-6 xl:flex-row xl:items-center xl:gap-6">
+                    <div className="flex items-center gap-4 xl:w-64 xl:gap-6">
                       <div className="relative">
                         <Switch
                           checked={schedule.isWorkingDay}
@@ -228,7 +228,7 @@ export default function WeeklyRoutine({
                       </div>
                     </div>
 
-                    <div className="flex-1 flex items-center justify-center sm:justify-start">
+                    <div className="flex min-w-0 flex-1 items-center justify-start">
                       {schedule.isWorkingDay ? (
                         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 bg-muted/30 p-3 sm:p-2 sm:px-4 rounded-2xl border border-border/20 shadow-sm transition-all hover:bg-muted/50 w-full sm:w-auto">
                           <div className="flex items-center gap-2 justify-between sm:justify-start">

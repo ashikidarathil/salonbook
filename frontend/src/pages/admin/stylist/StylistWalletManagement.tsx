@@ -90,15 +90,15 @@ export default function StylistWalletManagement({ stylistId }: StylistWalletMana
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 xl:grid-cols-3">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-          <Card className="border-none shadow-lg bg-primary text-primary-foreground h-full pt-5">
-            <CardContent className="p-6">
+          <Card className="border-none shadow-lg bg-primary text-primary-foreground h-full">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center gap-3 mb-2">
                 <Wallet className="size-5 opacity-80" />
                 <p className="text-sm font-medium opacity-80">Available Balance</p>
               </div>
-              <p className="text-4xl font-bold">
+              <p className="break-all text-2xl font-bold sm:text-3xl">
                 ₹{wallet?.withdrawableBalance?.toLocaleString('en-IN') ?? '0.00'}
               </p>
               <p className="text-xs mt-2 opacity-70 italic">Cleared funds in your wallet</p>
@@ -111,13 +111,13 @@ export default function StylistWalletManagement({ stylistId }: StylistWalletMana
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
         >
-          <Card className="border-none shadow-lg bg-amber-500 text-white h-full pt-5">
-            <CardContent className="p-6 text-black">
+          <Card className="border-none shadow-lg bg-amber-500 text-white h-full">
+            <CardContent className="p-4 text-black sm:p-6">
               <div className="flex items-center gap-3 mb-2">
                 <Clock className="size-5 opacity-80" />
                 <p className="text-sm font-medium opacity-80">Held Money (Escrow)</p>
               </div>
-              <p className="text-4xl font-bold">
+              <p className="break-all text-2xl font-bold sm:text-3xl">
                 ₹{heldBalance?.toLocaleString('en-IN') ?? '0.00'}
               </p>
               <p className="text-xs mt-2 opacity-70 italic">Releases every 2 minutes</p>
@@ -130,13 +130,13 @@ export default function StylistWalletManagement({ stylistId }: StylistWalletMana
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="border-none shadow-lg bg-muted/60 h-full pt-5">
-            <CardContent className="p-6">
+          <Card className="border-none shadow-lg bg-muted/60 h-full">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center gap-3 mb-2">
                 <TrendingUp className="size-5 text-muted-foreground" />
                 <p className="text-sm font-medium text-muted-foreground">Lifetime Earnings</p>
               </div>
-              <p className="text-4xl font-bold text-foreground">
+              <p className="break-all text-2xl font-bold sm:text-3xl text-foreground">
                 ₹{wallet?.totalEarnings?.toLocaleString('en-IN') ?? '0.00'}
               </p>
               <p className="text-xs mt-2 text-muted-foreground italic">Total revenue generated</p>
@@ -147,28 +147,28 @@ export default function StylistWalletManagement({ stylistId }: StylistWalletMana
 
       {/* Escrow Transactions */}
       <Card className="border-border/60 shadow-sm overflow-hidden">
-        <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b bg-muted/20 pb-4">
+        <CardHeader className="flex flex-col gap-3 space-y-0 border-b bg-muted/20 p-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
             <CardTitle className="text-sm font-bold">Escrow Transactions</CardTitle>
             <p className="text-[10px] text-muted-foreground mt-0.5">
               Detailed list of all held and released funds
             </p>
           </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex w-full items-center gap-2 xl:w-auto">
             <Button
               variant="outline"
               size="sm"
-              className="h-8 gap-2 text-xs"
+              className="h-10 shrink-0 gap-2 text-xs"
               onClick={handleRefresh}
             >
               {escrowLoading ? <Loader size="xs" /> : <RefreshCw className="size-3" />}
               Refresh
             </Button>
-            <form onSubmit={handleSearch} className="relative w-full sm:w-64">
+            <form onSubmit={handleSearch} className="relative min-w-0 flex-1 xl:w-64 xl:flex-none">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
               <Input
-                placeholder="Search booking number..."
-                className="pl-9 h-8 text-xs"
+                placeholder="Search booking..."
+                className="h-10 pl-9 text-base sm:text-xs"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -176,7 +176,7 @@ export default function StylistWalletManagement({ stylistId }: StylistWalletMana
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="lg:hidden">
+          <div className="xl:hidden">
             {escrowLoading && escrows.length === 0 ? (
               <div className="flex justify-center py-8">
                 <Loader size="sm" label="Loading escrow" />
@@ -214,7 +214,7 @@ export default function StylistWalletManagement({ stylistId }: StylistWalletMana
               </ul>
             )}
           </div>
-          <div className="hidden overflow-x-auto lg:block">
+          <div className="hidden overflow-x-auto xl:block">
             <table className="w-full text-xs text-left">
               <thead className="bg-muted/30 text-muted-foreground font-medium border-b">
                 <tr>

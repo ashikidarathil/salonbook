@@ -69,10 +69,10 @@ export default function OffDayManagement({ stylistId, onClose }: OffDayManagemen
 
   return (
     <div className="space-y-6">
-      <div className="space-y-6 rounded-2xl border bg-white p-3 shadow-sm sm:p-6 lg:p-8">
+      <div className="space-y-4 sm:space-y-6 sm:rounded-2xl sm:border sm:bg-white sm:p-6 sm:shadow-sm lg:p-8">
         {/* Component Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b pb-4 sm:pb-6">
+          <div className="flex min-w-0 items-center gap-4">
             {onClose && (
               <Button
                 variant="ghost"
@@ -91,7 +91,7 @@ export default function OffDayManagement({ stylistId, onClose }: OffDayManagemen
                     : 'break-words text-2xl font-bold sm:text-3xl'
                 }`}
               >
-                <Icon icon="solar:shield-user-bold" className="size-8 text-primary/80" />
+                <Icon icon="solar:shield-user-bold" className="size-7 shrink-0 text-primary/80" />
                 Off-Day Management
               </Heading>
               <p className="text-sm text-slate-500 mt-0.5">
@@ -99,7 +99,10 @@ export default function OffDayManagement({ stylistId, onClose }: OffDayManagemen
               </p>
             </div>
           </div>
-          <Badge variant="secondary" className="font-semibold px-4 py-1.5 rounded-full text-xs">
+          <Badge
+            variant="secondary"
+            className="w-fit rounded-full px-4 py-1.5 text-xs font-semibold"
+          >
             {pendingRequests.length} Pending Actions
           </Badge>
         </div>
@@ -125,13 +128,13 @@ export default function OffDayManagement({ stylistId, onClose }: OffDayManagemen
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
               {pendingRequests.map((request) => (
                 <Card
                   key={request.id}
                   className="border border-slate-200 shadow-sm rounded-2xl overflow-hidden hover:shadow-md transition-all duration-300"
                 >
-                  <CardHeader className="bg-slate-50/50 border-b pb-4">
+                  <CardHeader className="border-b bg-slate-50/50 p-4">
                     <div className="flex items-center gap-3">
                       <div className="size-10 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center">
                         <Icon icon="solar:user-bold" className="size-5 text-primary" />
@@ -146,7 +149,7 @@ export default function OffDayManagement({ stylistId, onClose }: OffDayManagemen
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="p-5 space-y-4">
+                  <CardContent className="space-y-4 p-4">
                     <div className="space-y-3">
                       <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-slate-100">
                         <Icon icon="solar:calendar-date-bold" className="size-4 text-slate-400" />
@@ -165,7 +168,7 @@ export default function OffDayManagement({ stylistId, onClose }: OffDayManagemen
                         <label className="text-[10px] font-bold tracking-wider text-slate-400 ml-1">
                           Reason
                         </label>
-                        <div className="p-3 bg-slate-50/50 rounded-xl text-xs font-medium italic text-slate-600 border border-slate-100 leading-relaxed">
+                        <div className="break-words rounded-xl border border-slate-100 bg-slate-50/50 p-3 text-xs font-medium italic leading-relaxed text-slate-600">
                           "{request.reason}"
                         </div>
                       </div>
@@ -221,7 +224,7 @@ export default function OffDayManagement({ stylistId, onClose }: OffDayManagemen
 
           <Card className="border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
             <CardContent className="p-0">
-              <ul className="divide-y lg:hidden">
+              <ul className="divide-y xl:hidden">
                 {historyRequests.map((request) => (
                   <li key={request.id} className="space-y-2 p-4">
                     <div className="flex items-start justify-between gap-3">
@@ -261,7 +264,7 @@ export default function OffDayManagement({ stylistId, onClose }: OffDayManagemen
                   </li>
                 ))}
               </ul>
-              <div className="hidden overflow-x-auto lg:block">
+              <div className="hidden overflow-x-auto xl:block">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-slate-50/50 border-b">

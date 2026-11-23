@@ -46,9 +46,8 @@ export default function StylistDetailsView({ stylist }: StylistDetailsViewProps)
 
   return (
     <div className="space-y-6">
-
       {/* Public profile address (readable URL name) */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border bg-white px-4 py-3">
+      <div className="flex min-w-0 flex-col gap-1 rounded-xl border bg-white px-4 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4">
         <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
           Public profile
         </span>
@@ -61,33 +60,33 @@ export default function StylistDetailsView({ stylist }: StylistDetailsViewProps)
         onValueChange={(value) => setParams({ section: value }, { replace: true })}
         className="space-y-6"
       >
-        <TabsList className="bg-slate-50/50 border p-1 rounded-xl w-full max-w-full md:w-auto overflow-x-auto !justify-start inline-flex">
+        <TabsList className="grid h-auto w-full grid-cols-4 gap-1 rounded-xl border bg-slate-50/50 p-1 xl:inline-flex xl:w-auto">
           <TabsTrigger
             value="schedule"
-            className="shrink-0 rounded-lg px-3 py-2 sm:px-8 text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+            className="min-w-0 rounded-lg px-1 py-2 text-xs font-medium sm:text-sm xl:px-8 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
           >
-            <Icon icon="solar:clock-circle-linear" className="mr-2 size-4" />
+            <Icon icon="solar:clock-circle-linear" className="mr-2 hidden size-4 sm:block" />
             Schedule
           </TabsTrigger>
           <TabsTrigger
             value="services"
-            className="shrink-0 rounded-lg px-3 py-2 sm:px-8 text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+            className="min-w-0 rounded-lg px-1 py-2 text-xs font-medium sm:text-sm xl:px-8 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
           >
-            <Icon icon="solar:scissors-square-linear" className="mr-2 size-4" />
+            <Icon icon="solar:scissors-square-linear" className="mr-2 hidden size-4 sm:block" />
             Services
           </TabsTrigger>
           <TabsTrigger
             value="off-days"
-            className="shrink-0 rounded-lg px-3 py-2 sm:px-8 text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+            className="min-w-0 rounded-lg px-1 py-2 text-xs font-medium sm:text-sm xl:px-8 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
           >
-            <Icon icon="solar:calendar-linear" className="mr-2 size-4" />
+            <Icon icon="solar:calendar-linear" className="mr-2 hidden size-4 sm:block" />
             Off-Days
           </TabsTrigger>
           <TabsTrigger
             value="wallet"
-            className="shrink-0 rounded-lg px-3 py-2 sm:px-8 text-xs font-medium data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
+            className="min-w-0 rounded-lg px-1 py-2 text-xs font-medium sm:text-sm xl:px-8 data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all"
           >
-            <Icon icon="solar:wallet-bold" className="mr-2 size-4" />
+            <Icon icon="solar:wallet-bold" className="mr-2 hidden size-4 sm:block" />
             Wallet
           </TabsTrigger>
         </TabsList>

@@ -55,9 +55,9 @@ export default function StylistScheduleManagement({
 
   return (
     <div className="space-y-4">
-      <div className="space-y-6 rounded-2xl border bg-white p-3 shadow-sm sm:p-6 lg:p-8">
+      <div className="space-y-4 sm:space-y-6 sm:rounded-2xl sm:border sm:bg-white sm:p-6 sm:shadow-sm lg:p-8">
         {/* Component Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b pb-4 sm:pb-6">
           <div className="flex items-center gap-4">
             <div>
               <h2 className="flex items-center gap-2 text-xl font-semibold tracking-tight text-slate-800 sm:text-2xl">
@@ -70,7 +70,10 @@ export default function StylistScheduleManagement({
               </p>
             </div>
           </div>
-          <Badge variant="secondary" className="font-semibold px-4 py-1.5 rounded-full text-xs">
+          <Badge
+            variant="secondary"
+            className="hidden rounded-full px-4 py-1.5 text-xs font-semibold md:inline-flex"
+          >
             Admin Access
           </Badge>
         </div>
@@ -96,28 +99,31 @@ export default function StylistScheduleManagement({
         ) : (
           /* Schedule Tabs */
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-2">
-            <div className="flex max-w-full overflow-x-auto">
-              <TabsList className="w-max shrink-0 !justify-start rounded-lg border bg-slate-50/50 p-1">
+            <div>
+              <TabsList className="grid h-auto w-full grid-cols-3 gap-1 rounded-lg border bg-slate-50/50 p-1 xl:inline-flex xl:w-auto">
                 <TabsTrigger
                   value="weekly"
-                  className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-1.5 transition-all text-sm font-medium"
+                  className="rounded-md min-w-0 px-1 py-2 text-xs font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm sm:text-sm xl:px-4"
                 >
-                  <Icon icon="solar:calendar-linear" className="mr-2 size-4" />
-                  Weekly Routine
+                  <Icon icon="solar:calendar-linear" className="mr-2 hidden size-4 lg:block" />
+                  <span className="lg:hidden">Weekly</span>
+                  <span className="hidden lg:inline">Weekly Routine</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="daily"
-                  className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-1.5 transition-all text-sm font-medium"
+                  className="rounded-md min-w-0 px-1 py-2 text-xs font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm sm:text-sm xl:px-4"
                 >
-                  <Icon icon="solar:calendar-date-linear" className="mr-2 size-4" />
-                  Daily Overrides
+                  <Icon icon="solar:calendar-date-linear" className="mr-2 hidden size-4 lg:block" />
+                  <span className="lg:hidden">Daily</span>
+                  <span className="hidden lg:inline">Daily Overrides</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="breaks"
-                  className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-1.5 transition-all text-sm font-medium"
+                  className="rounded-md min-w-0 px-1 py-2 text-xs font-medium transition-all data-[state=active]:bg-white data-[state=active]:shadow-sm sm:text-sm xl:px-4"
                 >
-                  <Icon icon="solar:coffee-cup-linear" className="mr-2 size-4" />
-                  Break Times
+                  <Icon icon="solar:coffee-cup-linear" className="mr-2 hidden size-4 lg:block" />
+                  <span className="lg:hidden">Breaks</span>
+                  <span className="hidden lg:inline">Break Times</span>
                 </TabsTrigger>
               </TabsList>
             </div>
