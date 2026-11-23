@@ -137,6 +137,11 @@ export class SlotRepository implements ISlotRepository {
   async updateSpecialSlot(id: string, data: Partial<ISpecialSlot>): Promise<ISpecialSlot | null> {
     return await SpecialSlotModel.findByIdAndUpdate(id, data, { new: true }).lean();
   }
+
+  async deleteSpecialSlot(id: string): Promise<void> {
+    await SpecialSlotModel.findByIdAndDelete(id);
+  }
+
   async findStylistById(id: string): Promise<IStylist | null> {
     return await StylistModel.findById(id).populate('userId', 'name email').lean();
   }

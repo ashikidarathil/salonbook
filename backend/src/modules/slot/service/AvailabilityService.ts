@@ -259,6 +259,7 @@ export class AvailabilityService implements IAvailabilityService {
 
           let status = SlotStatus.AVAILABLE;
           let note: string | undefined;
+          let bookingId: string | undefined;
 
           // Check if a CANCELLED (blocked) special slot covers this time slot
           const blockedSpecialSlot = allSpecialSlots.find((ss) => {
@@ -295,6 +296,7 @@ export class AvailabilityService implements IAvailabilityService {
               if (overlapped) {
                 status = isBlocked ? SlotStatus.BLOCKED : SlotStatus.BOOKED;
                 note = b.notes || (isBlocked ? SLOT_LABELS.BLOCKED_NOTE : undefined);
+                if (includeAll && !isBlocked) bookingId = String(b._id);
                 break;
               }
             }
@@ -320,6 +322,7 @@ export class AvailabilityService implements IAvailabilityService {
             startTimeUTC: new Date(queryDate.getTime() + slotStart * 60000).toISOString(),
             status,
             note,
+            bookingId,
             createdAt: queryDate.toISOString(),
             updatedAt: queryDate.toISOString(),
           });
@@ -328,6 +331,9 @@ export class AvailabilityService implements IAvailabilityService {
     }
 
     allSpecialSlots.forEach((ss) => {
+      // A cancelled record is blocked time, already applied to the grid above
+      if (ss.status === 'CANCELLED') return;
+
       const ssStart = timeToMinutes(ss.startTime);
       const ssEnd = timeToMinutes(ss.endTime);
       const reqDuration = duration || 0;
@@ -339,6 +345,7 @@ export class AvailabilityService implements IAvailabilityService {
 
       const bookingsForStylist = bookingMap.get(sid) || [];
       let currentStatus = SlotStatus.SPECIAL as SlotStatus;
+      let bookingId: string | undefined;
 
       for (const b of bookingsForStylist) {
         const intervals =
@@ -358,6 +365,7 @@ export class AvailabilityService implements IAvailabilityService {
 
         if (intervals.some((interval) => ssStart < interval.end && ssEnd > interval.start)) {
           currentStatus = SlotStatus.BOOKED;
+          if (includeAll && b.status !== BookingStatus.BLOCKED) bookingId = String(b._id);
           break;
         }
       }
@@ -375,6 +383,7 @@ export class AvailabilityService implements IAvailabilityService {
         status: currentStatus,
         price: ss.price,
         note: ss.note,
+        bookingId,
         createdAt: ss.createdAt.toISOString(),
         updatedAt: ss.updatedAt.toISOString(),
       });

@@ -24,6 +24,7 @@ export interface SlotItem {
   note?: string;
   price?: number;
   bookedServices?: string[];
+  bookingId?: string;
 }
 
 export interface ListSlotsParams {

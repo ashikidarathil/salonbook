@@ -148,3 +148,5 @@
   width, compact filters, and a one-column form on tablets.
 - 2026-11-23 — Admin responsive pass, Branches: branch cards and table, plus responsive Stylists, Categories,
   Services, Breaks and branch form pages.
+- 2026-11-23 — Slots redesign: admin filters, status chips, laptop day board and phone day list; stylist week strip.
+  Fixed blocked time being offered as special slots, unblock creating special slots, and delete blocking time.

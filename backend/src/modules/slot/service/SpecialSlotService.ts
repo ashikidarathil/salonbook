@@ -131,11 +131,11 @@ export class SpecialSlotService implements ISpecialSlotService {
       throw new AppError(SLOT_MESSAGES.SPECIAL_CANCELLED, HttpStatus.OK);
     }
 
-    await this.slotRepo.updateSpecialSlot(id, { status: SpecialSlotStatus.CANCELLED });
-    const updated = await this.slotRepo.findSpecialSlotById(id);
-    if (!updated) {
-      throw new AppError(SLOT_MESSAGES.NOT_FOUND, HttpStatus.NOT_FOUND);
-    }
-    return SlotMapper.toResponse(updated as unknown as SlotLike);
+    // CANCELLED means blocked time, so a removed special slot must not keep that status
+    await this.slotRepo.deleteSpecialSlot(id);
+    return SlotMapper.toResponse({
+      ...slot,
+      status: SpecialSlotStatus.CANCELLED,
+    } as unknown as SlotLike);
   }
 }
