@@ -132,3 +132,5 @@
 - 2026-11-23 — 5.7 follow-up: dashboard and wallet period filters fit phones, with equal tabs in one row and a full-width
   Specific Date button, for admin and stylist.
 - 2026-11-23 — 5.7 follow-up: admin mobile menu now opens, shows the active tab, and closes after navigating.
+- 2026-11-23 — Admin responsive pass, Dashboard: compact stat cards, readable charts with short dates, a proper empty
+  state, and layouts for phone, tablet and laptop. Checked with empty and large data at nine widths (91 checks).
