@@ -12,7 +12,7 @@ export function TrendingHairstyles() {
         </h2>
         <p className="text-muted-foreground">Get inspired by the latest trends</p>
       </div>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
         <Card className="pt-0 overflow-hidden">
           <img
             alt="Modern Layers"

@@ -64,7 +64,7 @@ export function TopStylists() {
           <Icon icon="solar:arrow-right-bold" className="ml-1 size-5" />
         </Button>
       </div>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
         {stylists.map((stylist) => (
           <Card key={stylist.stylistId} className="group hover:border-primary/20 transition-all">
             <CardContent className="pt-6 text-center">

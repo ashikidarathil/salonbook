@@ -47,9 +47,13 @@ export function Testimonials() {
         </h2>
         <p className="text-muted-foreground">Real reviews from our valued customers</p>
       </div>
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+      {/* Phones swipe through the reviews; wider screens show a grid */}
+      <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:overflow-visible md:px-0 md:pb-0 md:grid-cols-3 md:gap-8">
         {reviews.map((review) => (
-          <Card key={review.id} className="hover:shadow-md transition-shadow">
+          <Card
+            key={review.id}
+            className="w-[85%] shrink-0 snap-start transition-shadow hover:shadow-md sm:w-[45%] md:w-auto"
+          >
             <CardContent className="pt-6">
               <div className="flex items-center gap-3 mb-4">
                 <img

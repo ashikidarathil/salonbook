@@ -195,3 +195,6 @@
 - 2026-11-24 — Stylist responsive pass, Profile: photo beside the forms on laptops, one-column fields on tablets,
   full-width Cancel / Save on phones. Stylist top bar: title and name only from laptop width, long names
   shortened. Stylist responsive pass complete: Dashboard through Profile.
+- 2026-11-24 — Customer responsive pass, Home: hero gets the same side margin as the rest of the page; Popular
+  Services and client reviews swipe sideways on phones; Top Rated Stylists two per row on phones; Trending
+  Hairstyles three per row from tablet width. Phone page height about 10,400 px to 6,100 px.

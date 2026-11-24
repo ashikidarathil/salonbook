@@ -48,14 +48,15 @@ export function PopularServices() {
         </h2>
         <p className="text-muted-foreground">Discover our most-booked services</p>
       </div>
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+      {/* Phones swipe through the services; wider screens show a grid */}
+      <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:overflow-visible md:px-0 md:pb-0 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
         {services.map((service) => (
           <Card
             key={service.serviceId}
-            className="overflow-hidden transition-colors border-border/60 hover:border-primary/50 group flex flex-col"
+            className="group flex w-[82%] shrink-0 snap-start flex-col overflow-hidden border-border/60 transition-colors hover:border-primary/50 sm:w-[45%] md:w-auto"
           >
             {/* Service Image */}
-            <div className="relative flex items-center justify-center h-64 p-8 overflow-hidden bg-muted/30">
+            <div className="relative flex h-48 items-center justify-center overflow-hidden bg-muted/30 p-6 sm:h-64 sm:p-8">
               {service.imageUrl ? (
                 <img
                   src={service.imageUrl}
@@ -91,7 +92,7 @@ export function PopularServices() {
                 </p>
               )}
 
-              <div className="flex items-center gap-2 mb-4">
+              <div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1">
                 <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (
                     <Icon
@@ -112,9 +113,9 @@ export function PopularServices() {
                 <span className="text-xs text-muted-foreground">
                   ({service.totalReviews || 0} reviews)
                 </span>
-                <span className="mx-2 text-muted-foreground">•</span>
+                <span className="text-muted-foreground">•</span>
                 <span className="text-sm font-medium text-primary">
-                  {service.bookingCount} Bookings
+                  {service.bookingCount} {service.bookingCount === 1 ? 'Booking' : 'Bookings'}
                 </span>
               </div>
 
