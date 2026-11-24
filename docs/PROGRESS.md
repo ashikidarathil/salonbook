@@ -164,3 +164,6 @@
 - 2026-11-24 — Admin responsive pass, Notifications (shared by customer, stylist and admin): shared header and
   breadcrumbs shown once, status and day filters kept in the address, notification cards that wrap long text.
   Admin responsive pass complete: Dashboard through Notifications.
+- 2026-11-24 — Bug fixes: category and service names keep their capitals (duplicates still blocked in any case);
+  restoring a category or service makes it Active again; editing a disabled branch service's price keeps it
+  disabled; avatars without a photo (or with a broken one) show only the initial or icon.

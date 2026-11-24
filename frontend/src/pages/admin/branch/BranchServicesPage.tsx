@@ -121,7 +121,8 @@ export default function BranchServicesPage() {
         serviceId,
         price: priceNum,
         duration: durationNum,
-        isActive: true,
+        // Saving a price keeps a disabled service disabled; a new one starts enabled
+        isActive: editingService?.configured ? editingService.isActive : true,
       }),
     );
     closeLoading();

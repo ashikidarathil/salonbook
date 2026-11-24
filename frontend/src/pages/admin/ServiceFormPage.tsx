@@ -42,7 +42,7 @@ const serviceSchema = z.object({
 type ServiceFormData = z.infer<typeof serviceSchema>;
 
 const capitalizeFirst = (text: string) =>
-  text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+  text.charAt(0).toUpperCase() + text.slice(1);
 
 export default function ServiceFormPage() {
   const { id } = useParams<{ id: string }>();
