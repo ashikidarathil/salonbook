@@ -1,6 +1,6 @@
 import { injectable } from 'tsyringe';
 import { ServiceModel } from '../../../models/service.model';
-import type { ServiceDocument } from '../../../models/service.model';
+import type { ServiceDocument, ServiceImageField } from '../../../models/service.model';
 import type { IServiceRepository } from './IServiceRepository';
 import type { ServicePaginationQueryDto } from '../dto/service.request.dto';
 import type { ServicePaginatedResponse } from '../dto/service.response.dto';
@@ -62,8 +62,12 @@ export class ServiceRepository implements IServiceRepository {
     return ServiceModel.findByIdAndUpdate(id, data, { new: true });
   }
 
-  async updateImageUrl(id: string, imageUrl: string): Promise<ServiceDocument | null> {
-    return ServiceModel.findByIdAndUpdate(id, { imageUrl }, { new: true });
+  async updateImageUrl(
+    id: string,
+    imageUrl: string,
+    field: ServiceImageField = 'imageUrl',
+  ): Promise<ServiceDocument | null> {
+    return ServiceModel.findByIdAndUpdate(id, { [field]: imageUrl }, { new: true });
   }
 
   async softDelete(id: string): Promise<ServiceDocument | null> {
