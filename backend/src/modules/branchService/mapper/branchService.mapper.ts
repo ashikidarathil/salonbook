@@ -8,6 +8,7 @@ export type BranchServiceItemResponse = {
   price: number | null;
   duration: number | null;
   imageUrl?: string;
+  detailImageUrl?: string;
   description?: string;
   whatIncluded?: string[];
   isActive: boolean;

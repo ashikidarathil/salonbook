@@ -4,12 +4,17 @@ import { CategoryStatus } from './category.model';
 
 export type ServiceStatus = 'ACTIVE' | 'INACTIVE';
 
+/** imageUrl is the card picture in lists; detailImageUrl is shown on the service page. */
+export type ServiceImageField = 'imageUrl' | 'detailImageUrl';
+
 export interface ServiceDocument extends mongoose.Document {
   name: string;
   slug?: string;
   description?: string;
   categoryId: mongoose.Types.ObjectId;
   imageUrl?: string;
+  /** Larger picture for the service page; the card image is used when empty. */
+  detailImageUrl?: string;
   whatIncluded?: string[];
   status: ServiceStatus;
   isDeleted: boolean;
@@ -32,6 +37,7 @@ export type ServiceLean = {
     isDeleted: boolean;
   };
   imageUrl?: string;
+  detailImageUrl?: string;
   description?: string;
   whatIncluded?: string[];
   status: ServiceStatus;
@@ -48,6 +54,7 @@ const ServiceSchema = new Schema<ServiceDocument>(
     description: { type: String, trim: true },
     categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
     imageUrl: { type: String, default: null },
+    detailImageUrl: { type: String, default: null },
     whatIncluded: {
       type: [String],
       default: [],

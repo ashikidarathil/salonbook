@@ -98,7 +98,7 @@ export default function ServicesPage() {
     if (!confirmed) return;
 
     showLoading('Deleting image...');
-    const result = await dispatch(deleteServiceImage(serviceId));
+    const result = await dispatch(deleteServiceImage({ serviceId }));
     closeLoading();
 
     if (deleteServiceImage.fulfilled.match(result)) {

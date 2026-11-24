@@ -223,6 +223,10 @@
 - 2026-11-24 — Customer responsive pass, Chat: long links and words wrap inside the bubble instead of running
   off the screen (this also pushed the whole tablet layout sideways); bigger message "…" buttons; readable times,
   booking numbers, unread and header count bubbles. Shared with the stylist chat.
+- 2026-11-24 — Services: the whole service card opens the service page (Add to Cart still adds). Each service
+  now has two photos: a card photo for lists and a page photo for the service page (new detailImageUrl; upload
+  and delete take ?kind=detail). The service page falls back to the card photo when no page photo is set, and
+  the seed copies the card photo into the page photo. Admin service form shows both photos side by side.
 - 2026-11-24 — Stylist appointment details: everything in one card like the other detail pages (date, time and
   customer; services and totals; customer note; and for confirmed bookings the Completed, No Show and Cancel
   buttons along the bottom).

@@ -3,7 +3,7 @@
 import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { fetchBranchServicesPublicPaginated } from '@/features/branchService/branchService.thunks';
 import { fetchPublicCategories } from '@/features/category/categoryThunks';
 import { Button } from '@/components/ui/button';
@@ -86,11 +86,9 @@ export default function ServicesListingPage() {
     setCurrentPage(1);
   };
 
-  const handleViewDetails = (service: { serviceId: string; serviceSlug?: string }) => {
+  const detailsPath = (service: { serviceId: string; serviceSlug?: string }) => {
     const branch = selectedBranch!;
-    navigate(
-      `/branches/${branch.slug || branch.id}/services/${service.serviceSlug || service.serviceId}`,
-    );
+    return `/branches/${branch.slug || branch.id}/services/${service.serviceSlug || service.serviceId}`;
   };
 
   const branchServiceError = useAppSelector((state) => state.branchService.error);
@@ -243,7 +241,7 @@ export default function ServicesListingPage() {
               {services.map((service) => (
                 <Card
                   key={service.serviceId}
-                  className="group flex overflow-hidden border-border/60 transition-colors hover:border-primary/50 md:block"
+                  className="group relative flex cursor-pointer overflow-hidden border-border/60 transition-colors hover:border-primary/50 md:block"
                 >
                   {/* Service Image */}
                   {/* Phones: small photo beside the details; wider screens: photo on top */}
@@ -268,7 +266,13 @@ export default function ServicesListingPage() {
                   <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4 md:p-6">
                     <div className="mb-2 flex flex-wrap items-start justify-between gap-x-2 gap-y-1">
                       <h3 className="min-w-0 break-words text-base font-bold md:text-lg">
-                        {service.name.charAt(0).toUpperCase() + service.name.slice(1)}
+                        {/* Stretched link: the whole card opens the service page */}
+                        <Link
+                          to={detailsPath(service)}
+                          className="outline-none after:absolute after:inset-0 after:rounded-[inherit] after:content-[''] focus-visible:after:ring-2 focus-visible:after:ring-primary"
+                        >
+                          {service.name.charAt(0).toUpperCase() + service.name.slice(1)}
+                        </Link>
                       </h3>
                       {service.categoryName && (
                         <Badge className="px-2 font-normal rounded-sm" variant="outline">
@@ -320,7 +324,7 @@ export default function ServicesListingPage() {
                           ? `₹${service.price.toLocaleString('en-IN')}`
                           : 'Price on request'}
                       </span>
-                      <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 md:flex md:items-center">
+                      <div className="relative z-10 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 md:flex md:items-center">
                         <Button
                           variant="outline"
                           className={cn(
@@ -359,7 +363,7 @@ export default function ServicesListingPage() {
                         </Button>
                         <Button
                           className="h-9 min-w-0 bg-primary px-2 shadow-md shadow-primary/20 hover:bg-primary/90 md:h-10 md:px-4"
-                          onClick={() => handleViewDetails(service)}
+                          onClick={() => navigate(detailsPath(service))}
                         >
                           Details
                         </Button>
