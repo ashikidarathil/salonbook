@@ -110,7 +110,12 @@ export default function StylistBookingDetailPage() {
           )}
         </div>
 
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div
+          className={cn(
+            'grid gap-4',
+            b?.status === BookingStatus.CONFIRMED && 'xl:grid-cols-[minmax(0,1fr)_22rem]',
+          )}
+        >
           <div className="min-w-0 space-y-4">
             <Card className="border-border/60 shadow-sm">
               <CardContent className="grid grid-cols-1 gap-4 !p-4 sm:grid-cols-3 sm:!p-6">
@@ -205,7 +210,7 @@ export default function StylistBookingDetailPage() {
           {b?.status === BookingStatus.CONFIRMED && (
             <div className="space-y-3 xl:sticky xl:top-4 xl:self-start">
               <Button
-                className="h-12 w-full gap-2 bg-purple-600 text-base font-bold text-white hover:bg-purple-700"
+                className="h-12 w-full gap-2 bg-emerald-600 text-base font-bold text-white hover:bg-emerald-700"
                 onClick={() => handleStatusUpdate(BookingStatus.COMPLETED, 'Completed')}
               >
                 <Icon icon="solar:check-circle-bold-duotone" className="size-5" />
