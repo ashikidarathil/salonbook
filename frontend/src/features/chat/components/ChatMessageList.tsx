@@ -118,7 +118,7 @@ export function ChatMessageList({
 
             {index === 0 && (activeRoom?.bookingNumber || activeRoom?.booking?.bookingNumber) && (
               <div className="flex justify-center my-6">
-                <span className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.3em]">
+                <span className="text-[11px] font-bold text-muted-foreground/40 uppercase tracking-[0.3em]">
                   Booking #{activeRoom.bookingNumber || activeRoom.booking?.bookingNumber}
                 </span>
               </div>
@@ -126,7 +126,7 @@ export function ChatMessageList({
 
             {isSystem ? (
               <div className="flex justify-center my-1 w-full">
-                <div className="bg-muted/10 px-4 py-2 rounded-xl text-[10px] text-muted-foreground/50 text-center max-w-sm border border-border/10">
+                <div className="bg-muted/10 px-4 py-2 rounded-xl text-[11px] text-muted-foreground/50 text-center max-w-sm border border-border/10">
                   {msg.content}
                 </div>
               </div>
@@ -180,7 +180,7 @@ export function ChatMessageList({
                           }}
                         />
                         {msg.content && (
-                          <span className="mt-2 block max-w-48 sm:max-w-sm text-sm break-words whitespace-pre-wrap leading-relaxed">
+                          <span className="mt-2 block max-w-48 sm:max-w-sm text-sm [overflow-wrap:anywhere] whitespace-pre-wrap leading-relaxed">
                             {msg.content}
                           </span>
                         )}
@@ -192,7 +192,7 @@ export function ChatMessageList({
                         waveform={msg.waveform}
                       />
                     ) : msg.messageType === MessageType.TEXT ? (
-                      <p className="text-sm break-words whitespace-pre-wrap leading-relaxed">
+                      <p className="text-sm [overflow-wrap:anywhere] whitespace-pre-wrap leading-relaxed">
                         {msg.content}
                       </p>
                     ) : null}
@@ -205,7 +205,7 @@ export function ChatMessageList({
                         <DropdownMenu modal={false}>
                           <DropdownMenuTrigger
                             aria-label="Message options"
-                            className="flex size-6 items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-muted focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/msg:opacity-100"
+                            className="flex size-8 items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-muted focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/msg:opacity-100"
                           >
                             <Icon icon="solar:menu-dots-bold" className="size-4" />
                           </DropdownMenuTrigger>
@@ -221,7 +221,7 @@ export function ChatMessageList({
                         </DropdownMenu>
                       )
                     )}
-                    <span className="text-[10px] text-muted-foreground opacity-60">
+                    <span className="text-[11px] text-muted-foreground opacity-60">
                       {format(new Date(msg.createdAt), 'h:mm a')}
                     </span>
                     {isMine && msg.sendState !== 'failed' && !msg.deletedAt && (

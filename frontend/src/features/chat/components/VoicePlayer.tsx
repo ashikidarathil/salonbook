@@ -135,7 +135,7 @@ export function VoicePlayer({ src, duration, waveform }: VoicePlayerProps) {
             />
           ))}
         </div>
-        <span className="text-[10px] opacity-70 tabular-nums">
+        <span className="text-[11px] opacity-70 tabular-nums">
           {formatTime(isPlaying || currentTime > 0 ? currentTime : total)}
         </span>
       </div>

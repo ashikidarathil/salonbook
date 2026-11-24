@@ -304,7 +304,7 @@ export function Header() {
               {totalUnreadCount > 0 && (
                 <Badge
                   variant="destructive"
-                  className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold border-2 border-white"
+                  className="absolute -top-1 -right-1 px-1.5 py-0.5 min-w-[18px] h-[18px] flex items-center justify-center text-[11px] font-bold border-2 border-white"
                 >
                   {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
                 </Badge>
@@ -381,7 +381,7 @@ export function Header() {
                       >
                         Messages
                         {totalUnreadCount > 0 && (
-                          <span className="ml-1 bg-primary text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
+                          <span className="ml-1 bg-primary text-white text-[11px] font-bold rounded-full px-1.5 py-0.5 min-w-[18px] text-center">
                             {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
                           </span>
                         )}
