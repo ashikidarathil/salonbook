@@ -190,7 +190,7 @@ export default function CouponFormPage() {
       isSubmitting={isSubmitting}
       onSubmit={onSubmit}
     >
-      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
         <div className="space-y-2">
           <Label htmlFor="coupon-code">Code *</Label>
           <Input
@@ -210,7 +210,7 @@ export default function CouponFormPage() {
             disabled={!!id}
             onValueChange={(value) => change('discountType', value as DiscountType)}
           >
-            <SelectTrigger id="coupon-type">
+            <SelectTrigger id="coupon-type" className="h-10">
               <SelectValue placeholder="Select discount type" />
             </SelectTrigger>
             <SelectContent className="bg-white">

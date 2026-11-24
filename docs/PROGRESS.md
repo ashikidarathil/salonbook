@@ -152,3 +152,5 @@
   Fixed blocked time being offered as special slots, unblock creating special slots, and delete blocking time.
 - 2026-11-23 — Admin responsive pass, Holidays: holiday cards with date tile, fixed-width table from laptop width,
   and a one-column form on tablets.
+- 2026-11-23 — Admin responsive pass, Coupons: coupon cards with usage bar, fixed-width table from laptop width,
+  amounts as ₹1,000, and a one-column form on tablets.
