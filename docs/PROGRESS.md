@@ -189,3 +189,6 @@
 - 2026-11-24 — Stylist responsive pass, My Wallet: same look as the admin Platform Wallet (shared escrow card),
   All / Held / Released filter and search kept in the address, release dates in words, booking numbers link to
   the appointment, loading and empty states on every screen size.
+- 2026-11-24 — Stylist responsive pass, Reviews: same look as the admin Reviews page through shared review
+  card and filters (search, All / Today / 7 days / 30 days, day; kept in the address), rating overview card,
+  two cards per row on laptops, 10 per page.
