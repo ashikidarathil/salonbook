@@ -170,3 +170,5 @@
 - 2026-11-24 — Deleted chat preview shows a small gray icon instead of the red emoji (old saved previews too).
   Notification bell panel spans the width under the header on phones instead of hanging to the left.
   Customer header fits 320 px phones (the name hides below 360 px so every icon stays on screen).
+- 2026-11-24 — Popups (dropdowns, selects, menus, tooltips, dialogs, sheets) take the side colour of the page they
+  open from: green on admin pages, blue on stylist pages, coral for customers.
