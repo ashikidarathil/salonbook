@@ -248,3 +248,6 @@
   status) now sits inside the card as its top section.
 - 2026-11-24 — Service page: the category tag is always a soft coral label and no longer changes colour on
   hover (it is not a button).
+- 2026-11-24 — Chat loading: customer and stylist chat show the loader while the conversation list loads (it
+  said "No conversations yet." before), while a chat opened from a link waits for its room, and until a room's
+  messages first arrive. Admin chat already had loaders.

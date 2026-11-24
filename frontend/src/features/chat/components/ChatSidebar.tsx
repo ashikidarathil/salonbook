@@ -1,4 +1,5 @@
 import { Icon } from '@iconify/react';
+import { Loader } from '@/components/common/Loader';
 import { DeletedPreview } from './DeletedPreview';
 import { isDeletedPreview } from '../deletedPreview';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -9,6 +10,8 @@ import { MessageType } from '../chat.types';
 
 interface ChatSidebarProps {
   rooms: ChatRoom[];
+  /** Shows the loader instead of the empty message until the list arrives. */
+  isLoading?: boolean;
   activeRoomId: string | null;
   onRoomSelect: (roomId: string) => void;
   isStylist: boolean;
@@ -44,6 +47,7 @@ function getMessagePreviewContent(room: ChatRoom) {
 
 export function ChatSidebar({
   rooms,
+  isLoading = false,
   activeRoomId,
   onRoomSelect,
   isStylist,
@@ -86,7 +90,11 @@ export function ChatSidebar({
       </div>
 
       <div className="flex-1 overflow-y-auto w-full custom-scrollbar">
-        {rooms.length === 0 ? (
+        {rooms.length === 0 && isLoading ? (
+          <div className="flex h-full items-center justify-center p-4">
+            <Loader label="Loading conversations" />
+          </div>
+        ) : rooms.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full p-4 text-center text-muted-foreground">
             <Icon icon="solar:chat-round-line-duotone" className="size-12 mb-2 opacity-20" />
             <p>No conversations yet.</p>

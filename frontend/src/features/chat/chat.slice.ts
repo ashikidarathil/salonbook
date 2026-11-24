@@ -14,6 +14,8 @@ interface ChatState {
   activeRoomId: string | null;
   messagesByRoom: Record<string, ChatMessage[]>;
   isLoadingRooms: boolean;
+  /** True once the room list has loaded (or failed) at least once. */
+  roomsLoaded: boolean;
   isLoadingMessages: boolean;
   error: string | null;
   totalUnreadCount: number;
@@ -24,6 +26,7 @@ const initialState: ChatState = {
   activeRoomId: null,
   messagesByRoom: {},
   isLoadingRooms: false,
+  roomsLoaded: false,
   isLoadingMessages: false,
   error: null,
   totalUnreadCount: 0,
@@ -198,6 +201,8 @@ const chatSlice = createSlice({
       })
       .addCase(fetchRoomMessages.rejected, (state, action) => {
         state.isLoadingMessages = false;
+        // Mark the room as tried so the loader stops and the empty view shows
+        state.messagesByRoom[action.meta.arg.roomId] ??= [];
         state.error = (action.payload as string) || null;
       })
       // Initialize Room
@@ -225,6 +230,7 @@ const chatSlice = createSlice({
           action.type === fetchStylistRooms.fulfilled.type,
         (state, action: PayloadAction<ChatRoom[]>) => {
           state.isLoadingRooms = false;
+          state.roomsLoaded = true;
           state.rooms = action.payload;
         },
       )
@@ -234,6 +240,7 @@ const chatSlice = createSlice({
           action.type === fetchStylistRooms.rejected.type,
         (state, action: PayloadAction<string | undefined>) => {
           state.isLoadingRooms = false;
+          state.roomsLoaded = true;
           state.error = action.payload || null;
         },
       );
