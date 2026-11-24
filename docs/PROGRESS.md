@@ -234,3 +234,8 @@
   and admin login, Contact and Become a Stylist already fit every width (496 checks passed). Contact: Get
   Directions is a coral link under the address like Call now, and the map box is shorter on phones. This
   finishes the customer pass.
+- 2026-11-24 — Photo crop: the cropper offers Original, 1:1, 4:3, 3:4, 3:2, 16:9 and 9:16, and opens on the
+  shape the photo is shown in (card photo 4:3, page photo 16:9). Service cards (lists, home, related) show a
+  4:3 photo and the service page a 16:9 photo at every width, so photos look exactly as cropped. Fixed the
+  crop math (zoomed crops were zoomed twice). A broken page photo falls back to the card photo.
+  `npm run migrate:page-photos` copies each card photo into an empty page photo (MIGRATE_CONFIRM guard).

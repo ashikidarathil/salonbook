@@ -68,8 +68,11 @@ export default function ServiceDetailsPage() {
   const { assignedStylists } = useAppSelector((state) => state.stylistBranch);
   const { reviews, isLoading: isLoadingReviews } = useAppSelector((state) => state.review);
 
-  const [imageError, setImageError] = useState(false);
-  const heroImage = currentService?.detailImageUrl || currentService?.imageUrl;
+  // Page photo first, then the card photo if the page photo is missing or fails to load
+  const [failedImages, setFailedImages] = useState<string[]>([]);
+  const heroImage = [currentService?.detailImageUrl, currentService?.imageUrl].find(
+    (url): url is string => !!url && !failedImages.includes(url),
+  );
   // Tagged with the service they were loaded for, so another service's list never shows
   const [related, setRelated] = useState<{ serviceId?: string; items: BranchServiceItem[] }>({
     items: [],
@@ -215,13 +218,14 @@ export default function ServiceDetailsPage() {
 
             {/* Service Image & Pricing Card */}
             <Card className="mb-8 overflow-hidden shadow-sm border-border">
-              <div className="relative w-full overflow-hidden bg-muted h-[480px] ">
-                {heroImage && !imageError ? (
+              {/* Same 16:9 shape as the admin crop, so the photo shows exactly as cropped */}
+              <div className="relative aspect-video w-full overflow-hidden bg-muted">
+                {heroImage ? (
                   <img
                     src={heroImage}
-                    alt={currentService.name}
+                    alt={currentService?.name}
                     className="object-cover w-full h-full "
-                    onError={() => setImageError(true)}
+                    onError={() => setFailedImages((list) => [...list, heroImage])}
                   />
                 ) : (
                   <div className="flex items-center justify-center w-full h-full bg-gradient-to-br from-gray-200 to-gray-300">
@@ -463,7 +467,7 @@ export default function ServiceDetailsPage() {
                           className="pl-4 basis-4/5 sm:basis-1/2 md:basis-1/3"
                         >
                           <Card className="flex flex-col h-full pt-0 overflow-hidden transition-shadow hover:shadow-md">
-                            <div className="relative w-full h-48 bg-muted">
+                            <div className="relative aspect-[4/3] w-full bg-muted">
                               {service.imageUrl ? (
                                 <img
                                   src={service.imageUrl}
