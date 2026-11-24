@@ -177,3 +177,6 @@
 - 2026-11-24 — Stylist responsive pass, Dashboard: same layout as the admin dashboard through shared dashboard
   components (period filter, stat card, status ring, chart helpers); amounts as ₹1,00,000; quick links to
   Appointments and My Slots. Fixed Specific Date sending the previous day.
+- 2026-11-24 — Stylist responsive pass, Appointments: Today / All / day / search kept in the address, one clean
+  card per booking (price and status once), two-column action buttons, two cards per row on laptops; detail
+  page with amounts as ₹1,00,000 and actions beside the details on laptops. Today now uses the local date.
