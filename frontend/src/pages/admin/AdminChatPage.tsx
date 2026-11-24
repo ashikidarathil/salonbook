@@ -15,6 +15,8 @@ import { MessageType, SenderType } from '@/features/chat/chat.types';
 import type { ChatRoom, ChatMessage } from '@/features/chat/chat.types';
 import { ImageViewer } from '@/features/chat/components/ImageViewer';
 import { VoicePlayer } from '@/features/chat/components/VoicePlayer';
+import { DeletedPreview } from '@/features/chat/components/DeletedPreview';
+import { isDeletedPreview } from '@/features/chat/deletedPreview';
 
 const CHAT_OPEN_HOURS = 24;
 
@@ -202,7 +204,11 @@ export default function AdminChatPage() {
                       )}
                     </span>
                     <span className="mt-1 block truncate text-xs text-foreground/80">
-                      {room.lastMessage || 'No messages yet'}
+                      {isDeletedPreview(room.lastMessage) ? (
+                        <DeletedPreview />
+                      ) : (
+                        room.lastMessage || 'No messages yet'
+                      )}
                     </span>
                   </span>
                 </button>

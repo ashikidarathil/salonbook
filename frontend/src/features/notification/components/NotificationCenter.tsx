@@ -156,6 +156,7 @@ export const NotificationCenter: React.FC = () => {
         <Button
           variant="ghost"
           size="icon"
+          aria-label="Notifications"
           className="relative h-9 w-9 text-muted-foreground hover:text-primary transition-colors"
         >
           <Icon icon="solar:bell-bing-bold-duotone" className="size-6" />
@@ -169,7 +170,12 @@ export const NotificationCenter: React.FC = () => {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className={cn('w-80 p-0 sm:w-96', getThemeClass())} align="end">
+      <PopoverContent
+        // On phones the panel fills the width under the bell, kept 8px from both edges
+        className={cn('w-[calc(100vw-1rem)] p-0 sm:w-96', getThemeClass())}
+        align="end"
+        collisionPadding={8}
+      >
         <div className="p-4 pb-2 space-y-4">
           <div className="flex items-center justify-between">
             <h4 className="font-semibold text-lg">Notifications</h4>
@@ -200,7 +206,7 @@ export const NotificationCenter: React.FC = () => {
               </TabsTrigger>
             </TabsList>
 
-            <ScrollArea className="h-[400px] mt-4 -mx-4 border-t">
+            <ScrollArea className="mt-4 -mx-4 h-[min(400px,55dvh)] border-t">
               <TabsContent value="unread" className="m-0 focus-visible:ring-0">
                 {renderNotificationList()}
               </TabsContent>
