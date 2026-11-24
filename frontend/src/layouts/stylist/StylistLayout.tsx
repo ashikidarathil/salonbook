@@ -181,8 +181,8 @@ export function StylistLayout() {
               <div className="hidden md:block">
                 <SidebarTrigger />
               </div>
-              <div className="hidden sm:block w-px h-6 bg-border/50" />
-              <h1 className="text-lg font-semibold hidden sm:block">Stylist Panel</h1>
+              <div className="hidden h-6 w-px bg-border/50 lg:block" />
+              <h1 className="hidden text-lg font-semibold lg:block">Stylist Panel</h1>
             </div>
 
             <div className="flex items-center gap-3">
@@ -205,8 +205,10 @@ export function StylistLayout() {
                 )}
               </Button>
               <NotificationCenter />
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium leading-none">{user?.name}</p>
+              <div className="hidden min-w-0 max-w-56 text-right lg:block">
+                <p className="truncate text-sm font-medium leading-none" title={user?.name}>
+                  {user?.name}
+                </p>
                 <p className="text-xs text-muted-foreground mt-1 capitalize">
                   {user?.role.toLowerCase()}
                 </p>

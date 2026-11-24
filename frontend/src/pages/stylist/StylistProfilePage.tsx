@@ -332,243 +332,258 @@ export default function StylistProfilePage() {
           </p>
         </div>
 
-        <Card className="transition-shadow shadow-sm border-border/50 hover:shadow-md">
-          <CardHeader>
-            <CardTitle>Profile Picture</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center gap-6">
-            <div className="relative">
-              <Avatar className="w-40 h-40 ring-4 ring-primary/20">
-                <AvatarImage src={user?.profilePicture || undefined} />
-                <AvatarFallback className="text-4xl bg-primary text-primary-foreground">
-                  {user?.name?.[0]?.toUpperCase() || 'S'}
-                </AvatarFallback>
-              </Avatar>
-              {uploading && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
-                  <Loader size="md" />
-                </div>
-              )}
-            </div>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageSelect}
-              className="hidden"
-            />
-
-            <Button onClick={() => fileInputRef.current?.click()} variant="outline">
-              <Icon icon="solar:camera-bold" className="w-4 h-4 mr-2" />
-              Change Photo
-            </Button>
-          </CardContent>
-        </Card>
-
-        <form onSubmit={handleSave}>
-          <Card className="transition-shadow shadow-sm border-border/50 hover:shadow-md">
+        <div className="grid items-start gap-6 xl:grid-cols-[18rem_minmax(0,1fr)]">
+          <Card className="transition-shadow shadow-sm border-border/50 hover:shadow-md xl:sticky xl:top-4">
             <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
+              <CardTitle>Profile Picture</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid gap-6 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    value={form.name}
-                    onChange={(e) => handleChange('name', e.target.value)}
-                    placeholder="Enter your full name"
-                    className={errors.name ? 'border-red-500' : ''}
-                  />
-                  {errors.name && (
-                    <p className="flex items-center gap-1 text-xs text-red-600">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.name}
-                    </p>
-                  )}
+            <CardContent className="flex flex-col items-center gap-6">
+              <div className="relative">
+                <Avatar className="size-32 ring-4 ring-primary/20 sm:size-40">
+                  <AvatarImage src={user?.profilePicture || undefined} />
+                  <AvatarFallback className="text-4xl bg-primary text-primary-foreground">
+                    {user?.name?.[0]?.toUpperCase() || 'S'}
+                  </AvatarFallback>
+                </Avatar>
+                {uploading && (
+                  <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
+                    <Loader size="md" />
+                  </div>
+                )}
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageSelect}
+                className="hidden"
+              />
+
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                variant="outline"
+                className="h-10 w-full sm:w-auto"
+              >
+                <Icon icon="solar:camera-bold" className="w-4 h-4 mr-2" />
+                Change Photo
+              </Button>
+            </CardContent>
+          </Card>
+
+          <form onSubmit={handleSave}>
+            <Card className="transition-shadow shadow-sm border-border/50 hover:shadow-md">
+              <CardHeader>
+                <CardTitle>Personal Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid gap-6 xl:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input
+                      id="name"
+                      type="text"
+                      value={form.name}
+                      onChange={(e) => handleChange('name', e.target.value)}
+                      placeholder="Enter your full name"
+                      className={errors.name ? 'border-red-500' : ''}
+                    />
+                    {errors.name && (
+                      <p className="flex items-center gap-1 text-xs text-red-600">
+                        <AlertCircle className="w-3 h-3" />
+                        {errors.name}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      autoComplete="email"
+                      value={form.email}
+                      onChange={(e) => handleChange('email', e.target.value)}
+                      placeholder={!hasEmail ? 'Add your email' : undefined}
+                      className={errors.email ? 'border-red-500' : ''}
+                    />
+                    {errors.email && (
+                      <p className="flex items-center gap-1 text-xs text-red-600">
+                        <AlertCircle className="w-3 h-3" />
+                        {errors.email}
+                      </p>
+                    )}
+                    {!hasEmail && !errors.email && (
+                      <p className="flex items-center gap-1 text-xs text-amber-600">
+                        <AlertCircle className="w-3 h-3" />
+                        Add email for better account recovery
+                      </p>
+                    )}
+                  </div>
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
+                  <Label htmlFor="phone">Phone Number</Label>
                   <Input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    value={form.email}
-                    onChange={(e) => handleChange('email', e.target.value)}
-                    placeholder={!hasEmail ? 'Add your email' : undefined}
-                    className={errors.email ? 'border-red-500' : ''}
+                    id="phone"
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) => handleChange('phone', e.target.value)}
+                    placeholder={!hasPhone ? 'Add your phone number' : undefined}
+                    className={errors.phone ? 'border-red-500' : ''}
                   />
-                  {errors.email && (
+                  {errors.phone && (
                     <p className="flex items-center gap-1 text-xs text-red-600">
                       <AlertCircle className="w-3 h-3" />
-                      {errors.email}
+                      {errors.phone}
                     </p>
                   )}
-                  {!hasEmail && !errors.email && (
+                  {!form.phone && !errors.phone && (
                     <p className="flex items-center gap-1 text-xs text-amber-600">
                       <AlertCircle className="w-3 h-3" />
-                      Add email for better account recovery
+                      Add phone for notifications
                     </p>
                   )}
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={form.phone}
-                  onChange={(e) => handleChange('phone', e.target.value)}
-                  placeholder={!hasPhone ? 'Add your phone number' : undefined}
-                  className={errors.phone ? 'border-red-500' : ''}
-                />
-                {errors.phone && (
-                  <p className="flex items-center gap-1 text-xs text-red-600">
-                    <AlertCircle className="w-3 h-3" />
-                    {errors.phone}
-                  </p>
-                )}
-                {!form.phone && !errors.phone && (
-                  <p className="flex items-center gap-1 text-xs text-amber-600">
-                    <AlertCircle className="w-3 h-3" />
-                    Add phone for notifications
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="bio">Professional Bio</Label>
-                <Textarea
-                  id="bio"
-                  value={form.bio}
-                  onChange={(e) => handleChange('bio', e.target.value)}
-                  placeholder="Tell us about your experience and style..."
-                  className="min-h-[120px]"
-                />
-                <p className="text-xs text-muted-foreground">
-                  This bio will be displayed on your public profile.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Change Password */}
-          <Card className="mt-6 transition-shadow shadow-sm border-border/50 hover:shadow-md">
-            <CardHeader>
-              <CardTitle>Change Password</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Update your password to keep your account secure
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword">Current Password</Label>
-                <div className="relative">
-                  <Input
-                    id="currentPassword"
-                    type={showCurrentPassword ? 'text' : 'password'}
-                    value={form.currentPassword}
-                    onChange={(e) => handleChange('currentPassword', e.target.value)}
-                    placeholder="Enter current password"
-                    className={errors.currentPassword ? 'border-red-500 pr-10' : 'pr-10'}
+                <div className="space-y-2">
+                  <Label htmlFor="bio">Professional Bio</Label>
+                  <Textarea
+                    id="bio"
+                    value={form.bio}
+                    onChange={(e) => handleChange('bio', e.target.value)}
+                    placeholder="Tell us about your experience and style..."
+                    className="min-h-[120px]"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
-                  >
-                    <Icon
-                      icon={showCurrentPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
-                      className="w-5 h-5"
-                    />
-                  </button>
-                </div>
-                {errors.currentPassword && (
-                  <p className="flex items-center gap-1 text-xs text-red-600">
-                    <AlertCircle className="w-3 h-3" />
-                    {errors.currentPassword}
+                  <p className="text-xs text-muted-foreground">
+                    This bio will be displayed on your public profile.
                   </p>
-                )}
-              </div>
+                </div>
+              </CardContent>
+            </Card>
 
-              <div className="grid gap-6 sm:grid-cols-2">
+            {/* Change Password */}
+            <Card className="mt-6 transition-shadow shadow-sm border-border/50 hover:shadow-md">
+              <CardHeader>
+                <CardTitle>Change Password</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Update your password to keep your account secure
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="newPassword">New Password</Label>
+                  <Label htmlFor="currentPassword">Current Password</Label>
                   <div className="relative">
                     <Input
-                      id="newPassword"
-                      type={showNewPassword ? 'text' : 'password'}
-                      value={form.newPassword}
-                      onChange={(e) => handleChange('newPassword', e.target.value)}
-                      placeholder="Enter new password"
-                      className={errors.newPassword ? 'border-red-500 pr-10' : 'pr-10'}
+                      id="currentPassword"
+                      type={showCurrentPassword ? 'text' : 'password'}
+                      value={form.currentPassword}
+                      onChange={(e) => handleChange('currentPassword', e.target.value)}
+                      placeholder="Enter current password"
+                      className={errors.currentPassword ? 'border-red-500 pr-10' : 'pr-10'}
                     />
                     <button
                       type="button"
-                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                       className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
                     >
                       <Icon
-                        icon={showNewPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
+                        icon={showCurrentPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
                         className="w-5 h-5"
                       />
                     </button>
                   </div>
-                  {errors.newPassword && (
+                  {errors.currentPassword && (
                     <p className="flex items-center gap-1 text-xs text-red-600">
                       <AlertCircle className="w-3 h-3" />
-                      {errors.newPassword}
+                      {errors.currentPassword}
                     </p>
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      value={form.confirmPassword}
-                      onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                      placeholder="Confirm new password"
-                      className={errors.confirmPassword ? 'border-red-500 pr-10' : 'pr-10'}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
-                    >
-                      <Icon
-                        icon={showConfirmPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
-                        className="w-5 h-5"
+                <div className="grid gap-6 xl:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="newPassword"
+                        type={showNewPassword ? 'text' : 'password'}
+                        value={form.newPassword}
+                        onChange={(e) => handleChange('newPassword', e.target.value)}
+                        placeholder="Enter new password"
+                        className={errors.newPassword ? 'border-red-500 pr-10' : 'pr-10'}
                       />
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
+                      >
+                        <Icon
+                          icon={showNewPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
+                          className="w-5 h-5"
+                        />
+                      </button>
+                    </div>
+                    {errors.newPassword && (
+                      <p className="flex items-center gap-1 text-xs text-red-600">
+                        <AlertCircle className="w-3 h-3" />
+                        {errors.newPassword}
+                      </p>
+                    )}
                   </div>
-                  {errors.confirmPassword && (
-                    <p className="flex items-center gap-1 text-xs text-red-600">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.confirmPassword}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          <div className="flex justify-end gap-4 mt-6">
-            <Button type="button" variant="outline" onClick={handleReset}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!canSave || updatingProfile}>
-              <Icon icon="solar:diskette-bold" className="w-4 h-4 mr-2" />
-              Save Changes
-            </Button>
-          </div>
-        </form>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        value={form.confirmPassword}
+                        onChange={(e) => handleChange('confirmPassword', e.target.value)}
+                        placeholder="Confirm new password"
+                        className={errors.confirmPassword ? 'border-red-500 pr-10' : 'pr-10'}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
+                      >
+                        <Icon
+                          icon={showConfirmPassword ? 'solar:eye-bold' : 'solar:eye-closed-bold'}
+                          className="w-5 h-5"
+                        />
+                      </button>
+                    </div>
+                    {errors.confirmPassword && (
+                      <p className="flex items-center gap-1 text-xs text-red-600">
+                        <AlertCircle className="w-3 h-3" />
+                        {errors.confirmPassword}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-10 w-full sm:w-auto"
+                onClick={handleReset}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="h-10 w-full sm:w-auto"
+                disabled={!canSave || updatingProfile}
+              >
+                <Icon icon="solar:diskette-bold" className="w-4 h-4 mr-2" />
+                Save Changes
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
     </LoadingGate>
   );
