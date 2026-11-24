@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { LoadingGate } from '@/components/common/LoadingGate';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Icon } from '@iconify/react';
 import { fetchAdminDashboardStats } from '@/features/admin/state/admin.thunks';
 import {
@@ -15,17 +14,10 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
   BarChart,
   Bar,
   Legend,
 } from 'recharts';
-import { format, isValid, parse } from 'date-fns';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,
@@ -36,38 +28,19 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
-const PERIODS = [
-  { label: 'Today', value: 'today', icon: 'solar:calendar-date-bold-duotone' },
-  { label: 'Week', value: 'week', icon: 'solar:calendar-minimalistic-bold-duotone' },
-  { label: 'Month', value: 'month', icon: 'solar:calendar-bold-duotone' },
-  { label: 'Year', value: 'year', icon: 'solar:calendar-line-duotone' },
-];
-
-const LEGEND_STYLE = { fontSize: 12, paddingTop: 8 };
-const TICK_STYLE = { fontSize: 11, fill: '#94a3b8' };
-const CARD_CLASS = 'min-w-0 overflow-hidden border-border/40 shadow-sm';
-const CARD_HEADER_CLASS = 'border-b bg-gray-50/30 !p-4 sm:!px-6';
-const CARD_TITLE_CLASS = 'flex items-center gap-2 text-base font-semibold sm:text-lg';
-
-const money = (value: number) => `₹${value.toLocaleString('en-IN')}`;
-
-/** Short axis labels: 28 Oct instead of 2026-10-28. */
-const shortLabel = (label: string) => {
-  const pattern = /^\d{4}-\d{2}-\d{2}$/.test(label)
-    ? ['yyyy-MM-dd', 'd MMM']
-    : /^\d{4}-\d{2}$/.test(label)
-      ? ['yyyy-MM', 'MMM']
-      : null;
-  if (!pattern) return label;
-  const date = parse(label, pattern[0], new Date());
-  return isValid(date) ? format(date, pattern[1]) : label;
-};
-
-const EMPTY_RING = [{ name: 'No bookings', value: 1, color: '#f1f5f9' }];
-
-const compactNumber = (value: number) =>
-  new Intl.NumberFormat('en-IN', { notation: 'compact', maximumFractionDigits: 1 }).format(value);
+import { AnalyticsCard } from '@/components/dashboard/AnalyticsCard';
+import { DashboardPeriodFilter } from '@/components/dashboard/DashboardPeriodFilter';
+import { StatusRingCard } from '@/components/dashboard/StatusRingCard';
+import {
+  CARD_CLASS,
+  CARD_HEADER_CLASS,
+  CARD_TITLE_CLASS,
+  LEGEND_STYLE,
+  TICK_STYLE,
+  compactNumber,
+  money,
+  shortLabel,
+} from '@/components/dashboard/dashboard.utils';
 
 export default function DashboardContent() {
   const dispatch = useAppDispatch();
@@ -88,17 +61,6 @@ export default function DashboardContent() {
     loadStats();
   }, [loadStats]);
 
-  const activeStatuses = (stats?.bookingStatusBreakdown ?? []).filter(
-    (status: { value: number }) => status.value > 0,
-  );
-
-  const handleDateSelect = (date: Date | undefined) => {
-    setSelectedDate(date);
-    if (date) {
-      setPeriod('custom');
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
@@ -109,64 +71,13 @@ export default function DashboardContent() {
           </p>
         </div>
 
-        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center xl:w-auto xl:shrink-0">
-          <div className="flex w-full min-w-0 items-center rounded-xl border border-border/30 bg-muted/40 p-1 sm:flex-1 xl:w-auto xl:flex-none">
-            <Tabs
-              value={period !== 'custom' ? period : ''}
-              onValueChange={setPeriod}
-              className="w-full"
-            >
-              <TabsList className="grid h-9 w-full grid-cols-4 gap-1 bg-transparent">
-                {PERIODS.map((p) => (
-                  <TabsTrigger
-                    key={p.value}
-                    value={p.value}
-                    className="min-w-0 rounded-lg px-1 py-1.5 xl:px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary font-medium transition-all text-sm"
-                  >
-                    <Icon icon={p.icon} className="mr-2 hidden size-4 xl:block" />
-                    {p.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-          </div>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={`h-[40px] w-full shrink-0 rounded-xl px-4 font-medium sm:w-auto border-border/30 bg-muted/40 hover:bg-white transition-all shadow-sm text-sm ${period === 'custom' ? 'border-primary text-primary bg-white' : ''}`}
-              >
-                <Icon icon="solar:calendar-add-bold-duotone" className="mr-2 size-4" />
-                {period === 'custom' && selectedDate
-                  ? format(selectedDate, 'PPP')
-                  : 'Specific Date'}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 rounded-xl" align="end">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={handleDateSelect}
-                initialFocus
-                className="rounded-xl theme-admin"
-              />
-              <div className="p-3 border-t border-border/40 bg-muted/10">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full text-xs font-medium h-8 rounded-lg hover:bg-white hover:text-primary transition-colors"
-                  onClick={() => {
-                    setSelectedDate(new Date());
-                    setPeriod('month');
-                  }}
-                >
-                  Clear Selection
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
+        <DashboardPeriodFilter
+          period={period}
+          date={selectedDate}
+          onPeriodChange={setPeriod}
+          onDateChange={setSelectedDate}
+          defaultPeriod="month"
+        />
       </div>
 
       <LoadingGate
@@ -314,84 +225,11 @@ export default function DashboardContent() {
                 </CardContent>
               </Card>
 
-              {/* Status Breakdown Pie Chart */}
-              <Card className={CARD_CLASS}>
-                <CardHeader className={CARD_HEADER_CLASS}>
-                  <CardTitle className={CARD_TITLE_CLASS}>
-                    <Icon icon="solar:pie-chart-bold-duotone" className="text-primary size-5" />
-                    Booking Distribution
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col items-center gap-4 !p-4 sm:flex-row sm:!p-6 xl:flex-col">
-                  <div className="relative h-48 w-full shrink-0 sm:w-1/2 xl:w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={activeStatuses.length ? activeStatuses : EMPTY_RING}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={58}
-                          outerRadius={78}
-                          paddingAngle={activeStatuses.length > 1 ? 5 : 0}
-                          dataKey="value"
-                          stroke="none"
-                          isAnimationActive={activeStatuses.length > 0}
-                        >
-                          {(activeStatuses.length ? activeStatuses : EMPTY_RING).map((entry) => (
-                            <Cell key={entry.name} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        {activeStatuses.length > 0 && (
-                          <Tooltip
-                            contentStyle={{
-                              borderRadius: '8px',
-                              border: '1px solid #f1f5f9',
-                              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                            }}
-                          />
-                        )}
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                      <span className="text-2xl font-bold text-gray-900">
-                        {stats.summary.totalBookings}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground font-medium">Total</span>
-                    </div>
-                  </div>
-
-                  <div className="w-full min-w-0 space-y-2">
-                    {stats.bookingStatusBreakdown.map(
-                      (status: { name: string; value: number; color: string }) => (
-                        <div
-                          key={status.name}
-                          className="flex items-center justify-between p-2 rounded-lg bg-gray-50/30 border border-gray-100/50"
-                        >
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="w-2 h-2 rounded-full"
-                              style={{ backgroundColor: status.color }}
-                            />
-                            <span className="text-xs font-medium text-gray-600">{status.name}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-semibold text-gray-900">
-                              {status.value}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground font-normal">
-                              (
-                              {stats.summary.totalBookings > 0
-                                ? Math.round((status.value / stats.summary.totalBookings) * 100)
-                                : 0}
-                              %)
-                            </span>
-                          </div>
-                        </div>
-                      ),
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <StatusRingCard
+                title="Booking Distribution"
+                total={stats.summary.totalBookings}
+                statuses={stats.bookingStatusBreakdown}
+              />
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-2">
@@ -559,38 +397,5 @@ export default function DashboardContent() {
         )}
       </LoadingGate>
     </div>
-  );
-}
-
-interface AnalyticsCardProps {
-  title: string;
-  value: string;
-  subtitle: string;
-  icon: string;
-  color: string;
-  bg: string;
-  className?: string;
-}
-
-function AnalyticsCard({ title, value, subtitle, icon, color, bg, className }: AnalyticsCardProps) {
-  return (
-    <Card className={`${CARD_CLASS} rounded-xl ${className ?? ''}`}>
-      <CardContent className="flex h-full flex-col gap-2 !p-3 sm:!p-4">
-        <div className="flex items-start justify-between gap-2">
-          <p className="min-w-0 text-[11px] font-medium uppercase leading-tight tracking-wide text-muted-foreground sm:text-xs">
-            {title}
-          </p>
-          <span
-            className={`flex size-8 shrink-0 items-center justify-center rounded-lg sm:size-9 ${bg}`}
-          >
-            <Icon icon={icon} className={`size-5 ${color}`} />
-          </span>
-        </div>
-        <p className={`mt-auto break-all text-xl font-bold leading-tight sm:text-2xl ${color}`}>
-          {value}
-        </p>
-        <p className="text-[11px] text-muted-foreground">{subtitle}</p>
-      </CardContent>
-    </Card>
   );
 }

@@ -174,3 +174,6 @@
   open from: green on admin pages, blue on stylist pages, coral for customers.
 - 2026-11-24 — Carousel arrows (Stylists and Services filter rows, service details) show only when there is more
   to scroll in that direction, instead of always showing greyed out.
+- 2026-11-24 — Stylist responsive pass, Dashboard: same layout as the admin dashboard through shared dashboard
+  components (period filter, stat card, status ring, chart helpers); amounts as ₹1,00,000; quick links to
+  Appointments and My Slots. Fixed Specific Date sending the previous day.
