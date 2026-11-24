@@ -248,3 +248,7 @@
   status) now sits inside the card as its top section.
 - 2026-11-24 — Service page: the category tag is always a soft coral label and no longer changes colour on
   hover (it is not a button).
+- 2026-11-24 — Admin booking details: one card like the stylist page (title, booking number and status;
+  date, time, customer, payment and reschedules; services with stylists and totals; customer note;
+  cancellation details; Completed, No Show and Cancel along the bottom for confirmed bookings). Shared status
+  colours; no text under 11px; details two per row on phones.
