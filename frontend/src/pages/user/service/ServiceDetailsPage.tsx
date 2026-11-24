@@ -178,7 +178,6 @@ export default function ServiceDetailsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
-      <RouteBreadcrumbs className="w-full px-4 pt-4 sm:px-6 lg:px-8" />
       <main className="flex-1">
         <LoadingGate
           loading={!resolved.error && (loading || (!currentService && !error))}
@@ -189,17 +188,8 @@ export default function ServiceDetailsPage() {
           loadingMessage="Loading service details..."
         >
           <div className="container max-w-6xl px-4 py-8 mx-auto">
-            {/* Back Button */}
-            <div className="mb-6">
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/services')}
-                className="gap-2 pl-0 text-muted-foreground hover:text-primary hover:bg-transparent"
-              >
-                <Icon icon="lucide:arrow-left" className="size-4" />
-                Back to Services
-              </Button>
-            </div>
+            {/* The breadcrumbs above already lead back to Services */}
+            <RouteBreadcrumbs className="mb-6" />
 
             <div className="mb-8">
               {/* Category badge above the title */}

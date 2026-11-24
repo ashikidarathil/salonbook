@@ -124,7 +124,6 @@ export default function StylistDetailsPage() {
   return (
     <div className="min-h-screen bg-background font-sans text-foreground w-full flex flex-col">
       <Header />
-      <RouteBreadcrumbs className="w-full px-4 pt-4 sm:px-6 lg:px-8" />
       <main className="flex-1">
         <LoadingGate
           loading={!resolved.error && (loading || !error) && !selectedStylist}
@@ -133,13 +132,8 @@ export default function StylistDetailsPage() {
           emptyMessage="Stylist not found."
         >
           <div className="container mx-auto px-4 py-6 max-w-6xl space-y-6">
-            <div
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer w-fit"
-              onClick={() => navigate(-1)}
-            >
-              <Icon icon="solar:arrow-left-linear" className="size-4" />
-              <span>Back to Stylists</span>
-            </div>
+            {/* The breadcrumbs lead back to Stylists, so no separate back link */}
+            <RouteBreadcrumbs />
 
             <Card className="border-none shadow-sm bg-gradient-to-r from-primary/5 to-white overflow-visible">
               <CardContent className="p-4 sm:p-8">

@@ -98,11 +98,14 @@ export default function ServicesListingPage() {
   return (
     <div className="flex flex-col min-h-screen font-sans bg-background text-foreground">
       <Header />
-      <RouteBreadcrumbs className="w-full px-4 pt-4 sm:px-6 lg:px-8" />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative py-16 overflow-hidden text-center  bg-gradient-to-b from-primary/10 via-primary/5 to-background md:py-20 ">
+        <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-primary/5 to-background pb-16 pt-4 text-center md:pb-20">
           <div className="absolute top-0 w-full h-full -translate-x-1/2 pointer-events-none left-1/2 bg-gradient-to-b from-white/50 to-transparent" />
+          {/* Breadcrumbs sit inside the header band, lined up with the content below */}
+          <div className="container relative z-10 mx-auto mb-10 px-4 text-left md:mb-12">
+            <RouteBreadcrumbs />
+          </div>
           <div className="container relative z-10 flex flex-col items-center px-4 mx-auto">
             <h1 className="mb-4 text-4xl font-bold md:text-5xl text-foreground font-heading">
               Our Services

@@ -216,3 +216,7 @@
   fill the full width when there are no action buttons; Slots has a Pick calendar to jump to any day up to 90
   days ahead (admin date box too). Server allows 90 days only for the admin and stylist slot views; customers
   still book 14 days ahead.
+- 2026-11-24 — Customer responsive pass, Profile/Favourites/Wallet: readable wallet dates, labels and badges;
+  bigger Add Money button; larger show/hide password buttons with labels. Breadcrumbs: one per page (removed
+  "Back to Services/Stylists" links), and on Services and Stylists the breadcrumb sits inside the pink header,
+  lined up with the page content.
