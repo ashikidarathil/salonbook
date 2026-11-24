@@ -25,6 +25,7 @@ import { ChatSidebar } from '@/features/chat/components/ChatSidebar';
 import { ChatMessageList } from '@/features/chat/components/ChatMessageList';
 import { ChatInput } from '@/features/chat/components/ChatInput';
 import { CHAT_UI } from '@/features/chat/chat.constants';
+import { Loader } from '@/components/common/Loader';
 import { useDebounce } from '@/hooks/useDebounce';
 import type { RootState } from '@/app/store';
 
@@ -35,7 +36,7 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { user } = useAppSelector((state) => state.auth);
-  const { rooms, messagesByRoom, isLoadingMessages } = useAppSelector(
+  const { rooms, roomsLoaded, messagesByRoom, isLoadingMessages } = useAppSelector(
     (state: RootState) => state.chat,
   );
 
@@ -163,6 +164,7 @@ export default function ChatPage() {
     <div className={`flex ${isStylist ? 'h-[calc(100dvh-4rem)]' : 'h-full'} bg-background w-full overflow-hidden`}>
       <ChatSidebar
         rooms={rooms}
+        isLoading={!roomsLoaded}
         activeRoomId={activeRoomId}
         isStylist={isStylist}
         onSearch={setSearchQuery}
@@ -175,7 +177,12 @@ export default function ChatPage() {
       <div
         className={`flex-1 min-w-0 flex flex-col w-full h-full bg-muted/10 relative ${!activeRoomId ? 'hidden md:flex' : 'flex'}`}
       >
-        {!activeRoomId ? (
+        {activeRoomId && !activeRoom && !roomsLoaded ? (
+          // Opened straight from a link: wait for the room before drawing its header
+          <div className="flex flex-1 items-center justify-center">
+            <Loader label="Loading chat" />
+          </div>
+        ) : !activeRoomId ? (
           <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground mt-10">
             <div className="size-24 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
               <Icon icon="solar:chat-round-dots-bold-duotone" className="size-12 animate-pulse" />
@@ -240,7 +247,7 @@ export default function ChatPage() {
               messages={currentMessages}
               activeRoom={activeRoom}
               userId={user?.id}
-              isLoading={isLoadingMessages}
+              isLoading={isLoadingMessages || !(activeRoomId in messagesByRoom)}
               isClosed={isClosed}
               messagesEndRef={messagesEndRef}
               onRetry={retryMessage}
