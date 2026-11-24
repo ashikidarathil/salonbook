@@ -227,3 +227,6 @@
   now has two photos: a card photo for lists and a page photo for the service page (new detailImageUrl; upload
   and delete take ?kind=detail). The service page falls back to the card photo when no page photo is set, and
   the seed copies the card photo into the page photo. Admin service form shows both photos side by side.
+- 2026-11-24 — Stylist appointment details: everything in one card like the other detail pages (date, time and
+  customer; services and totals; customer note; and for confirmed bookings the Completed, No Show and Cancel
+  buttons along the bottom).
