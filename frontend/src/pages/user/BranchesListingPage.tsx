@@ -3,6 +3,7 @@
 import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
 import { useEffect, useState, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
+import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import {
   fetchNearestBranches,
@@ -36,7 +37,9 @@ export default function BranchesListingPage() {
   useEffect(() => {
     if (!navigator.geolocation) {
       setTimeout(() => {
-        setLocationError('Geolocation is not supported by your browser');
+        setLocationError(
+          "This browser can't share your location, so branches are listed in the usual order.",
+        );
       }, 0);
       return;
     }
@@ -52,7 +55,12 @@ export default function BranchesListingPage() {
       },
       (error) => {
         console.error('Geolocation error:', error);
-        setLocationError(error.message);
+        // Plain words instead of the browser's own error text
+        setLocationError(
+          error.code === error.PERMISSION_DENIED
+            ? 'Location is turned off, so branches are listed in the usual order. Turn it on to see the nearest branch first.'
+            : "We couldn't find your location, so branches are listed in the usual order.",
+        );
       },
       {
         enableHighAccuracy: true,
@@ -109,6 +117,7 @@ export default function BranchesListingPage() {
   };
 
   const branchError = useAppSelector((state) => state.branch.error);
+  const selectedBranch = useAppSelector((state) => state.branch.selectedBranch);
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -124,10 +133,10 @@ export default function BranchesListingPage() {
               {hasLocation ? '📍 Showing branches nearest to you' : 'Browse our salons'}
             </p>
             {locationError && (
-              <div className="p-3 mt-3 text-sm text-yellow-800 border border-yellow-200 rounded-lg bg-yellow-50">
-                <Icon icon="solar:info-circle-bold" className="inline mr-2" />
-                {locationError}
-              </div>
+              <p className="mt-3 flex items-start gap-2 rounded-lg border bg-muted/40 p-3 text-sm text-muted-foreground">
+                <Icon icon="solar:map-point-linear" className="mt-0.5 size-4 shrink-0" />
+                <span className="min-w-0">{locationError}</span>
+              </p>
             )}
           </div>
 
@@ -135,8 +144,8 @@ export default function BranchesListingPage() {
           <div className="mb-8">
             <div className="relative max-w-md">
               <Icon
-                icon="solar:magnifier-bold"
-                className="absolute pointer-events-none left-3 top-3 size-5 text-muted-foreground"
+                icon="solar:magnifer-linear"
+                className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-muted-foreground"
               />
               <Input
                 placeholder="Search by name, address, or phone..."
@@ -165,9 +174,12 @@ export default function BranchesListingPage() {
               {filteredBranches.map((branch: Branch, index: number) => (
                 <Card
                   key={branch.id || index}
-                  className="flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg"
+                  className={cn(
+                    'flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg',
+                    selectedBranch?.id === branch.id && 'border-primary ring-1 ring-primary',
+                  )}
                 >
-                  <div className="flex flex-col flex-1 p-6">
+                  <div className="flex flex-1 flex-col p-5 sm:p-6">
                     {'distance' in branch && (
                       <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-sm font-semibold w-fit">
                         <Icon icon="solar:map-point-bold" className="size-4" />
@@ -175,7 +187,16 @@ export default function BranchesListingPage() {
                       </div>
                     )}
 
-                    <h3 className="mb-3 text-xl font-bold text-gray-900">{branch.name}</h3>
+                    <div className="mb-3 flex items-start justify-between gap-2">
+                      <h3 className="min-w-0 break-words text-xl font-bold text-gray-900">
+                        {branch.name}
+                      </h3>
+                      {selectedBranch?.id === branch.id && (
+                        <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+                          Selected
+                        </span>
+                      )}
+                    </div>
 
                     {/* Address */}
                     <div className="flex gap-3 mb-4 text-sm text-muted-foreground">
@@ -204,7 +225,9 @@ export default function BranchesListingPage() {
                       size="lg"
                     >
                       <Icon icon="solar:check-circle-bold" className="mr-2 size-5" />
-                      Select Branch
+                      {selectedBranch?.id === branch.id
+                        ? 'Continue with this branch'
+                        : 'Select Branch'}
                     </Button>
                   </div>
                 </Card>

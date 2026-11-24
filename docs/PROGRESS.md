@@ -198,3 +198,5 @@
 - 2026-11-24 — Customer responsive pass, Home: hero gets the same side margin as the rest of the page; Popular
   Services and client reviews swipe sideways on phones; Top Rated Stylists two per row on phones; Trending
   Hairstyles three per row from tablet width. Phone page height about 10,400 px to 6,100 px.
+- 2026-11-24 — Customer responsive pass, Branches: plain-words note when location is off (not the browser's
+  error text), working search icon, the chosen branch is marked Selected, slightly tighter cards on phones.
