@@ -251,3 +251,7 @@
 - 2026-11-24 — Chat loading: customer and stylist chat show the loader while the conversation list loads (it
   said "No conversations yet." before), while a chat opened from a link waits for its room, and until a room's
   messages first arrive. Admin chat already had loaders.
+- 2026-11-24 — Admin booking details: one card like the stylist page (title, booking number and status;
+  date, time, customer, payment and reschedules; services with stylists and totals; customer note;
+  cancellation details; Completed, No Show and Cancel along the bottom for confirmed bookings). Shared status
+  colours; no text under 11px; details two per row on phones.
