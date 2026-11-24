@@ -93,9 +93,14 @@ export function Header() {
     <header className="sticky top-0 z-50 bg-white border-b">
       <div className="container flex items-center justify-between px-4 py-4 mx-auto">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
+        <Link
+          to="/"
+          aria-label="SalonBook home"
+          className="flex shrink-0 items-center gap-1.5 sm:gap-2"
+        >
           <Icon icon="solar:scissors-bold" className="size-6 text-primary" />
-          <span className="text-xl font-bold">SalonBook</span>
+          {/* The name hides on the narrowest phones so every icon still fits */}
+          <span className="hidden text-lg font-bold min-[360px]:inline sm:text-xl">SalonBook</span>
         </Link>
 
         {/* Desktop Nav */}
@@ -114,11 +119,11 @@ export function Header() {
         </nav>
 
         {/* Right Side Actions */}
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center gap-0.5 sm:gap-2">
           {/* Branch Selection Popover (Visible on all screens) */}
           <Popover open={branchPopoverOpen} onOpenChange={setBranchPopoverOpen}>
             <PopoverTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative group h-10 w-10">
+              <Button variant="ghost" size="icon" className="group relative size-9 sm:size-10">
                 <Icon
                   icon="solar:map-point-bold-duotone"
                   className={`size-6 transition-colors ${
@@ -275,7 +280,7 @@ export function Header() {
               variant="ghost"
               size="icon"
               onClick={() => navigate('/cart')}
-              className="h-10 w-10 text-muted-foreground hover:text-primary transition-colors relative"
+              className="relative size-9 text-muted-foreground transition-colors hover:text-primary sm:size-10"
             >
               <Icon icon="solar:cart-large-2-bold-duotone" className="size-6" />
               {cartItems.length > 0 && (
@@ -292,7 +297,7 @@ export function Header() {
               variant="ghost"
               size="icon"
               onClick={() => navigate('/chat')}
-              className="relative h-10 w-10 text-muted-foreground hover:text-primary transition-colors"
+              className="relative size-9 text-muted-foreground transition-colors hover:text-primary sm:size-10"
               title="Messages"
             >
               <Icon icon="solar:chat-round-bold-duotone" className="size-6" />
@@ -312,7 +317,12 @@ export function Header() {
           {/* Mobile Menu Trigger */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button size="icon" variant="ghost" className="lg:hidden h-10 w-10">
+              <Button
+                size="icon"
+                variant="ghost"
+                aria-label="Menu"
+                className="size-9 sm:size-10 lg:hidden"
+              >
                 <Icon icon="solar:menu-dots-bold" className="size-6" />
               </Button>
             </SheetTrigger>

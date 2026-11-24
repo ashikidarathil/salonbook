@@ -167,3 +167,6 @@
 - 2026-11-24 — Bug fixes: category and service names keep their capitals (duplicates still blocked in any case);
   restoring a category or service makes it Active again; editing a disabled branch service's price keeps it
   disabled; avatars without a photo (or with a broken one) show only the initial or icon.
+- 2026-11-24 — Deleted chat preview shows a small gray icon instead of the red emoji (old saved previews too).
+  Notification bell panel spans the width under the header on phones instead of hanging to the left.
+  Customer header fits 320 px phones (the name hides below 360 px so every icon stays on screen).

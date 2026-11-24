@@ -1,4 +1,6 @@
 import { Icon } from '@iconify/react';
+import { DeletedPreview } from './DeletedPreview';
+import { isDeletedPreview } from '../deletedPreview';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { format } from 'date-fns';
@@ -34,6 +36,8 @@ function getMessagePreviewContent(room: ChatRoom) {
       </span>
     );
   }
+
+  if (isDeletedPreview(room.lastMessage)) return <DeletedPreview />;
 
   return <span>{room.lastMessage || 'Start a conversation'}</span>;
 }
