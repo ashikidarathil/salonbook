@@ -87,32 +87,31 @@ export default function StylistBookingDetailPage() {
       role="STYLIST"
     >
       <div className="w-full space-y-5 text-foreground">
-        <div className="flex items-start gap-2 sm:gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-10 shrink-0"
-            aria-label="Back"
-            onClick={() => navigate(-1)}
-          >
-            <Icon icon="solar:arrow-left-linear" className="size-5" />
-          </Button>
-          <div className="min-w-0 flex-1">
-            <h1 className="break-words text-2xl font-bold sm:text-3xl">Appointment Details</h1>
-            <p className="mt-1 break-all font-mono text-sm text-muted-foreground">
-              #{b?.bookingNumber}
-            </p>
-          </div>
-          {b && (
-            <Badge variant="outline" className={cn('mt-1 shrink-0', bookingStatusClass(b.status))}>
-              {bookingStatusLabel(b.status)}
-            </Badge>
-          )}
-        </div>
-
-        {/* Everything about the booking in one card, like the other detail pages */}
+        {/* Everything about the booking in one card, title included */}
         <Card className="overflow-hidden border-border/60 shadow-sm">
           <CardContent className="divide-y divide-border/60 !p-0">
+            <div className="flex items-start gap-2 p-4 sm:gap-3 sm:p-6">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="-ml-2 size-10 shrink-0"
+                aria-label="Back"
+                onClick={() => navigate(-1)}
+              >
+                <Icon icon="solar:arrow-left-linear" className="size-5" />
+              </Button>
+              <div className="min-w-0 flex-1">
+                <h1 className="break-words text-2xl font-bold sm:text-3xl">Appointment Details</h1>
+                <p className="mt-1 break-all font-mono text-sm text-muted-foreground">
+                  #{b?.bookingNumber}
+                </p>
+              </div>
+              {b && (
+                <Badge variant="outline" className={cn('mt-1 shrink-0', bookingStatusClass(b.status))}>
+                  {bookingStatusLabel(b.status)}
+                </Badge>
+              )}
+            </div>
             <dl className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-3 sm:p-6">
               <div className="min-w-0">
                 <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Date</dt>

@@ -244,5 +244,7 @@
   underneath. Old plain-text items (including "Title: detail") are read as items automatically.
   `npm run migrate:included` converts old items and fills empty descriptions from INCLUDED_DESCRIPTIONS (never
   overwrites admin text) and lists any titles with no description. The seed writes the descriptions too.
+- 2026-11-24 — Stylist appointment details: the title row (back arrow, Appointment Details, booking number and
+  status) now sits inside the card as its top section.
 - 2026-11-24 — Service page: the category tag is always a soft coral label and no longer changes colour on
   hover (it is not a button).
