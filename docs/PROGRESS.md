@@ -183,3 +183,6 @@
 - 2026-11-24 — Stylist responsive pass, My Schedule: three tabs side by side on phones (Weekly / Daily / Breaks),
   readable Daily calendar with a key and coloured bars on small screens, bigger break delete button, break
   reasons wrap. Shared with the admin stylist schedule.
+- 2026-11-24 — Stylist responsive pass, Leave Requests: request history as cards (leave type in words, clear
+  status badge, day count, full reason and admin remark, Withdraw button); form fits phones, end date follows the
+  start date, form beside history only from laptop width.
