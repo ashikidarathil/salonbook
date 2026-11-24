@@ -156,3 +156,5 @@
   amounts as ₹1,000, and a one-column form on tablets.
 - 2026-11-24 — Admin responsive pass, Dispute Chats: WhatsApp-style list then conversation on phones, side by side
   from tablet width, search, open chat kept in the address, real voice player, opens at the newest message.
+- 2026-11-24 — Admin responsive pass, Reviews: shared page header and breadcrumbs, filters kept in the address,
+  review cards in two columns from laptop width, full-size Delete and Restore, shared pagination.
