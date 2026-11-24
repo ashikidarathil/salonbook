@@ -25,7 +25,6 @@ const ROUTES: CrumbRoute[] = [
     ({ id }) => [{ label: 'Bookings', href: '/admin/bookings' }, { label: id ?? 'Booking' }],
   ],
   ['/admin/off-days', single('Leave Requests')],
-  ['/admin/notifications', single('Notifications')],
 
   ['/stylist', single('Dashboard')],
   ['/stylist/profile', single('Profile')],
@@ -39,12 +38,10 @@ const ROUTES: CrumbRoute[] = [
     ],
   ],
   ['/stylist/wallet', single('Wallet')],
-  ['/stylist/notifications', single('Notifications')],
   ['/stylist/reviews', single('Reviews')],
 
   ['/profile', single('Profile Settings')],
   ['/profile/favorites', single('Favorites')],
-  ['/profile/notifications', single('Notifications')],
   ['/profile/bookings', single('My Bookings')],
   [
     '/profile/bookings/:id',
