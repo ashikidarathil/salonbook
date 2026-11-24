@@ -1,457 +1,319 @@
-import { Loader } from '@/components/common/Loader';
-import { useEffect, useState, useCallback } from 'react';
-import { useAppDispatch, useAppSelector } from '../../app/hooks';
+import { useCallback, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { endOfDay, format, parseISO, startOfDay, startOfYear, subDays } from 'date-fns';
+import { CalendarClock, CheckCircle, Lock, RefreshCw, Search, Wallet, X } from 'lucide-react';
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchAdminEscrows } from '@/features/escrow/escrow.thunks';
 import { EscrowStatus } from '@/features/escrow/escrow.types';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import {
-  DollarSign,
-  Lock,
-  Calendar as CalendarIcon,
-  CheckCircle,
-  Search,
-  RefreshCw,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import { format, startOfDay, endOfDay, subDays, startOfYear } from 'date-fns';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover';
-import { Calendar } from '../../components/ui/calendar';
-import { Icon } from '@iconify/react';
+import type { EscrowResponseDto } from '@/features/escrow/escrow.types';
+import { Loader } from '@/components/common/Loader';
+import { PageHeader } from '@/components/common/PageHeader';
+import Pagination from '@/components/pagination/Pagination';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useListParams } from '@/hooks/useListParams';
+import { cn } from '@/lib/utils';
 
+const LIMIT = 10;
 const PERIODS = [
-  { label: 'All', value: 'all', icon: 'solar:globus-bold-duotone' },
-  { label: 'Today', value: 'today', icon: 'solar:calendar-date-bold-duotone' },
-  { label: 'Week', value: 'week', icon: 'solar:calendar-minimalistic-bold-duotone' },
-  { label: 'Month', value: 'month', icon: 'solar:calendar-bold-duotone' },
-  { label: 'Year', value: 'year', icon: 'solar:calendar-line-duotone' },
-];
+  { value: 'ALL', label: 'All' },
+  { value: 'today', label: 'Today' },
+  { value: 'week', label: 'Week' },
+  { value: 'month', label: 'Month' },
+  { value: 'year', label: 'Year' },
+] as const;
+const TABS = [
+  { value: 'ALL', label: 'Escrowed Funds' },
+  { value: 'released', label: 'Release History' },
+] as const;
+
+const rupees = (amount: number) => `₹${amount.toLocaleString('en-IN')}`;
+const isDay = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value);
+const showDate = (value?: string) =>
+  value && /^\d{4}-\d{2}-\d{2}/.test(value) ? format(new Date(value), 'd MMM yyyy') : value || '—';
+
+function dateRange(period: string, day: string) {
+  const now = new Date();
+  if (period === 'day') {
+    return {
+      startDate: startOfDay(parseISO(day)).toISOString(),
+      endDate: endOfDay(parseISO(day)).toISOString(),
+    };
+  }
+  const starts: Record<string, Date> = {
+    today: startOfDay(now),
+    week: startOfDay(subDays(now, 6)),
+    month: startOfDay(subDays(now, 29)),
+    year: startOfYear(now),
+  };
+  const start = starts[period];
+  return start
+    ? { startDate: start.toISOString(), endDate: endOfDay(now).toISOString() }
+    : { startDate: undefined, endDate: undefined };
+}
+
+function EscrowCard({ escrow, released }: { escrow: EscrowResponseDto; released: boolean }) {
+  const services = escrow.bookingId?.items
+    ?.map((item) => item?.serviceId?.name)
+    .filter(Boolean)
+    .join(', ');
+  const rows = [
+    ['Customer', escrow.bookingId?.userId?.name],
+    ['Stylist', escrow.stylistId?.userId?.name],
+    ['Service', services],
+    released
+      ? ['Released', showDate(escrow.releaseDate)]
+      : ['Created', format(new Date(escrow.createdAt), 'd MMM yyyy')],
+  ];
+
+  return (
+    <li className="flex min-w-0 flex-col gap-4 rounded-2xl border bg-white p-4 shadow-sm sm:p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p
+            className={cn(
+              'break-all text-xl font-bold',
+              released ? 'text-green-600' : 'text-primary',
+            )}
+          >
+            {rupees(escrow.amount)}
+          </p>
+          {escrow.bookingId?.id ? (
+            <Link
+              to={`/admin/bookings/${escrow.bookingId.id}`}
+              className="mt-0.5 inline-block break-all text-xs font-medium text-muted-foreground underline-offset-2 hover:underline"
+            >
+              #{escrow.bookingId.bookingNumber}
+            </Link>
+          ) : (
+            <p className="mt-0.5 text-xs text-muted-foreground">No booking</p>
+          )}
+        </div>
+        <Badge
+          variant="outline"
+          className={cn(
+            'shrink-0',
+            released
+              ? 'border-green-200 bg-green-50 text-green-700'
+              : 'border-amber-200 bg-amber-50 text-amber-700',
+          )}
+        >
+          {released ? 'Released' : 'Held'}
+        </Badge>
+      </div>
+      <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1.5 rounded-xl bg-muted/50 p-3 text-sm">
+        {rows.map(([label, value]) => (
+          <div key={label} className="contents">
+            <dt className="text-muted-foreground">{label}</dt>
+            <dd className="break-words font-medium">{value || '—'}</dd>
+          </div>
+        ))}
+      </dl>
+    </li>
+  );
+}
 
 export default function AdminWalletPage() {
   const dispatch = useAppDispatch();
-  const { escrows, pagination, loading } = useAppSelector((s) => s.escrow);
+  const { escrows, pagination, loading } = useAppSelector((state) => state.escrow);
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
-  const [page, setPage] = useState(1);
-  const [activeTab, setActiveTab] = useState('escrowed');
-  const [period, setPeriod] = useState<string>('all');
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-
-  const getDateRange = (period: string, customDate?: Date) => {
-    let start: Date | undefined;
-    let end: Date | undefined = endOfDay(new Date());
-
-    if (period === 'all') {
-      return { startDate: undefined, endDate: undefined };
-    }
-
-    if (period === 'custom' && customDate) {
-      start = startOfDay(customDate);
-      end = endOfDay(customDate);
-    } else if (period === 'today') {
-      start = startOfDay(new Date());
-    } else if (period === 'week') {
-      start = startOfDay(subDays(new Date(), 6));
-    } else if (period === 'month') {
-      start = startOfDay(subDays(new Date(), 29));
-    } else if (period === 'year') {
-      start = startOfDay(startOfYear(new Date()));
-    }
-
-    return {
-      startDate: start?.toISOString(),
-      endDate: end?.toISOString(),
-    };
-  };
+  // Filters live in the address, so a refresh or coming back keeps them
+  const list = useListParams();
+  const debouncedSearch = useDebounce(list.search, 500);
+  const released = list.value('tab') === 'released';
+  const day = isDay(list.value('day')) ? list.value('day') : '';
+  const period = day ? 'day' : list.value('period');
+  const page = list.page;
+  const pageTotal = escrows.reduce((sum, escrow) => sum + escrow.amount, 0);
 
   const loadEscrows = useCallback(() => {
-    const { startDate, endDate } = getDateRange(period, selectedDate);
     dispatch(
       fetchAdminEscrows({
         page,
-        limit: 10,
-        search: debouncedSearchTerm,
-        status: activeTab === 'escrowed' ? EscrowStatus.HELD : EscrowStatus.RELEASED,
-        startDate,
-        endDate,
+        limit: LIMIT,
+        search: debouncedSearch.trim() || undefined,
+        status: released ? EscrowStatus.RELEASED : EscrowStatus.HELD,
+        ...dateRange(period, day),
       }),
     );
-  }, [dispatch, page, debouncedSearchTerm, activeTab, period, selectedDate]);
+  }, [dispatch, page, debouncedSearch, released, period, day]);
 
   useEffect(() => {
     loadEscrows();
   }, [loadEscrows]);
 
-  const handleTabChange = (val: string) => {
-    setActiveTab(val);
-    setPage(1);
-  };
-
-  const handleRefresh = () => {
-    loadEscrows();
-  };
-
-  const handleDateSelect = (date: Date | undefined) => {
-    setSelectedDate(date);
-    if (date) {
-      setPeriod('custom');
-      setPage(1);
-    }
-  };
-
-  // Note: Since we are using pagination, these totals are ONLY for the current page if calculated here.
-  const pageTotal = (escrows || []).reduce((s, e) => s + e.amount, 0);
+  const summary = [
+    {
+      label: released ? 'Released on this page' : 'Held on this page',
+      value: rupees(pageTotal),
+      note: `${escrows.length} of ${pagination?.totalItems ?? escrows.length} records`,
+      icon: released ? CheckCircle : Lock,
+      accent: true,
+    },
+    {
+      label: released ? 'Total releases' : 'Total held records',
+      value: String(pagination?.totalItems ?? escrows.length),
+      note: 'For the chosen period and search',
+      icon: Wallet,
+    },
+    {
+      label: 'Automatic release',
+      value: 'Every 2 minutes',
+      note: 'Held funds move to stylist wallets automatically',
+      icon: CalendarClock,
+    },
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
-        <div>
-          <h1 className="break-words text-2xl font-bold sm:text-3xl">Financial Oversight</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Monitor escrowed funds and daily releases
-          </p>
-        </div>
-
-        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
-          <div className="flex w-full items-center rounded-xl border border-border/30 bg-muted/40 p-1 sm:inline-flex sm:w-auto">
-            <Tabs
-              value={period !== 'custom' ? period : ''}
-              onValueChange={setPeriod}
-              className="w-full"
-            >
-              <TabsList className="grid h-9 w-full grid-cols-5 gap-1 bg-transparent sm:inline-flex sm:w-auto">
-                {PERIODS.map((p) => (
-                  <TabsTrigger
-                    key={p.value}
-                    value={p.value}
-                    className="min-w-0 rounded-lg px-1 py-1.5 sm:px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary font-medium transition-all text-xs sm:text-sm"
-                  >
-                    <Icon icon={p.icon} className="mr-2 hidden size-4 sm:block" />
-                    {p.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-          </div>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={`h-[40px] w-full rounded-xl px-4 font-medium sm:w-auto border-border/30 bg-muted/40 hover:bg-white transition-all shadow-sm text-sm ${period === 'custom' ? 'border-primary text-primary bg-white' : ''}`}
-              >
-                <Icon icon="solar:calendar-add-bold-duotone" className="mr-2 size-4" />
-                {period === 'custom' && selectedDate
-                  ? format(selectedDate, 'PPP')
-                  : 'Specific Date'}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 rounded-xl" align="end">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={handleDateSelect}
-                initialFocus
-                className="rounded-xl theme-admin"
-              />
-              <div className="p-3 border-t border-border/40 bg-muted/10">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full text-xs font-medium h-8 rounded-lg hover:bg-white hover:text-primary transition-colors"
-                  onClick={() => {
-                    setSelectedDate(new Date());
-                    setPeriod('month');
-                  }}
-                >
-                  Clear Selection
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-[40px] rounded-xl gap-2 shadow-sm border-border/30 bg-muted/40"
-            onClick={handleRefresh}
-          >
+    <div className="space-y-5">
+      <PageHeader
+        title="Platform Wallet"
+        description="Monitor escrowed funds and releases to stylists."
+        breadcrumbs={[{ label: 'Platform Wallet' }]}
+        actions={
+          <Button variant="outline" className="h-10 w-full gap-2 sm:w-auto" onClick={loadEscrows}>
             {loading ? <Loader size="xs" /> : <RefreshCw className="size-4" />}
             Refresh
           </Button>
-        </div>
+        }
+      />
+
+      <div className="grid grid-cols-2 gap-1 rounded-xl border bg-muted/40 p-1 sm:inline-grid">
+        {TABS.map((tab) => {
+          const active = (tab.value === 'released') === released;
+          return (
+            <button
+              key={tab.value}
+              type="button"
+              aria-pressed={active}
+              onClick={() => list.update({ tab: tab.value })}
+              className={cn(
+                'h-9 min-w-0 rounded-lg px-3 text-sm font-semibold transition-colors',
+                active ? 'bg-white text-primary shadow-sm' : 'text-muted-foreground',
+              )}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-          <Card className="border-none shadow-lg bg-primary text-primary-foreground pt-5">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-2 opacity-80">
-                {activeTab === 'escrowed' ? (
-                  <Lock className="size-5" />
-                ) : (
-                  <CheckCircle className="size-5" />
-                )}
-                <p className="text-sm font-medium">
-                  {activeTab === 'escrowed' ? 'Page Escrow Total' : 'Page Release Total'}
-                </p>
-              </div>
-              <p className="text-3xl font-bold text-white">₹{pageTotal.toLocaleString('en-IN')}</p>
-              <p className="text-xs mt-1 opacity-70">Showing current page funds</p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <Card className="border-none shadow-lg bg-muted/60 pt-5">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-2 text-muted-foreground">
-                <CalendarIcon className="size-5" />
-                <p className="text-sm font-medium">Automatic Release</p>
-              </div>
-              <p className="text-3xl font-bold">Every 2 Minutes</p>
-              <p className="text-xs mt-1 text-muted-foreground italic">
-                Funds are processed automatically every 2 minutes.
-              </p>
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Card className="border-none shadow-lg bg-muted/60 pt-5">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3 mb-2 text-muted-foreground">
-                <DollarSign className="size-5" />
-                <p className="text-sm font-medium">Search Records</p>
-              </div>
-              <div className="relative">
-                <Input
-                  placeholder="Booking #..."
-                  className="h-9 pr-8"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="ghost"
-                  className="absolute right-0 top-0 h-9 w-9 pointer-events-none"
-                >
-                  <Search className="size-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+      <div className="grid gap-3 lg:grid-cols-3">
+        {summary.map((item) => (
+          <div
+            key={item.label}
+            className={cn(
+              'min-w-0 rounded-2xl border p-4 shadow-sm sm:p-5',
+              item.accent ? 'border-primary bg-primary text-primary-foreground' : 'bg-white',
+            )}
+          >
+            <p
+              className={cn(
+                'flex items-center gap-2 text-sm font-medium',
+                item.accent ? 'opacity-90' : 'text-muted-foreground',
+              )}
+            >
+              <item.icon className="size-4 shrink-0" />
+              <span className="min-w-0 break-words">{item.label}</span>
+            </p>
+            <p className="mt-2 break-words text-2xl font-bold">{item.value}</p>
+            <p className={cn('mt-1 text-xs', item.accent ? 'opacity-80' : 'text-muted-foreground')}>
+              {item.note}
+            </p>
+          </div>
+        ))}
       </div>
 
-      {/* Escrow Details */}
-      <Card>
-        <CardHeader className="pb-0 border-b-0">
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <Icon icon="solar:wad-of-money-bold-duotone" className="text-primary size-5" />
-            Funds Overview
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0 mt-4">
-          <Tabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList className="mx-6">
-              <TabsTrigger value="escrowed">Escrowed Funds</TabsTrigger>
-              <TabsTrigger value="released">Release History</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="escrowed" className="mt-4 border-t">
-              {loading && escrows.length === 0 ? (
-                <div className="py-12 text-center text-muted-foreground italic">
-                  <Loader size="sm" className="mx-auto mb-3" />
-                </div>
-              ) : escrows.length === 0 ? (
-                <div className="py-12 text-center text-muted-foreground">
-                  <Lock className="size-10 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm">No funds currently in escrow matching your search</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-border/50">
-                  {escrows.map((e) => (
-                    <div
-                      key={e.id}
-                      className="p-6 flex items-start justify-between hover:bg-muted/10 transition-colors"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                          <span className="font-bold text-xl text-primary font-heading">
-                            ₹{e.amount.toLocaleString('en-IN')}
-                          </span>
-                          <Badge variant="outline" className="font-mono text-[10px] uppercase">
-                            #{e.bookingId?.bookingNumber || 'N/A'}
-                          </Badge>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-2">
-                          <div className="flex items-center gap-2 text-xs">
-                            <span className="text-muted-foreground">Customer:</span>
-                            <span className="font-semibold">
-                              {e.bookingId?.userId?.name || 'N/A'}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-xs">
-                            <span className="text-muted-foreground">Stylist:</span>
-                            <span className="font-semibold">
-                              {e.stylistId?.userId?.name || 'N/A'}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-xs col-span-full">
-                            <span className="text-muted-foreground">Service:</span>
-                            <span className="font-medium">
-                              {e.bookingId?.items
-                                ?.map((i) => i?.serviceId?.name)
-                                .filter(Boolean)
-                                .join(', ') || 'N/A'}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-4 mt-2">
-                          {/* <p className="text-[10px] text-amber-600 font-bold flex items-center gap-1 uppercase tracking-wider">
-                            <Calendar className="size-3" />
-                            Release: {e.releaseMonth}
-                          </p> */}
-                          <p className="text-[10px] text-muted-foreground flex items-center gap-1 uppercase tracking-wider">
-                            Created: {format(new Date(e.createdAt), 'dd MMM yyyy')}
-                          </p>
-                        </div>
-                      </div>
-                      <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200 uppercase tracking-widest text-[10px] px-3 py-1">
-                        HELD
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="released" className="mt-4 border-t">
-              {loading && escrows.length === 0 ? (
-                <div className="py-12 text-center text-muted-foreground italic">
-                  <Loader size="sm" className="mx-auto mb-3" />
-                </div>
-              ) : escrows.length === 0 ? (
-                <div className="py-12 text-center text-muted-foreground">
-                  <CheckCircle className="size-10 mx-auto mb-3 opacity-30" />
-                  <p className="text-sm">No releases found matching your search</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-border/50">
-                  {escrows.map((e) => (
-                    <div
-                      key={e.id}
-                      className="p-6 flex items-start justify-between hover:bg-muted/10 transition-colors"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                          <span className="font-bold text-xl text-green-600 font-heading">
-                            ₹{e.amount.toLocaleString('en-IN')}
-                          </span>
-                          <Badge variant="outline" className="font-mono text-[10px] uppercase">
-                            #{e.bookingId?.bookingNumber || 'N/A'}
-                          </Badge>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-2">
-                          <div className="flex items-center gap-2 text-xs">
-                            <div className="size-6 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-bold text-[10px]">
-                              C
-                            </div>
-                            <span className="text-muted-foreground">Customer:</span>
-                            <span className="font-semibold">
-                              {e.bookingId.userId?.name || 'N/A'}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-xs">
-                            <div className="size-6 rounded-full bg-green-50 flex items-center justify-center text-green-600 font-bold text-[10px]">
-                              S
-                            </div>
-                            <span className="text-muted-foreground">Stylist:</span>
-                            <span className="font-semibold">
-                              {e.stylistId?.userId?.name || 'N/A'}
-                            </span>
-                          </div>
-                        </div>
-
-                        <p className="text-[10px] text-green-600 font-bold flex items-center gap-1 uppercase tracking-wider">
-                          <CheckCircle className="size-3" />
-                          Released on {e.releaseDate}
-                        </p>
-                      </div>
-                      <Badge
-                        variant="outline"
-                        className="bg-green-50 text-green-700 border-green-200 uppercase tracking-widest text-[10px] px-3 py-1"
-                      >
-                        RELEASED
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-
-          {/* Pagination */}
-          {pagination && pagination.pages > 1 && (
-            <div className="px-6 py-4 flex items-center justify-between border-t bg-muted/10">
-              <p className="text-xs text-muted-foreground font-medium">
-                Showing page {pagination.page} of {pagination.pages}
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 flex items-center gap-1 px-3"
-                  disabled={page === 1}
-                  onClick={() => setPage((p) => p - 1)}
-                >
-                  <ChevronLeft className="size-4" /> Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 flex items-center gap-1 px-3"
-                  disabled={page === pagination.pages}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  Next <ChevronRight className="size-4" />
-                </Button>
-              </div>
-            </div>
+      <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_auto_12rem]">
+        <div className="relative min-w-0">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            aria-label="Search by booking number"
+            placeholder="Search booking number..."
+            value={list.search}
+            onChange={(event) => list.update({ q: event.target.value })}
+            className="h-10 pl-9 pr-10"
+          />
+          {list.search && (
+            <button
+              type="button"
+              aria-label="Clear search"
+              onClick={() => list.update({ q: undefined })}
+              className="absolute right-1 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+            >
+              <X className="size-4" />
+            </button>
           )}
-        </CardContent>
-      </Card>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem] xl:contents">
+          <div
+            className="grid grid-cols-5 gap-1 rounded-xl border bg-muted/40 p-1"
+            role="group"
+            aria-label="Filter by period"
+          >
+            {PERIODS.map((item) => (
+              <button
+                key={item.value}
+                type="button"
+                aria-pressed={period === item.value}
+                onClick={() => list.update({ period: item.value, day: undefined })}
+                className={cn(
+                  'h-8 min-w-0 rounded-lg px-1 text-xs font-semibold transition-colors xl:px-3',
+                  period === item.value
+                    ? 'bg-white text-primary shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+          <Input
+            type="date"
+            aria-label="Choose a day"
+            value={day}
+            onChange={(event) =>
+              list.update({ day: event.target.value || undefined, period: undefined })
+            }
+            className={cn('h-10 min-w-0', period === 'day' && 'border-primary')}
+          />
+        </div>
+      </div>
 
-      {/* <div className="bg-blue-50 border border-blue-100 p-5 rounded-xl flex gap-4 items-start shadow-sm">
-        <div className="bg-blue-600 p-2 rounded-lg shrink-0">
-          <Info className="size-5 text-white" />
+      {loading && escrows.length === 0 ? (
+        <div className="flex justify-center py-16">
+          <Loader label="Loading wallet" />
         </div>
-        <div className="text-sm text-blue-900">
-          <p className="font-bold mb-1 font-heading uppercase tracking-tighter">Escrow Payout Strategy</p>
-          <p className="opacity-80">Funds are held securely by the platform until the 1st of every month. On release day, our system automatically moves these funds to each stylist's available wallet balance. You can track all scheduled and past releases here.</p>
+      ) : escrows.length === 0 ? (
+        <div className="rounded-2xl border bg-white px-6 py-12 text-center text-muted-foreground shadow-sm">
+          {released ? (
+            <CheckCircle className="mx-auto mb-3 size-10 opacity-30" />
+          ) : (
+            <Lock className="mx-auto mb-3 size-10 opacity-30" />
+          )}
+          <p className="text-sm">
+            {released ? 'No releases found.' : 'No funds in escrow for these filters.'}
+          </p>
         </div>
-      </div> */}
+      ) : (
+        <div className="space-y-3">
+          <ul className="grid gap-3 lg:grid-cols-2">
+            {escrows.map((escrow) => (
+              <EscrowCard key={escrow.id} escrow={escrow} released={released} />
+            ))}
+          </ul>
+          {pagination && pagination.totalPages > 1 && (
+            <Pagination
+              className="mt-2"
+              currentPage={page}
+              totalPages={pagination.totalPages}
+              onPageChange={(next) => list.update({}, next)}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }

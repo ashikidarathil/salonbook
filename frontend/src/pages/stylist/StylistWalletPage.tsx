@@ -288,8 +288,8 @@ export default function StylistWalletPage() {
           {/* Pagination */}
           <div className="p-8 border-t border-border/10">
             <Pagination
-              currentPage={pagination?.page || 1}
-              totalPages={pagination?.pages || 0}
+              currentPage={pagination?.currentPage || 1}
+              totalPages={pagination?.totalPages || 0}
               onPageChange={setPage}
             />
           </div>

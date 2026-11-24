@@ -9,11 +9,12 @@ export interface PaginationQueryDto {
   endDate?: string;
 }
 
+/** Matches the server's shared pagination response */
 export interface EscrowPagination {
-  total: number;
-  page: number;
-  limit: number;
-  pages: number;
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
 }
 
 export interface PaginatedEscrowResponse {

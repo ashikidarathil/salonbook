@@ -26,7 +26,6 @@ const ROUTES: CrumbRoute[] = [
   ],
   ['/admin/off-days', single('Leave Requests')],
   ['/admin/notifications', single('Notifications')],
-  ['/admin/wallet', single('Platform Wallet')],
 
   ['/stylist', single('Dashboard')],
   ['/stylist/profile', single('Profile')],

@@ -158,3 +158,6 @@
   from tablet width, search, open chat kept in the address, real voice player, opens at the newest message.
 - 2026-11-24 — Admin responsive pass, Reviews: shared page header and breadcrumbs, filters kept in the address,
   review cards in two columns from laptop width, full-size Delete and Restore, shared pagination.
+- 2026-11-24 — Admin responsive pass, Platform Wallet: shared header and breadcrumbs, filters kept in the address,
+  escrow cards with booking links. Fixed wallet pagination (frontend read total/pages; server sends
+  totalItems/totalPages), so records after the first 10 are reachable on admin and stylist wallets.
