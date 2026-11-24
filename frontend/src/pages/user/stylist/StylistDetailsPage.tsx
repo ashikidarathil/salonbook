@@ -145,7 +145,11 @@ export default function StylistDetailsPage() {
               <CardContent className="p-4 sm:p-8">
                 <div className="flex flex-col md:flex-row gap-6 relative">
                   <button
-                    className={`absolute top-0 right-0 p-2 rounded-full shadow-sm transition-colors ${
+                    type="button"
+                    aria-label={
+                      isFavorite(selectedStylist?.id || '') ? 'Remove from favourites' : 'Add to favourites'
+                    }
+                    className={`absolute top-0 right-0 flex size-10 items-center justify-center rounded-full shadow-sm transition-colors ${
                       isFavorite(selectedStylist?.id || '')
                         ? 'text-destructive bg-white'
                         : 'bg-white text-muted-foreground hover:text-destructive'
@@ -380,7 +384,7 @@ export default function StylistDetailsPage() {
                         <Icon icon="solar:letter-bold" className="size-4" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-0.5">
+                        <p className="mb-0.5 text-xs font-semibold text-muted-foreground">
                           Email Address
                         </p>
                         <p className="text-sm font-semibold truncate">
@@ -393,7 +397,7 @@ export default function StylistDetailsPage() {
                         <Icon icon="solar:phone-bold" className="size-4" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-0.5">
+                        <p className="mb-0.5 text-xs font-semibold text-muted-foreground">
                           Phone Number
                         </p>
                         <p className="text-sm font-semibold">

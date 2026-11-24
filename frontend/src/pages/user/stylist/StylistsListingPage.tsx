@@ -225,7 +225,7 @@ export default function StylistsListingPage() {
                   key={stylist.id}
                   className="group overflow-hidden border-border/60 shadow-sm hover:shadow-md transition-all duration-300 pt-0 flex flex-col"
                 >
-                  <div className="relative aspect-[4/3] bg-muted overflow-hidden">
+                  <div className="relative aspect-[16/10] overflow-hidden bg-muted sm:aspect-[4/3]">
                     <img
                       src={
                         stylist.profilePicture ||
@@ -242,7 +242,11 @@ export default function StylistsListingPage() {
                       </div>
                     )}
                     <button
-                      className={`absolute top-4 right-4 p-2 bg-white/80 backdrop-blur-sm rounded-full transition-colors ${
+                      type="button"
+                      aria-label={
+                        isFavorite(stylist.id) ? 'Remove from favourites' : 'Add to favourites'
+                      }
+                      className={`absolute top-3 right-3 flex size-10 items-center justify-center bg-white/80 backdrop-blur-sm rounded-full transition-colors ${
                         isFavorite(stylist.id)
                           ? 'text-destructive bg-white shadow-sm'
                           : 'text-muted-foreground hover:text-destructive hover:bg-white'
@@ -301,7 +305,7 @@ export default function StylistsListingPage() {
                         stylist.assignedServices.map((service, idx) => (
                           <span
                             key={idx}
-                            className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20"
+                            className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-primary/10 text-primary border border-primary/20"
                           >
                             {service.charAt(0).toUpperCase() + service.slice(1)}
                           </span>
