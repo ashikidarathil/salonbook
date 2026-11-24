@@ -223,3 +223,7 @@
 - 2026-11-24 — Customer responsive pass, Chat: long links and words wrap inside the bubble instead of running
   off the screen (this also pushed the whole tablet layout sideways); bigger message "…" buttons; readable times,
   booking numbers, unread and header count bubbles. Shared with the stylist chat.
+- 2026-11-24 — Customer responsive pass, Auth/Contact/Apply: login, signup, all OTP and password pages, stylist
+  and admin login, Contact and Become a Stylist already fit every width (496 checks passed). Contact: Get
+  Directions is a coral link under the address like Call now, and the map box is shorter on phones. This
+  finishes the customer pass.
