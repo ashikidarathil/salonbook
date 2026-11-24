@@ -186,3 +186,6 @@
 - 2026-11-24 — Stylist responsive pass, Leave Requests: request history as cards (leave type in words, clear
   status badge, day count, full reason and admin remark, Withdraw button); form fits phones, end date follows the
   start date, form beside history only from laptop width.
+- 2026-11-24 — Stylist responsive pass, My Wallet: same look as the admin Platform Wallet (shared escrow card),
+  All / Held / Released filter and search kept in the address, release dates in words, booking numbers link to
+  the appointment, loading and empty states on every screen size.

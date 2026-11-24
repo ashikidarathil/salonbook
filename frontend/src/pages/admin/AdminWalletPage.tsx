@@ -1,15 +1,13 @@
 import { useCallback, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { endOfDay, format, parseISO, startOfDay, startOfYear, subDays } from 'date-fns';
+import { endOfDay, parseISO, startOfDay, startOfYear, subDays } from 'date-fns';
 import { CalendarClock, CheckCircle, Lock, RefreshCw, Search, Wallet, X } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchAdminEscrows } from '@/features/escrow/escrow.thunks';
 import { EscrowStatus } from '@/features/escrow/escrow.types';
-import type { EscrowResponseDto } from '@/features/escrow/escrow.types';
 import { Loader } from '@/components/common/Loader';
+import { EscrowCard } from '@/components/wallet/EscrowCard';
 import { PageHeader } from '@/components/common/PageHeader';
 import Pagination from '@/components/pagination/Pagination';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -31,9 +29,6 @@ const TABS = [
 
 const rupees = (amount: number) => `₹${amount.toLocaleString('en-IN')}`;
 const isDay = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value);
-const showDate = (value?: string) =>
-  value && /^\d{4}-\d{2}-\d{2}/.test(value) ? format(new Date(value), 'd MMM yyyy') : value || '—';
-
 function dateRange(period: string, day: string) {
   const now = new Date();
   if (period === 'day') {
@@ -52,67 +47,6 @@ function dateRange(period: string, day: string) {
   return start
     ? { startDate: start.toISOString(), endDate: endOfDay(now).toISOString() }
     : { startDate: undefined, endDate: undefined };
-}
-
-function EscrowCard({ escrow, released }: { escrow: EscrowResponseDto; released: boolean }) {
-  const services = escrow.bookingId?.items
-    ?.map((item) => item?.serviceId?.name)
-    .filter(Boolean)
-    .join(', ');
-  const rows = [
-    ['Customer', escrow.bookingId?.userId?.name],
-    ['Stylist', escrow.stylistId?.userId?.name],
-    ['Service', services],
-    released
-      ? ['Released', showDate(escrow.releaseDate)]
-      : ['Created', format(new Date(escrow.createdAt), 'd MMM yyyy')],
-  ];
-
-  return (
-    <li className="flex min-w-0 flex-col gap-4 rounded-2xl border bg-white p-4 shadow-sm sm:p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p
-            className={cn(
-              'break-all text-xl font-bold',
-              released ? 'text-green-600' : 'text-primary',
-            )}
-          >
-            {rupees(escrow.amount)}
-          </p>
-          {escrow.bookingId?.id ? (
-            <Link
-              to={`/admin/bookings/${escrow.bookingId.id}`}
-              className="mt-0.5 inline-block break-all text-xs font-medium text-muted-foreground underline-offset-2 hover:underline"
-            >
-              #{escrow.bookingId.bookingNumber}
-            </Link>
-          ) : (
-            <p className="mt-0.5 text-xs text-muted-foreground">No booking</p>
-          )}
-        </div>
-        <Badge
-          variant="outline"
-          className={cn(
-            'shrink-0',
-            released
-              ? 'border-green-200 bg-green-50 text-green-700'
-              : 'border-amber-200 bg-amber-50 text-amber-700',
-          )}
-        >
-          {released ? 'Released' : 'Held'}
-        </Badge>
-      </div>
-      <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1.5 rounded-xl bg-muted/50 p-3 text-sm">
-        {rows.map(([label, value]) => (
-          <div key={label} className="contents">
-            <dt className="text-muted-foreground">{label}</dt>
-            <dd className="break-words font-medium">{value || '—'}</dd>
-          </div>
-        ))}
-      </dl>
-    </li>
-  );
 }
 
 export default function AdminWalletPage() {
@@ -301,7 +235,13 @@ export default function AdminWalletPage() {
         <div className="space-y-3">
           <ul className="grid gap-3 lg:grid-cols-2">
             {escrows.map((escrow) => (
-              <EscrowCard key={escrow.id} escrow={escrow} released={released} />
+              <EscrowCard
+                key={escrow.id}
+                escrow={escrow}
+                bookingHref={(item) =>
+                  item.bookingId?.id ? `/admin/bookings/${item.bookingId.id}` : undefined
+                }
+              />
             ))}
           </ul>
           {pagination && pagination.totalPages > 1 && (
