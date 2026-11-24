@@ -1,6 +1,10 @@
 import { injectable } from 'tsyringe';
 import { ServiceModel } from '../../../models/service.model';
-import type { ServiceDocument, ServiceImageField } from '../../../models/service.model';
+import type {
+  IncludedItem,
+  ServiceDocument,
+  ServiceImageField,
+} from '../../../models/service.model';
 import type { IServiceRepository } from './IServiceRepository';
 import type { ServicePaginationQueryDto } from '../dto/service.request.dto';
 import type { ServicePaginatedResponse } from '../dto/service.response.dto';
@@ -15,7 +19,7 @@ export class ServiceRepository implements IServiceRepository {
     description?: string;
     categoryId: string;
     imageUrl?: string;
-    whatIncluded?: string[];
+    whatIncluded?: IncludedItem[];
   }): Promise<ServiceDocument> {
     const doc = new ServiceModel({
       name: data.name.trim(),
@@ -56,7 +60,7 @@ export class ServiceRepository implements IServiceRepository {
       status: 'ACTIVE' | 'INACTIVE';
       imageUrl: string;
       categoryId: string;
-      whatIncluded?: string[];
+      whatIncluded?: IncludedItem[];
     }>,
   ): Promise<ServiceDocument | null> {
     return ServiceModel.findByIdAndUpdate(id, data, { new: true });

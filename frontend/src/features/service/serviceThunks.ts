@@ -6,6 +6,7 @@ import type {
   ServiceQuery,
   PaginatedServiceResponse,
   ServiceImageKind,
+  IncludedItem,
 } from './service.types';
 import { handleThunkError } from '@/common/utils/thunk.utils';
 import { ERROR_MESSAGES } from '@/common/constants/error.messages';
@@ -49,7 +50,7 @@ export const createService = createAsyncThunk<
     description?: string;
     categoryId: string;
     status?: ServiceStatus;
-    whatIncluded?: string[];
+    whatIncluded?: IncludedItem[];
     slug?: string;
   },
   { rejectValue: string }
@@ -75,7 +76,7 @@ export const updateService = createAsyncThunk<
       status: ServiceStatus;
       imageUrl: string;
       categoryId: string;
-      whatIncluded: string[];
+      whatIncluded: IncludedItem[];
       slug: string;
     }>;
   },

@@ -1,4 +1,8 @@
-import type { ServiceDocument, ServiceImageField } from '../../../models/service.model';
+import type {
+  IncludedItem,
+  ServiceDocument,
+  ServiceImageField,
+} from '../../../models/service.model';
 import type { ServicePaginationQueryDto } from '../dto/service.request.dto';
 import type { ServicePaginatedResponse } from '../dto/service.response.dto';
 
@@ -8,7 +12,7 @@ export interface IServiceRepository {
     description?: string;
     categoryId: string;
     imageUrl?: string;
-    whatIncluded?: string[];
+    whatIncluded?: IncludedItem[];
   }): Promise<ServiceDocument>;
 
   findById(id: string): Promise<ServiceDocument | null>;
@@ -24,7 +28,7 @@ export interface IServiceRepository {
       description?: string;
       status: 'ACTIVE' | 'INACTIVE';
       imageUrl: string;
-      whatIncluded?: string[];
+      whatIncluded?: IncludedItem[];
     }>,
   ): Promise<ServiceDocument | null>;
 

@@ -234,3 +234,8 @@
   and admin login, Contact and Become a Stylist already fit every width (496 checks passed). Contact: Get
   Directions is a coral link under the address like Call now, and the map box is shorter on phones. This
   finishes the customer pass.
+- 2026-11-24 — What's included: each item is now a title with a description ({ title, description }). Admin
+  service form edits both for every item; the service page lists them as bullets with the description
+  underneath. Old plain-text items (including "Title: detail") are read as items automatically.
+  `npm run migrate:included` converts old items and fills empty descriptions from INCLUDED_DESCRIPTIONS (never
+  overwrites admin text) and lists any titles with no description. The seed writes the descriptions too.

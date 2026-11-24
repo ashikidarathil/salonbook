@@ -14,7 +14,7 @@ import type {
 import { BranchServiceMapper } from '../mapper/branchService.mapper';
 import { IBranchCategoryRepository } from '../../branchCategory/repository/IBranchCategoryRepository';
 
-import { ServiceModel, ServiceLean } from '../../../models/service.model';
+import { ServiceModel, ServiceLean, toIncludedItems } from '../../../models/service.model';
 import type { PaginationQueryDto } from '../../../common/dto/pagination.query.dto';
 import { PaginationQueryParser } from '../../../common/dto/pagination.query.dto';
 import type { PaginatedResponse } from '../../../common/dto/pagination.response.dto';
@@ -249,7 +249,7 @@ export class BranchServiceService implements IBranchServiceService {
         imageUrl: s.imageUrl,
         detailImageUrl: s.detailImageUrl,
         description: s.description,
-        whatIncluded: s.whatIncluded,
+        whatIncluded: toIncludedItems(s.whatIncluded),
         price: m ? m.price : null,
         duration: m ? m.duration : null,
         isActive: m ? m.isActive : false,
@@ -353,7 +353,7 @@ export class BranchServiceService implements IBranchServiceService {
       imageUrl: service.imageUrl,
       detailImageUrl: service.detailImageUrl,
       description: service.description,
-      whatIncluded: service.whatIncluded,
+      whatIncluded: toIncludedItems(service.whatIncluded),
       price: mapping.price,
       duration: mapping.duration,
       isActive: mapping.isActive,

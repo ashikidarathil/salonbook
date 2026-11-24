@@ -1,3 +1,4 @@
+import type { IncludedItem } from '../../../models/service.model';
 export interface ServiceResponseDto {
   id: string;
   slug?: string;
@@ -7,7 +8,7 @@ export interface ServiceResponseDto {
   categoryName?: string;
   imageUrl?: string;
   detailImageUrl?: string;
-  whatIncluded?: string[];
+  whatIncluded?: IncludedItem[];
   status: 'ACTIVE' | 'INACTIVE';
   isDeleted: boolean;
   createdAt: string;

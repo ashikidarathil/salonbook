@@ -1,13 +1,20 @@
 import { z } from 'zod';
 import { SlugSchema } from '../../../common/dto/slug.schema';
 
+const IncludedItemSchema = z
+  .object({
+    title: z.string().trim().min(1, 'Each included item needs a title').max(60),
+    description: z.string().trim().max(300).optional(),
+  })
+  .strict();
+
 export const CreateServiceSchema = z
   .object({
     name: z.string().min(1, 'Service name is required'),
     description: z.string().optional(),
     categoryId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid category ID'),
     imageUrl: z.string().url('Invalid image URL').optional(),
-    whatIncluded: z.array(z.string()).optional(),
+    whatIncluded: z.array(IncludedItemSchema).max(20).optional(),
     slug: SlugSchema.optional(),
   })
   .strict();
@@ -22,7 +29,7 @@ export const UpdateServiceSchema = z
       .string()
       .regex(/^[0-9a-fA-F]{24}$/, 'Invalid category ID')
       .optional(),
-    whatIncluded: z.array(z.string()).optional(),
+    whatIncluded: z.array(IncludedItemSchema).max(20).optional(),
     slug: SlugSchema.optional(),
   })
   .strict();

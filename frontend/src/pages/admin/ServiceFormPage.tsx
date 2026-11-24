@@ -7,7 +7,7 @@ import { Check, Plus, X } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { createService, updateService } from '@/features/service/serviceThunks';
 import { fetchCategories } from '@/features/category/categoryThunks';
-import type { Service } from '@/features/service/service.types';
+import type { IncludedItem, Service } from '@/features/service/service.types';
 import { serviceService } from '@/services/service.service';
 import { ERROR_MESSAGES } from '@/common/constants/error.messages';
 import { showError, showSuccess } from '@/common/utils/swal.utils';
@@ -29,7 +29,14 @@ const serviceSchema = z.object({
   name: z.string().trim().min(2, 'Name must be at least 2 characters'),
   description: z.string().optional(),
   categoryId: z.string().min(1, 'Category is required'),
-  whatIncluded: z.array(z.string()).optional(),
+  whatIncluded: z
+    .array(
+      z.object({
+        title: z.string().trim().min(1, 'Give each item a title').max(60),
+        description: z.string().trim().max(300).optional(),
+      }),
+    )
+    .optional(),
   slug: slugFormField,
 });
 
@@ -117,11 +124,20 @@ export default function ServiceFormPage() {
 
 
   const addIncluded = () => {
-    const item = includedInput.trim();
-    if (!item || whatIncluded.length >= MAX_INCLUDED) return;
-    setValue('whatIncluded', [...whatIncluded, item], { shouldDirty: true });
+    const title = includedInput.trim();
+    if (!title || whatIncluded.length >= MAX_INCLUDED) return;
+    setValue('whatIncluded', [...whatIncluded, { title, description: '' }], {
+      shouldDirty: true,
+    });
     setIncludedInput('');
   };
+
+  const updateIncluded = (index: number, changes: Partial<IncludedItem>) =>
+    setValue(
+      'whatIncluded',
+      whatIncluded.map((item, i) => (i === index ? { ...item, ...changes } : item)),
+      { shouldDirty: true },
+    );
 
   const onSubmit = async (data: ServiceFormData) => {
     const payload = { ...data, slug: slugForSubmit(data.slug) };
@@ -234,13 +250,15 @@ export default function ServiceFormPage() {
                 <Label htmlFor="service-included" className="text-base font-semibold">
                   What's Included (optional)
                 </Label>
-                <p className="mt-1 text-sm text-muted-foreground">Add up to {MAX_INCLUDED} items</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Add up to {MAX_INCLUDED} items, each with a short description
+                </p>
               </div>
               <div className="flex gap-2">
                 <Input
                   id="service-included"
                   value={includedInput}
-                  placeholder="e.g., Free hair consultation"
+                  placeholder="e.g., Hair wash"
                   disabled={whatIncluded.length >= MAX_INCLUDED}
                   onChange={(e) => setIncludedInput(e.target.value)}
                   onKeyDown={(e) => {
@@ -262,30 +280,47 @@ export default function ServiceFormPage() {
                 </Button>
               </div>
               {whatIncluded.length > 0 && (
-                <ul className="space-y-2">
+                <ul className="space-y-3">
                   {whatIncluded.map((item, index) => (
-                    <li
-                      key={`${item}-${index}`}
-                      className="flex items-center justify-between gap-2 rounded-lg border bg-muted/30 p-3"
-                    >
-                      <span className="flex min-w-0 items-start gap-2 text-sm">
-                        <Check className="mt-0.5 size-4 shrink-0 text-green-600" />
-                        <span className="break-words">{item}</span>
-                      </span>
-                      <button
-                        type="button"
-                        aria-label={`Remove ${item}`}
-                        className="flex size-8 shrink-0 items-center justify-center rounded-full text-red-600 hover:bg-red-50"
-                        onClick={() =>
-                          setValue(
-                            'whatIncluded',
-                            whatIncluded.filter((_, i) => i !== index),
-                            { shouldDirty: true },
-                          )
-                        }
-                      >
-                        <X className="size-4" />
-                      </button>
+                    <li key={index} className="space-y-2 rounded-lg border bg-muted/30 p-3">
+                      <div className="flex items-center gap-2">
+                        <Check className="size-4 shrink-0 text-green-600" />
+                        <Input
+                          aria-label={`Item ${index + 1} title`}
+                          value={item.title}
+                          maxLength={60}
+                          className="h-9 min-w-0 flex-1 bg-white font-medium"
+                          onChange={(e) => updateIncluded(index, { title: e.target.value })}
+                        />
+                        <button
+                          type="button"
+                          aria-label={`Remove ${item.title || 'item'}`}
+                          className="flex size-9 shrink-0 items-center justify-center rounded-full text-red-600 hover:bg-red-50"
+                          onClick={() =>
+                            setValue(
+                              'whatIncluded',
+                              whatIncluded.filter((_, i) => i !== index),
+                              { shouldDirty: true },
+                            )
+                          }
+                        >
+                          <X className="size-4" />
+                        </button>
+                      </div>
+                      <Textarea
+                        aria-label={`Item ${index + 1} description`}
+                        value={item.description ?? ''}
+                        rows={2}
+                        maxLength={300}
+                        placeholder="Describe what the customer gets"
+                        className="bg-white text-sm"
+                        onChange={(e) => updateIncluded(index, { description: e.target.value })}
+                      />
+                      {errors.whatIncluded?.[index]?.title && (
+                        <p className="text-sm text-red-600">
+                          {errors.whatIncluded[index]?.title?.message}
+                        </p>
+                      )}
                     </li>
                   ))}
                 </ul>

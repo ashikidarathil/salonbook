@@ -36,6 +36,7 @@ import {
   stylists,
   WEEKLY_SHIFT,
   WORKING_DAYS,
+  INCLUDED_DESCRIPTIONS,
 } from './seedData';
 import { serviceImages, stylistImages } from './seedImages';
 import { ensureSlugs } from './ensureSlugs';
@@ -94,7 +95,10 @@ async function main(): Promise<void> {
         $set: {
           name: s.name,
           description: s.description,
-          whatIncluded: s.whatIncluded,
+          whatIncluded: s.whatIncluded.map((title) => ({
+            title,
+            description: INCLUDED_DESCRIPTIONS[title] ?? '',
+          })),
           categoryId,
           status: 'ACTIVE',
           isDeleted: false,
