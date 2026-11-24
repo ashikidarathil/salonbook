@@ -28,7 +28,7 @@ export function HeroSection() {
   };
 
   return (
-    <section className="container px-2 py-16 mx-auto md:py-24 ">
+    <section className="container mx-auto px-4 py-12 sm:px-6 md:py-24">
       <div className="max-w-3xl">
         <h1 className="mb-6 text-5xl font-bold tracking-tight font-heading md:text-6xl lg:text-7xl">
           Book Your Perfect
