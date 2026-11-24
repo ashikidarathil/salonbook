@@ -199,7 +199,7 @@ export default function ServiceDetailsPage() {
               {/* Category badge above the title */}
               <div className="mb-2 flex flex-col gap-2">
                 {currentService?.categoryName && (
-                  <Badge className="self-start px-3 py-1 text-xs font-semibold tracking-wider uppercase bg-accent text-accent-foreground hover:bg-primary/10 hover:text-primary">
+                  <Badge className="self-start border-transparent bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary hover:bg-primary/10">
                     {currentService.categoryName}
                   </Badge>
                 )}
