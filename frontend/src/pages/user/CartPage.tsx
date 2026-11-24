@@ -1,4 +1,6 @@
 import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
+import { format, parseISO } from 'date-fns';
+import { formatRupees } from '@/common/utils/money';
 import { Loader } from '@/components/common/Loader';
 import { bookingRef } from '@/common/utils/bookingRef';
 import { useEffect, useState, useCallback } from 'react';
@@ -188,19 +190,20 @@ export default function CartPage() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-bold text-lg truncate">{item.name}</h3>
+                      <div className="mb-2 flex items-start justify-between gap-2">
+                        <h3 className="line-clamp-2 break-words text-lg font-bold">{item.name}</h3>
                         <button
                           onClick={() => dispatch(removeFromCart(item.serviceId))}
-                          className="text-muted-foreground hover:text-destructive"
+                          aria-label={`Remove ${item.name}`}
+                          className="-mr-2 -mt-1 flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                         >
                           <Icon icon="solar:trash-bin-trash-bold" className="size-5" />
                         </button>
                       </div>
                       <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
                         <span className="flex items-center gap-1">
-                          <Icon icon="solar:bill-list-bold" className="text-primary size-4" />₹
-                          {item.price}
+                          <Icon icon="solar:bill-list-bold" className="text-primary size-4" />
+                          {formatRupees(item.price)}
                         </span>
                         <span className="flex items-center gap-1">
                           <Icon icon="solar:clock-circle-bold" className="text-primary size-4" />
@@ -238,8 +241,8 @@ export default function CartPage() {
                                 </div>
                                 <div>
                                   <p className="text-sm font-bold">{item.stylistName}</p>
-                                  <p className="text-[10px] text-primary font-medium">
-                                    {item.date} at {item.startTime}
+                                  <p className="text-xs text-primary font-medium">
+                                    {item.date ? format(parseISO(item.date), 'EEE, d MMM') : ''} · {item.startTime}
                                   </p>
                                 </div>
                               </div>
@@ -248,7 +251,7 @@ export default function CartPage() {
                               variant="ghost"
                               size="sm"
                               onClick={() => navigate(`/cart/schedule/${item.serviceId}`)}
-                              className="text-xs h-8 px-2"
+                              className="h-9 px-3 text-sm"
                             >
                               Change
                             </Button>
@@ -283,7 +286,7 @@ export default function CartPage() {
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between text-muted-foreground">
                   <span>Subtotal ({items.length} items)</span>
-                  <span>₹{totalPrice}</span>
+                  <span>{formatRupees(totalPrice)}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>Total Duration</span>
@@ -291,7 +294,7 @@ export default function CartPage() {
                 </div>
                 <div className="border-t border-dashed pt-4 flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span className="text-primary">₹{totalPrice}</span>
+                  <span className="text-primary">{formatRupees(totalPrice)}</span>
                 </div>
               </div>
 
@@ -301,7 +304,7 @@ export default function CartPage() {
                   <Icon icon="solar:shield-check-bold" className="size-4" />
                   <span>20% Advance Required at Checkout</span>
                 </div>
-                <p className="text-[11px] text-primary/60 leading-relaxed">
+                <p className="text-xs text-primary/60 leading-relaxed">
                   The exact advance amount will be calculated by the system at checkout. The
                   remaining 80% is paid at the saloon after your service.
                 </p>
@@ -331,7 +334,7 @@ export default function CartPage() {
                 )}
               </Button>
 
-              <p className="text-[10px] text-center text-muted-foreground mt-4">
+              <p className="text-xs text-center text-muted-foreground mt-4">
                 By proceeding, you agree to our Terms & Conditions
               </p>
             </Card>

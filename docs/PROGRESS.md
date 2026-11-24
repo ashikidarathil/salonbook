@@ -205,3 +205,6 @@
   the title and gives review dates readable text. Phone list height about 6,250 px to 4,000 px.
 - 2026-11-24 — Customer responsive pass, Stylists: shorter photos on phones, readable service tags and contact
   labels, larger favourite (heart) buttons with labels for screen readers. Booking page already fit.
+- 2026-11-24 — Customer responsive pass, Cart and payment: all amounts as ₹1,00,000 (cart, checkout, payment
+  result) through a shared formatRupees helper; chosen slot shown as Thu, 26 Nov · 11:00; long service names
+  wrap; bigger Remove and Change buttons; readable notes; readable cart count bubble in the header.

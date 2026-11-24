@@ -284,7 +284,7 @@ export function Header() {
             >
               <Icon icon="solar:cart-large-2-bold-duotone" className="size-6" />
               {cartItems.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] font-bold rounded-full size-4 flex items-center justify-center border-2 border-white">
+                <span className="absolute -right-1 -top-1 flex size-[18px] items-center justify-center rounded-full border-2 border-white bg-primary text-[11px] font-bold text-white">
                   {cartItems.length}
                 </span>
               )}

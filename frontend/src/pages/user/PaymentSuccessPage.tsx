@@ -1,6 +1,7 @@
 'use client';
 
 import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
+import { formatRupees } from '@/common/utils/money';
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { matchesBookingRef } from '@/common/utils/bookingRef';
@@ -109,7 +110,7 @@ export default function PaymentSuccessPage() {
                         )}
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold text-slate-900">₹{item.price}</p>
+                        <p className="font-semibold text-slate-900">{formatRupees(item.price)}</p>
                       </div>
                     </div>
                   ))}
@@ -117,15 +118,15 @@ export default function PaymentSuccessPage() {
 
                 <div className="grid grid-cols-2 gap-4 pt-4">
                   <div className="p-4 rounded-2xl bg-emerald-50/40 border border-emerald-100/40">
-                    <p className="text-[11px] font-medium text-emerald-600 mb-1">Paid Advance</p>
+                    <p className="text-xs font-medium text-emerald-600 mb-1">Paid Advance</p>
                     <p className="text-2xl font-semibold text-emerald-700">
-                      ₹{currentBooking.advanceAmount}
+                      {formatRupees(currentBooking.advanceAmount)}
                     </p>
                   </div>
                   <div className="p-4 rounded-2xl bg-slate-50/40 border border-slate-100/40">
-                    <p className="text-[11px] font-medium text-slate-500 mb-1">Payable at Salon</p>
+                    <p className="text-xs font-medium text-slate-500 mb-1">Payable at Salon</p>
                     <p className="text-2xl font-semibold text-slate-700">
-                      ₹{currentBooking.payableAmount - currentBooking.advanceAmount}
+                      {formatRupees(currentBooking.payableAmount - currentBooking.advanceAmount)}
                     </p>
                   </div>
                 </div>
