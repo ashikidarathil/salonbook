@@ -275,10 +275,10 @@ export default function StylistWalletManagement({ stylistId }: StylistWalletMana
             </table>
           </div>
 
-          {pagination && pagination.pages > 1 && (
+          {pagination && pagination.totalPages > 1 && (
             <div className="px-4 py-2 flex items-center justify-between border-t bg-muted/5">
               <p className="text-[10px] text-muted-foreground">
-                Page {pagination.page} of {pagination.pages}
+                Page {pagination.currentPage} of {pagination.totalPages}
               </p>
               <div className="flex gap-1">
                 <Button
@@ -294,7 +294,7 @@ export default function StylistWalletManagement({ stylistId }: StylistWalletMana
                   variant="outline"
                   size="sm"
                   className="h-7 w-7 p-0"
-                  disabled={page === pagination.pages}
+                  disabled={page === pagination.totalPages}
                   onClick={() => setPage((p) => p + 1)}
                 >
                   <ChevronRight className="size-3.5" />
