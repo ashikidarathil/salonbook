@@ -23,6 +23,8 @@ export const SLOT_KIND_LABEL: Record<SlotKind, string> = {
 
 const DAY_STATUSES: SlotStatus[] = ['OFF_DAY', 'NON_WORKING', 'NO_SCHEDULE', 'HOLIDAY'];
 const BOOKING_WINDOW_DAYS = 14;
+/** Staff can look at and plan days further ahead than customers can book. */
+const VIEW_WINDOW_DAYS = 90;
 
 /** A whole-day marker such as leave or holiday, rather than a time slot. */
 export const isDayStatus = (slot: SlotItem) => DAY_STATUSES.includes(slot.status);
@@ -40,30 +42,33 @@ export const parseSlotFilter = (value: string): SlotFilter =>
 
 export const todayString = () => format(new Date(), 'yyyy-MM-dd');
 
-/** The server counts its 14-day window from the UTC date. */
-export const lastBookableDate = () => {
+const utcDaysAhead = (days: number) => {
   const now = new Date();
-  return new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + BOOKING_WINDOW_DAYS),
-  )
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + days))
     .toISOString()
     .slice(0, 10);
 };
+
+/** Customers can book 14 days ahead, counted from the UTC date. */
+export const lastBookableDate = () => utcDaysAhead(BOOKING_WINDOW_DAYS);
+
+/** The last day the slot boards let staff open. */
+export const lastViewDate = () => utcDaysAhead(VIEW_WINDOW_DAYS);
 
 export const shiftDate = (date: string, days: number) =>
   format(addDays(parseISO(date), days), 'yyyy-MM-dd');
 
 export const clampSlotDate = (value: string) => {
   const today = todayString();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || value < today || value > lastBookableDate()) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || value < today || value > lastViewDate()) {
     return today;
   }
   return value;
 };
 
-export const bookableDates = () => {
+export const viewDates = () => {
   const dates: string[] = [];
-  const last = lastBookableDate();
+  const last = lastViewDate();
   for (let date = todayString(); date <= last; date = shiftDate(date, 1)) dates.push(date);
   return dates;
 };

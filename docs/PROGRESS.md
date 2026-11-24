@@ -212,3 +212,7 @@
   readable status and payment, amount as ₹1,00,000, two-column buttons), two cards per row on laptops; booking
   page with readable labels, tidy service rows and a coral Reschedule button. Phone list about 4,600 px to
   2,700 px. Reschedule and review pages already fit.
+- 2026-11-24 — Stylist fixes: Completed buttons are green (appointments list and details); appointment details
+  fill the full width when there are no action buttons; Slots has a Pick calendar to jump to any day up to 90
+  days ahead (admin date box too). Server allows 90 days only for the admin and stylist slot views; customers
+  still book 14 days ahead.

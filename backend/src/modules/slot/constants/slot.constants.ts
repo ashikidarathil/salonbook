@@ -11,6 +11,8 @@ export enum SlotStatus {
 }
 
 export const BOOKING_WINDOW_DAYS = 14;
+/** Admins and stylists can look further ahead than customers can book. */
+export const STAFF_VIEW_WINDOW_DAYS = 90;
 export const SLOT_GRID_SIZE = 15;
 
 export const SLOT_PREFIXES = {
