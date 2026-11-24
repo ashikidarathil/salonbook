@@ -223,3 +223,6 @@
 - 2026-11-24 — Customer responsive pass, Chat: long links and words wrap inside the bubble instead of running
   off the screen (this also pushed the whole tablet layout sideways); bigger message "…" buttons; readable times,
   booking numbers, unread and header count bubbles. Shared with the stylist chat.
+- 2026-11-24 — Stylist appointment details: everything in one card like the other detail pages (date, time and
+  customer; services and totals; customer note; and for confirmed bookings the Completed, No Show and Cancel
+  buttons along the bottom).
