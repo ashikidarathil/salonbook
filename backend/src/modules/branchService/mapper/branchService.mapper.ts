@@ -1,3 +1,4 @@
+import type { IncludedItem } from '../../../models/service.model';
 export type BranchServiceItemResponse = {
   branchId: string;
   serviceId: string;
@@ -10,7 +11,7 @@ export type BranchServiceItemResponse = {
   imageUrl?: string;
   detailImageUrl?: string;
   description?: string;
-  whatIncluded?: string[];
+  whatIncluded?: IncludedItem[];
   isActive: boolean;
   configured: boolean;
   createdAt?: string | Date;

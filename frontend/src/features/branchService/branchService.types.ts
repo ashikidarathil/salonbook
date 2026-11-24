@@ -1,3 +1,4 @@
+import type { IncludedItem } from '@/features/service/service.types';
 import type { PaginationMetadata } from '@/common/types/pagination.metadata';
 
 export interface BranchServiceItem {
@@ -12,7 +13,7 @@ export interface BranchServiceItem {
   imageUrl?: string;
   detailImageUrl?: string;
   description?: string;
-  whatIncluded?: string[];
+  whatIncluded?: IncludedItem[];
   isActive: boolean;
   configured: boolean;
   rating?: number;

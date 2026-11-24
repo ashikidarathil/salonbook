@@ -1,3 +1,4 @@
+import type { IncludedItem } from '../../../models/service.model';
 import type { PaginationQueryDto } from '../../../common/dto/pagination.query.dto';
 
 export interface CreateServiceDto {
@@ -6,7 +7,7 @@ export interface CreateServiceDto {
   description?: string;
   categoryId: string;
   imageUrl?: string;
-  whatIncluded?: string[];
+  whatIncluded?: IncludedItem[];
 }
 
 export interface UpdateServiceDto {
@@ -16,7 +17,7 @@ export interface UpdateServiceDto {
   status?: 'ACTIVE' | 'INACTIVE';
   imageUrl?: string;
   categoryId?: string;
-  whatIncluded?: string[];
+  whatIncluded?: IncludedItem[];
 }
 
 export interface SoftDeleteServiceDto {

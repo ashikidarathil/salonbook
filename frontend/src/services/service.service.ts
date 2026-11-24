@@ -1,4 +1,4 @@
-import type { ServiceImageKind } from '@/features/service/service.types';
+import type { IncludedItem, ServiceImageKind } from '@/features/service/service.types';
 import { api } from './api/api';
 import { API_ROUTES } from '@/common/constants/api.routes';
 import { buildUrl } from '@/common/utils/api.utils';
@@ -14,7 +14,7 @@ export type CreateServiceInput = {
   description?: string;
   categoryId: string;
   imageUrl?: string;
-  whatIncluded?: string[];
+  whatIncluded?: IncludedItem[];
   slug?: string;
 };
 

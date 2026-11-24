@@ -298,37 +298,26 @@ export default function ServiceDetailsPage() {
                       <CardTitle className="text-lg">What's Included</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-6">
-                        {currentService.whatIncluded.map((item, index) => {
-                          // Items are either "Title: detail" or just "Title"
-                          const separator = item.indexOf(':');
-                          const title = separator === -1 ? item : item.slice(0, separator);
-                          const detail = separator === -1 ? '' : item.slice(separator + 1).trim();
-                          return (
-                            <div key={index} className="flex gap-4">
-                              <div className="p-1 mt-1 rounded h-fit bg-accent/10">
-                                <Icon
-                                  icon="solar:check-circle-bold"
-                                  className="text-accent size-5"
-                                />
-                              </div>
-                              <div>
-                                <p className="text-foreground">
-                                  {title}
-                                  {detail && (
-                                    <>
-                                      :{' '}
-                                      <span className="text-muted-foreground">
-                                        {detail.charAt(0).toUpperCase() + detail.slice(1)}
-                                      </span>
-                                    </>
-                                  )}
+                      <ul className="space-y-5">
+                        {currentService.whatIncluded.map((item, index) => (
+                          <li key={index} className="flex gap-3">
+                            <Icon
+                              icon="solar:check-circle-bold"
+                              className="mt-0.5 size-5 shrink-0 text-primary"
+                            />
+                            <div className="min-w-0">
+                              <p className="break-words font-semibold text-foreground">
+                                {item.title.charAt(0).toUpperCase() + item.title.slice(1)}
+                              </p>
+                              {item.description && (
+                                <p className="mt-1 break-words text-sm leading-relaxed text-muted-foreground">
+                                  {item.description}
                                 </p>
-                              </div>
+                              )}
                             </div>
-                          );
-                        })}
-                      </div>
+                          </li>
+                        ))}
+                      </ul>
                     </CardContent>
                   </Card>
                 )}

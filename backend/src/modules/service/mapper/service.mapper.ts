@@ -1,4 +1,4 @@
-import type { ServiceDocument } from '../../../models/service.model';
+import { toIncludedItems, type ServiceDocument } from '../../../models/service.model';
 import type { ServiceResponseDto } from '../dto/service.response.dto';
 
 export class ServiceMapper {
@@ -11,7 +11,7 @@ export class ServiceMapper {
       categoryId: doc.categoryId?._id ? doc.categoryId._id.toString() : doc.categoryId?.toString(),
       imageUrl: doc.imageUrl,
       detailImageUrl: doc.detailImageUrl,
-      whatIncluded: doc.whatIncluded || [],
+      whatIncluded: toIncludedItems(doc.whatIncluded),
       status: doc.status,
       isDeleted: doc.isDeleted,
       createdAt: doc.createdAt.toISOString(),

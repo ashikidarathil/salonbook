@@ -239,3 +239,8 @@
   4:3 photo and the service page a 16:9 photo at every width, so photos look exactly as cropped. Fixed the
   crop math (zoomed crops were zoomed twice). A broken page photo falls back to the card photo.
   `npm run migrate:page-photos` copies each card photo into an empty page photo (MIGRATE_CONFIRM guard).
+- 2026-11-24 — What's included: each item is now a title with a description ({ title, description }). Admin
+  service form edits both for every item; the service page lists them as bullets with the description
+  underneath. Old plain-text items (including "Title: detail") are read as items automatically.
+  `npm run migrate:included` converts old items and fills empty descriptions from INCLUDED_DESCRIPTIONS (never
+  overwrites admin text) and lists any titles with no description. The seed writes the descriptions too.

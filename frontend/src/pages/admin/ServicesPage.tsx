@@ -420,7 +420,7 @@ export default function ServicesPage() {
                             {svc.whatIncluded.slice(0, 2).map((item, idx) => (
                               <div key={idx} className="flex min-w-0 items-start gap-1">
                                 <span className="text-gray-400">•</span>
-                                <span className="min-w-0 truncate text-xs">{item.split(':')[0]}</span>
+                                <span className="min-w-0 truncate text-xs">{item.title}</span>
                               </div>
                             ))}
                             {/* Show More Button */}
