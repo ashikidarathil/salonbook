@@ -1,40 +1,54 @@
-'use client';
-
-import { useEffect, useState, useCallback } from 'react';
-import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { LoadingGate } from '@/components/common/LoadingGate';
-import { useNavigate } from 'react-router-dom';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-import { fetchStylistStats } from '@/features/booking/booking.thunks';
 import {
-  AreaChart,
   Area,
+  AreaChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
 } from 'recharts';
 import { format } from 'date-fns';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
+import { useAppDispatch, useAppSelector } from '@/app/hooks';
+import { fetchStylistStats } from '@/features/booking/booking.thunks';
+import { LoadingGate } from '@/components/common/LoadingGate';
+import { AnalyticsCard } from '@/components/dashboard/AnalyticsCard';
+import { DashboardPeriodFilter } from '@/components/dashboard/DashboardPeriodFilter';
+import { StatusRingCard } from '@/components/dashboard/StatusRingCard';
+import {
+  CARD_CLASS,
+  CARD_HEADER_CLASS,
+  CARD_TITLE_CLASS,
+  LEGEND_STYLE,
+  TICK_STYLE,
+  TOOLTIP_STYLE,
+  compactNumber,
+  money,
+  shortLabel,
+  trendUnit,
+} from '@/components/dashboard/dashboard.utils';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-const PERIODS = [
-  { label: 'Today', value: 'today', icon: 'solar:calendar-date-bold-duotone' },
-  { label: 'Week', value: 'week', icon: 'solar:calendar-minimalistic-bold-duotone' },
-  { label: 'Month', value: 'month', icon: 'solar:calendar-bold-duotone' },
-  { label: 'Year', value: 'year', icon: 'solar:calendar-line-duotone' },
+const QUICK_LINKS = [
+  {
+    to: '/stylist/appointments',
+    title: 'Manage Appointments',
+    text: 'View and manage all your bookings',
+    icon: 'solar:calendar-search-line-duotone',
+  },
+  {
+    to: '/stylist/slots',
+    title: 'My Slots',
+    text: 'See your day and block time',
+    icon: 'solar:clock-circle-line-duotone',
+  },
 ];
 
 export default function StylistDashboard() {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   const { stats, loading, error } = useAppSelector((state) => state.booking);
   const [period, setPeriod] = useState<string>('today');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -43,7 +57,7 @@ export default function StylistDashboard() {
     dispatch(
       fetchStylistStats({
         period: period === 'custom' ? 'today' : period,
-        date: period === 'custom' ? selectedDate?.toISOString().split('T')[0] : undefined,
+        date: period === 'custom' && selectedDate ? format(selectedDate, 'yyyy-MM-dd') : undefined,
       }),
     );
   }, [dispatch, period, selectedDate]);
@@ -52,83 +66,22 @@ export default function StylistDashboard() {
     loadStats();
   }, [loadStats]);
 
-  const handleDateSelect = (date: Date | undefined) => {
-    setSelectedDate(date);
-    if (date) {
-      setPeriod('custom');
-    }
-  };
-
   return (
     <div className="space-y-6">
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+      <div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
         <div>
-          <h1 className="break-words text-2xl font-bold sm:text-3xl">
-            Analytics Dashboard
-          </h1>
+          <h1 className="break-words text-2xl font-bold sm:text-3xl">Analytics Dashboard</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Real-time performance metrics and booking analytics
+            Your performance and booking activity
           </p>
         </div>
-
-        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
-          <div className="flex w-full items-center rounded-xl border border-border/30 bg-muted/40 p-1 sm:inline-flex sm:w-auto">
-            <Tabs
-              value={period !== 'custom' ? period : ''}
-              onValueChange={setPeriod}
-              className="w-full"
-            >
-              <TabsList className="grid h-9 w-full grid-cols-4 gap-1 bg-transparent sm:inline-flex sm:w-auto">
-                {PERIODS.map((p) => (
-                  <TabsTrigger
-                    key={p.value}
-                    value={p.value}
-                    className="min-w-0 rounded-lg px-1 py-1.5 sm:px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary font-medium transition-all text-sm"
-                  >
-                    <Icon icon={p.icon} className="mr-2 hidden size-4 sm:block" />
-                    {p.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-          </div>
-
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={`h-[40px] w-full rounded-xl px-4 font-medium sm:w-auto border-border/30 bg-muted/40 hover:bg-white transition-all shadow-sm text-sm ${period === 'custom' ? 'border-primary text-primary bg-white' : ''}`}
-              >
-                <Icon icon="solar:calendar-add-bold-duotone" className="mr-2 size-4" />
-                {period === 'custom' && selectedDate
-                  ? format(selectedDate, 'PPP')
-                  : 'Specific Date'}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 rounded-xl" align="end">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={handleDateSelect}
-                initialFocus
-                className="rounded-xl theme-stylist"
-              />
-              <div className="p-3 border-t border-border/40 bg-muted/10">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full text-xs font-medium h-8 rounded-lg hover:bg-white hover:text-primary transition-colors"
-                  onClick={() => {
-                    setSelectedDate(new Date());
-                    setPeriod('today');
-                  }}
-                >
-                  Clear Selection
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
+        <DashboardPeriodFilter
+          period={period}
+          date={selectedDate}
+          onPeriodChange={setPeriod}
+          onDateChange={setSelectedDate}
+          defaultPeriod="today"
+        />
       </div>
 
       <LoadingGate
@@ -141,74 +94,73 @@ export default function StylistDashboard() {
         backPath="/stylist"
       >
         {stats && (
-          <div className="space-y-6 animate-in fade-in duration-500">
-            {/* Stats Overview */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 ">
+          <div className="space-y-4 duration-500 animate-in fade-in sm:space-y-6">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
               <AnalyticsCard
                 title="Total Revenue"
-                value={`₹${stats.summary.revenue.toLocaleString()}`}
+                value={money(stats.summary.revenue)}
                 subtitle="Earned revenue"
                 icon="solar:wad-of-money-line-duotone"
                 color="text-emerald-600"
-                bg="bg-emerald-50/50"
+                bg="bg-emerald-50"
+                className="col-span-2 sm:col-span-1"
               />
               <AnalyticsCard
                 title="Total Bookings"
-                value={stats.summary.total.toString()}
+                value={stats.summary.total.toLocaleString('en-IN')}
                 subtitle="Appointments received"
                 icon="solar:calendar-mark-line-duotone"
                 color="text-blue-600"
-                bg="bg-blue-50/50"
+                bg="bg-blue-50"
               />
               <AnalyticsCard
                 title="Completed"
-                value={stats.summary.completed.toString()}
+                value={stats.summary.completed.toLocaleString('en-IN')}
                 subtitle="Successfully served"
                 icon="solar:check-circle-line-duotone"
                 color="text-indigo-600"
-                bg="bg-indigo-50/50"
+                bg="bg-indigo-50"
               />
               <AnalyticsCard
                 title="Cancellations"
-                value={stats.summary.cancelled.toString()}
+                value={stats.summary.cancelled.toLocaleString('en-IN')}
                 subtitle="Missed opportunities"
                 icon="solar:close-circle-line-duotone"
                 color="text-rose-600"
-                bg="bg-rose-50/50"
+                bg="bg-rose-50"
+                className="col-span-2 sm:col-span-1"
               />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Trend Chart */}
-              <Card className="lg:col-span-2 overflow-hidden border-border/40 shadow-sm hover:shadow-md transition-shadow">
-                <CardHeader className="border-b bg-gray-50/30 flex flex-row items-center justify-between py-4">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-3">
+              <Card className={`${CARD_CLASS} xl:col-span-2`}>
+                <CardHeader className={CARD_HEADER_CLASS}>
                   <div>
-                    <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                    <CardTitle className={CARD_TITLE_CLASS}>
                       <Icon
                         icon="solar:chart-square-bold-duotone"
-                        className="text-primary size-5"
+                        className="size-5 text-primary"
                       />
                       Performance Trend
                     </CardTitle>
-                    <p className="text-xs text-muted-foreground font-normal mt-0.5">
-                      {period === 'today' ? 'Hourly' : period === 'year' ? 'Monthly' : 'Daily'}{' '}
-                      activity
+                    <p className="mt-0.5 text-xs font-normal text-muted-foreground">
+                      {trendUnit(period)} activity
                     </p>
                   </div>
                 </CardHeader>
-                <CardContent className="pt-6">
-                  <div className="min-h-[300px] w-full">
-                    <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="!p-3 !pt-4 sm:!p-6">
+                  <div className="h-64 w-full sm:h-80">
+                    <ResponsiveContainer width="100%" height="100%">
                       <AreaChart
                         data={stats.chartData}
-                        margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                        margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
                       >
                         <defs>
-                          <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                          <linearGradient id="stylistRevenue" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.1} />
                             <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                           </linearGradient>
-                          <linearGradient id="colorBookings" x1="0" y1="0" x2="0" y2="1">
+                          <linearGradient id="stylistBookings" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="5%" stopColor="#10b981" stopOpacity={0.1} />
                             <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                           </linearGradient>
@@ -218,50 +170,44 @@ export default function StylistDashboard() {
                           dataKey="label"
                           axisLine={false}
                           tickLine={false}
-                          tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 400 }}
-                          dy={10}
-                          tickFormatter={(val: string) => {
-                            if (!val) return '';
-                            if (period === 'month' || period === 'week') {
-                              try {
-                                const date = new Date(val);
-                                if (isNaN(date.getTime())) return val;
-                                return format(date, 'MMM dd');
-                              } catch {
-                                return val;
-                              }
-                            }
-                            return val;
-                          }}
+                          tick={TICK_STYLE}
+                          tickFormatter={shortLabel}
+                          minTickGap={24}
+                          dy={8}
                         />
                         <YAxis
+                          yAxisId="revenue"
                           axisLine={false}
                           tickLine={false}
-                          tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 400 }}
+                          tick={TICK_STYLE}
+                          tickFormatter={compactNumber}
+                          width={40}
                         />
+                        {/* Bookings are far smaller than rupees, so they get their own scale */}
+                        <YAxis yAxisId="bookings" orientation="right" hide />
                         <Tooltip
-                          contentStyle={{
-                            borderRadius: '8px',
-                            border: '1px solid #f1f5f9',
-                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                          }}
+                          labelFormatter={(label) => shortLabel(String(label))}
+                          contentStyle={TOOLTIP_STYLE}
                         />
+                        <Legend iconType="circle" iconSize={8} wrapperStyle={LEGEND_STYLE} />
                         <Area
+                          yAxisId="revenue"
                           type="monotone"
                           dataKey="revenue"
                           stroke="#8b5cf6"
                           strokeWidth={2}
                           fillOpacity={1}
-                          fill="url(#colorRevenue)"
+                          fill="url(#stylistRevenue)"
                           name="Revenue"
                         />
                         <Area
+                          yAxisId="bookings"
                           type="monotone"
                           dataKey="bookings"
                           stroke="#10b981"
                           strokeWidth={2}
                           fillOpacity={1}
-                          fill="url(#colorBookings)"
+                          fill="url(#stylistBookings)"
                           name="Bookings"
                         />
                       </AreaChart>
@@ -270,139 +216,39 @@ export default function StylistDashboard() {
                 </CardContent>
               </Card>
 
-              {/* Status Breakdown Pie Chart */}
-              <Card className="border-border/40 shadow-sm hover:shadow-md transition-shadow">
-                <CardHeader className="border-b bg-gray-50/30 py-4">
-                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                    <Icon icon="solar:pie-chart-bold-duotone" className="text-primary size-5" />
-                    Status Distribution
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-6 flex flex-col items-center justify-center">
-                  <div className="h-[250px] w-full relative">
-                    <ResponsiveContainer width="100%" height={250}>
-                      <PieChart>
-                        <Pie
-                          data={stats.statusBreakdown.filter((s: { value: number }) => s.value > 0)}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={80}
-                          paddingAngle={5}
-                          dataKey="value"
-                          stroke="none"
-                        >
-                          {stats.statusBreakdown.map((entry: { color: string }, index: number) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          contentStyle={{
-                            borderRadius: '8px',
-                            border: '1px solid #f1f5f9',
-                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                          }}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                      <span className="text-2xl font-bold text-gray-900">
-                        {stats.summary.total}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground font-medium">Total</span>
-                    </div>
-                  </div>
-
-                  <div className="w-full mt-4 space-y-2">
-                    {stats.statusBreakdown.map(
-                      (status: { name: string; value: number; color: string }) => (
-                        <div
-                          key={status.name}
-                          className="flex items-center justify-between p-2 rounded-lg bg-gray-50/30 border border-gray-100/50"
-                        >
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="w-2 h-2 rounded-full"
-                              style={{ backgroundColor: status.color }}
-                            />
-                            <span className="text-xs font-medium text-gray-600">{status.name}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-semibold text-gray-900">
-                              {status.value}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground font-normal">
-                              (
-                              {stats.summary.total > 0
-                                ? Math.round((status.value / stats.summary.total) * 100)
-                                : 0}
-                              %)
-                            </span>
-                          </div>
-                        </div>
-                      ),
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <StatusRingCard
+                title="Status Distribution"
+                total={stats.summary.total}
+                statuses={stats.statusBreakdown}
+              />
             </div>
 
-            {/* Manage Appointments CTA */}
-            <div className="flex flex-col md:flex-row gap-6">
-              <Card
-                className="flex-1 border-primary/10 bg-primary/0 hover:bg-primary/5 transition-all cursor-pointer group rounded-xl pt-5"
-                onClick={() => navigate('/stylist/appointments')}
-              >
-                <CardContent className="p-6 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-primary/10 text-primary rounded-xl group-hover:bg-primary group-hover:text-white transition-all">
-                      <Icon icon="solar:calendar-search-line-duotone" className="size-6" />
-                    </div>
-                    <div>
-                      <h3 className="text-base font-semibold text-gray-900">Manage Appointments</h3>
-                      <p className="text-xs text-muted-foreground font-normal">
-                        View and manage all your bookings
-                      </p>
-                    </div>
-                  </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+              {QUICK_LINKS.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className="group flex min-w-0 items-center justify-between gap-3 rounded-xl border border-primary/10 bg-white p-4 shadow-sm transition-all hover:bg-primary/5 sm:p-5"
+                >
+                  <span className="flex min-w-0 items-center gap-3 sm:gap-4">
+                    <span className="shrink-0 rounded-xl bg-primary/10 p-3 text-primary transition-all group-hover:bg-primary group-hover:text-white">
+                      <Icon icon={item.icon} className="size-6" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block font-semibold text-gray-900">{item.title}</span>
+                      <span className="block text-xs text-muted-foreground">{item.text}</span>
+                    </span>
+                  </span>
                   <Icon
                     icon="solar:alt-arrow-right-linear"
-                    className="size-5 text-primary/40 group-hover:text-primary group-hover:translate-x-1 transition-all"
+                    className="size-5 shrink-0 text-primary/40 transition-all group-hover:translate-x-1 group-hover:text-primary"
                   />
-                </CardContent>
-              </Card>
+                </Link>
+              ))}
             </div>
           </div>
         )}
       </LoadingGate>
     </div>
-  );
-}
-
-interface AnalyticsCardProps {
-  title: string;
-  value: string;
-  subtitle: string;
-  icon: string;
-  color: string;
-  bg: string;
-}
-
-function AnalyticsCard({ title, value, subtitle, icon, color, bg }: AnalyticsCardProps) {
-  return (
-    <Card className="border-border/40 shadow-sm hover:shadow-md transition-all rounded-xl pt-5">
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col justify-center">
-            <p className="text-xs font-medium text-muted-foreground">{title}</p>
-            <h3 className={`text-2xl font-semibold mt-1 ${color}`}>{value}</h3>
-            <p className="text-[10px] text-muted-foreground font-normal mt-0.5">{subtitle}</p>
-          </div>
-          <div className={`p-3 rounded-xl ${bg} flex items-center justify-center`}>
-            <Icon icon={icon} className={`size-6 ${color}`} />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   );
 }
