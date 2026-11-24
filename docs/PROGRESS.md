@@ -203,3 +203,5 @@
 - 2026-11-24 — Customer responsive pass, Services: compact rows on phones and small tablets (photo beside the
   details; buttons stack below 360 px), photo cards from tablet width; service details puts the category above
   the title and gives review dates readable text. Phone list height about 6,250 px to 4,000 px.
+- 2026-11-24 — Customer responsive pass, Stylists: shorter photos on phones, readable service tags and contact
+  labels, larger favourite (heart) buttons with labels for screen readers. Booking page already fit.
