@@ -154,3 +154,5 @@
   and a one-column form on tablets.
 - 2026-11-23 — Admin responsive pass, Coupons: coupon cards with usage bar, fixed-width table from laptop width,
   amounts as ₹1,000, and a one-column form on tablets.
+- 2026-11-24 — Admin responsive pass, Dispute Chats: WhatsApp-style list then conversation on phones, side by side
+  from tablet width, search, open chat kept in the address, real voice player, opens at the newest message.
