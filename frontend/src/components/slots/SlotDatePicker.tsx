@@ -2,7 +2,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { lastBookableDate, shiftDate, todayString } from '@/features/slot/slotBoard';
+import { lastViewDate, shiftDate, todayString } from '@/features/slot/slotBoard';
 
 interface SlotDatePickerProps {
   value: string;
@@ -13,7 +13,7 @@ interface SlotDatePickerProps {
 export function SlotDatePicker({ value, onChange }: SlotDatePickerProps) {
   const today = todayString();
   const tomorrow = shiftDate(today, 1);
-  const last = lastBookableDate();
+  const last = lastViewDate();
   const quick = [
     { label: 'Today', date: today },
     { label: 'Tomorrow', date: tomorrow },

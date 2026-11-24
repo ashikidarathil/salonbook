@@ -259,7 +259,7 @@ export default function StylistAppointmentsPage() {
                   {booking.status === BookingStatus.CONFIRMED && (
                     <>
                       <Button
-                        className="h-10 min-w-0 gap-2 bg-purple-600 px-2 text-white hover:bg-purple-700"
+                        className="h-10 min-w-0 gap-2 bg-emerald-600 px-2 text-white hover:bg-emerald-700"
                         onClick={() =>
                           handleStatusUpdate(booking.id, BookingStatus.COMPLETED, 'Completed')
                         }

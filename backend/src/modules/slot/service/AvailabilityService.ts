@@ -10,6 +10,8 @@ import {
   SLOT_GRID_SIZE,
   SLOT_PREFIXES,
   SLOT_LABELS,
+  BOOKING_WINDOW_DAYS,
+  STAFF_VIEW_WINDOW_DAYS,
 } from '../constants/slot.constants';
 import { BookingStatus, IBooking, IBookingItem } from '../../../models/booking.model';
 import { toObjectId } from '../../../common/utils/mongoose.util';
@@ -60,7 +62,8 @@ export class AvailabilityService implements IAvailabilityService {
 
     const nowBoundary = new Date();
     nowBoundary.setUTCHours(0, 0, 0, 0);
-    const maxDate = new Date(nowBoundary.getTime() + 14 * 24 * 60 * 60 * 1000);
+    const windowDays = includeAll ? STAFF_VIEW_WINDOW_DAYS : BOOKING_WINDOW_DAYS;
+    const maxDate = new Date(nowBoundary.getTime() + windowDays * 24 * 60 * 60 * 1000);
 
     if (queryDate < nowBoundary || queryDate > maxDate) {
       return [];
