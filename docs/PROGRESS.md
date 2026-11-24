@@ -172,3 +172,5 @@
   Customer header fits 320 px phones (the name hides below 360 px so every icon stays on screen).
 - 2026-11-24 — Popups (dropdowns, selects, menus, tooltips, dialogs, sheets) take the side colour of the page they
   open from: green on admin pages, blue on stylist pages, coral for customers.
+- 2026-11-24 — Carousel arrows (Stylists and Services filter rows, service details) show only when there is more
+  to scroll in that direction, instead of always showing greyed out.
