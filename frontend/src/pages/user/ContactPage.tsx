@@ -112,9 +112,9 @@ export default function ContactPage() {
                               <p className="text-sm text-muted-foreground">{selectedBranch.address}</p>
                             </div>
                             <Button 
-                              variant="secondary" 
+                              variant="ghost" 
                               size="sm"
-                              className="w-full h-9 group"
+                              className="group -ml-2 h-9 px-2 text-primary hover:bg-primary/10 hover:text-primary"
                               onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${selectedBranch.latitude},${selectedBranch.longitude}`, '_blank')}
                             >
                               Get Directions
@@ -177,7 +177,7 @@ export default function ContactPage() {
         {/* Map placeholder */}
         <Card className="mt-12">
           <CardContent className="p-0">
-            <div className="flex items-center justify-center rounded-lg bg-muted h-96">
+            <div className="flex h-56 items-center justify-center rounded-lg bg-muted sm:h-72 md:h-96">
               <div className="text-center">
                 <Icon
                   icon="solar:map-bold"

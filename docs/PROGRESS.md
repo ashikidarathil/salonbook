@@ -230,3 +230,7 @@
 - 2026-11-24 — Stylist appointment details: everything in one card like the other detail pages (date, time and
   customer; services and totals; customer note; and for confirmed bookings the Completed, No Show and Cancel
   buttons along the bottom).
+- 2026-11-24 — Customer responsive pass, Auth/Contact/Apply: login, signup, all OTP and password pages, stylist
+  and admin login, Contact and Become a Stylist already fit every width (496 checks passed). Contact: Get
+  Directions is a coral link under the address like Call now, and the map box is shorter on phones. This
+  finishes the customer pass.
