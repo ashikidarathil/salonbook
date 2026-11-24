@@ -61,10 +61,10 @@ function TransactionRow({ tx }: { tx: WalletTransaction }) {
       <div className="flex-1 min-w-0 pr-2">
         <p className="font-medium text-slate-800 text-[13px] sm:text-sm truncate">{cleanDescription}</p>
         <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1 sm:mt-0.5">
-          <span className="text-[10px] sm:text-[11px] text-slate-400">{date}</span>
+          <span className="text-xs text-slate-400">{date}</span>
           {refType && (
             <span
-              className={`text-[9px] sm:text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-slate-100 ${refType.color} whitespace-nowrap`}
+              className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-full bg-slate-100 ${refType.color} whitespace-nowrap`}
             >
               <Icon icon={refType.icon} className="size-2 sm:size-2.5 inline mr-0.5 relative -top-[0.5px]" />
               {refType.label}
@@ -106,7 +106,7 @@ export default function WalletPage() {
           <CardContent className="p-4 sm:p-8 relative z-10">
             <div className="flex items-center justify-between mb-4 sm:mb-6 gap-2">
               <div className="min-w-0">
-                <p className="text-primary-foreground/70 text-[10px] sm:text-xs mt-3 font-semibold uppercase tracking-wider mb-1">
+                <p className="text-primary-foreground/70 text-xs mt-3 font-semibold uppercase tracking-wider mb-1">
                   Available Balance
                 </p>
                 {isLoading ? (
@@ -135,7 +135,7 @@ export default function WalletPage() {
               </div>
               <Button
                 asChild
-                className="bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground font-bold px-3 sm:px-4 h-8 sm:h-9 text-[10px] sm:text-xs shadow-sm rounded-lg whitespace-nowrap transition-colors border border-primary-foreground/10"
+                className="bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground font-bold px-3 sm:px-4 h-9 text-xs shadow-sm rounded-lg whitespace-nowrap transition-colors border border-primary-foreground/10"
               >
                 <Link to="add">
                   <Icon
