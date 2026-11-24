@@ -56,15 +56,15 @@ export function PopularServices() {
             className="group flex w-[82%] shrink-0 snap-start flex-col overflow-hidden border-border/60 transition-colors hover:border-primary/50 sm:w-[45%] md:w-auto"
           >
             {/* Service Image */}
-            <div className="relative flex h-48 items-center justify-center overflow-hidden bg-muted/30 p-6 sm:h-64 sm:p-8">
+            <div className="relative flex items-center justify-center overflow-hidden bg-muted/30 p-6 sm:p-8">
               {service.imageUrl ? (
                 <img
                   src={service.imageUrl}
                   alt={service.serviceName}
-                  className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+                  className="aspect-[4/3] w-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               ) : (
-                <div className="flex items-center justify-center w-full h-full bg-white rounded-lg shadow-sm opacity-50">
+                <div className="flex aspect-[4/3] w-full items-center justify-center rounded-lg bg-white opacity-50 shadow-sm">
                   <Icon
                     icon="solar:scissors-square-bold-duotone"
                     className="size-16 text-muted-foreground/30"

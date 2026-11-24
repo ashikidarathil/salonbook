@@ -14,7 +14,8 @@
     "create-admin": "ts-node src/scripts/createAdmin.ts",
     "seed": "ts-node src/scripts/seed.ts",
     "seed:reviews": "ts-node src/scripts/seedReviews.ts",
-    "migrate:slugs": "ts-node src/scripts/migrateSlugs.ts"
+    "migrate:slugs": "ts-node src/scripts/migrateSlugs.ts",
+    "migrate:page-photos": "ts-node src/scripts/copyServicePagePhotos.ts"
   },
   "keywords": [],
   "author": "",

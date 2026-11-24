@@ -8,6 +8,13 @@ import { ERROR_MESSAGES } from '@/common/constants/error.messages';
 import { showConfirm, showError, showSuccess } from '@/common/utils/swal.utils';
 import { ImageCropper } from '@/components/cropper/ImageCropper';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
+/** Each photo is cropped to the shape it is shown in on the site. */
+const SHAPE = {
+  card: { aspect: '4:3', className: 'aspect-[4/3]', label: '4:3' },
+  detail: { aspect: '16:9', className: 'aspect-video', label: '16:9' },
+} as const;
 
 interface ServicePhotoFieldProps {
   serviceId: string;
@@ -95,9 +102,16 @@ export function ServicePhotoField({
     <div className="min-w-0 space-y-3">
       <div>
         <p className="font-semibold">{title}</p>
-        <p className="mt-0.5 text-sm text-muted-foreground">{hint}</p>
+        <p className="mt-0.5 text-sm text-muted-foreground">
+          {hint} · {SHAPE[kind].label}
+        </p>
       </div>
-      <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-lg border-2 border-dashed bg-muted/30">
+      <div
+        className={cn(
+          'flex items-center justify-center overflow-hidden rounded-lg border-2 border-dashed bg-muted/30',
+          SHAPE[kind].className,
+        )}
+      >
         {photo ? (
           <img src={photo} alt={title} className="size-full object-cover" />
         ) : (
@@ -148,6 +162,7 @@ export function ServicePhotoField({
         <ImageCropper
           open
           imageSrc={cropSource}
+          defaultAspect={SHAPE[kind].aspect}
           onClose={() => setCropSource(null)}
           onCropComplete={(file) => {
             setPendingFile(file);
