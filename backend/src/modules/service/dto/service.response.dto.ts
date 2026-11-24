@@ -6,6 +6,7 @@ export interface ServiceResponseDto {
   categoryId: string;
   categoryName?: string;
   imageUrl?: string;
+  detailImageUrl?: string;
   whatIncluded?: string[];
   status: 'ACTIVE' | 'INACTIVE';
   isDeleted: boolean;

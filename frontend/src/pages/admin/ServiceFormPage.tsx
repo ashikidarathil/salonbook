@@ -1,28 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ChangeEvent } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Check, ImagePlus, Plus, Trash2, X } from 'lucide-react';
+import { Check, Plus, X } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import {
-  createService,
-  deleteServiceImage,
-  updateService,
-  uploadServiceImage,
-} from '@/features/service/serviceThunks';
+import { createService, updateService } from '@/features/service/serviceThunks';
 import { fetchCategories } from '@/features/category/categoryThunks';
 import type { Service } from '@/features/service/service.types';
 import { serviceService } from '@/services/service.service';
 import { ERROR_MESSAGES } from '@/common/constants/error.messages';
-import { showConfirm, showError, showSuccess } from '@/common/utils/swal.utils';
+import { showError, showSuccess } from '@/common/utils/swal.utils';
 import { slugForSubmit, slugFormField } from '@/common/utils/slug';
+import { ServicePhotoField } from '@/components/admin/ServicePhotoField';
 import { SlugField } from '@/components/admin/SlugField';
 import { FormPage } from '@/components/common/FormPage';
 import { Loader } from '@/components/common/Loader';
 import { PageHeader } from '@/components/common/PageHeader';
-import { ImageCropper } from '@/components/cropper/ImageCropper';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -50,18 +44,13 @@ export default function ServiceFormPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { categories } = useAppSelector((state) => state.category);
-  const imageLoading = useAppSelector((state) => state.service.imageLoading);
 
   const [service, setService] = useState<Service | null>(null);
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'missing'>(
     id ? 'loading' : 'ready',
   );
   const [includedInput, setIncludedInput] = useState('');
-  const [cropSource, setCropSource] = useState<string | null>(null);
-  const [pendingFile, setPendingFile] = useState<File | null>(null);
-  const [pendingPreview, setPendingPreview] = useState<string | null>(null);
   const photoRef = useRef<HTMLDivElement>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const listSearch = (location.state as { from?: string } | null)?.from ?? '';
   const backTo = `${LIST_PATH}${listSearch}`;
@@ -126,12 +115,6 @@ export default function ServiceFormPage() {
     }
   }, [loadState, location.hash]);
 
-  useEffect(
-    () => () => {
-      if (pendingPreview) URL.revokeObjectURL(pendingPreview);
-    },
-    [pendingPreview],
-  );
 
   const addIncluded = () => {
     const item = includedInput.trim();
@@ -157,54 +140,9 @@ export default function ServiceFormPage() {
     }
   };
 
-  const onPickImage = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = '';
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => setCropSource(reader.result as string);
-    reader.readAsDataURL(file);
-  };
-
-  const clearPending = () => {
-    setPendingFile(null);
-    setPendingPreview(null);
-  };
-
   const refreshPhoto = async () => {
     const fresh = await loadService();
     if (fresh) setService(fresh);
-  };
-
-  const uploadPhoto = async () => {
-    if (!id || !pendingFile) return;
-    const result = await dispatch(uploadServiceImage({ serviceId: id, file: pendingFile }));
-    if (uploadServiceImage.fulfilled.match(result)) {
-      showSuccess('Success', 'Image uploaded successfully');
-      clearPending();
-      await refreshPhoto();
-    } else {
-      showError('Failed', (result.payload as string) || ERROR_MESSAGES.UPLOAD_PICTURE_FAILED);
-    }
-  };
-
-  const removePhoto = async () => {
-    if (!id) return;
-    const confirmed = await showConfirm(
-      'Delete Image?',
-      'Are you sure you want to delete this service image?',
-      'Delete',
-      'Cancel',
-      '#ef4444',
-    );
-    if (!confirmed) return;
-    const result = await dispatch(deleteServiceImage(id));
-    if (deleteServiceImage.fulfilled.match(result)) {
-      showSuccess('Deleted', 'Image deleted successfully');
-      await refreshPhoto();
-    } else {
-      showError('Failed', (result.payload as string) || ERROR_MESSAGES.DELETE_FAILED);
-    }
   };
 
   if (loadState !== 'ready') {
@@ -226,8 +164,6 @@ export default function ServiceFormPage() {
       </div>
     );
   }
-
-  const photo = pendingPreview ?? service?.imageUrl;
 
   return (
     <>
@@ -357,59 +293,28 @@ export default function ServiceFormPage() {
             </div>
 
             {id ? (
-              <div ref={photoRef} id="photo" className="scroll-mt-4 space-y-3 border-t pt-6">
+              <div ref={photoRef} id="photo" className="scroll-mt-4 space-y-4 border-t pt-6">
                 <div>
-                  <p className="text-base font-semibold">Service Photo</p>
+                  <p className="text-base font-semibold">Service Photos</p>
                   <p className="mt-1 text-sm text-muted-foreground">Photos save straight away</p>
                 </div>
-                <div className="flex h-56 items-center justify-center overflow-hidden rounded-lg border-2 border-dashed bg-muted/30 sm:h-72">
-                  {photo ? (
-                    <img src={photo} alt="Service" className="size-full object-cover" />
-                  ) : (
-                    <ImagePlus className="size-8 text-muted-foreground" />
-                  )}
-                </div>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/*"
-                  aria-label="Choose service photo"
-                  className="hidden"
-                  onChange={onPickImage}
-                />
-                <div className="grid gap-2 sm:grid-cols-2 [&>button]:h-10">
-                  {pendingFile ? (
-                    <>
-                      <Button type="button" disabled={imageLoading} onClick={uploadPhoto}>
-                        {imageLoading ? 'Uploading...' : 'Save Photo'}
-                      </Button>
-                      <Button type="button" variant="outline" onClick={clearPending}>
-                        Discard
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => fileRef.current?.click()}
-                      >
-                        <ImagePlus className="mr-2 size-4" />
-                        {service?.imageUrl ? 'Change Photo' : 'Choose Photo'}
-                      </Button>
-                      {service?.imageUrl && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="text-red-600"
-                          onClick={removePhoto}
-                        >
-                          <Trash2 className="mr-2 size-4" />
-                          Delete Photo
-                        </Button>
-                      )}
-                    </>
-                  )}
+                <div className="grid gap-6 lg:grid-cols-2">
+                  <ServicePhotoField
+                    serviceId={id}
+                    kind="card"
+                    title="Card photo"
+                    hint="Shown in service lists"
+                    url={service?.imageUrl}
+                    onChanged={refreshPhoto}
+                  />
+                  <ServicePhotoField
+                    serviceId={id}
+                    kind="detail"
+                    title="Page photo"
+                    hint="Shown on the service page"
+                    url={service?.detailImageUrl}
+                    onChanged={refreshPhoto}
+                  />
                 </div>
               </div>
             ) : (
@@ -421,17 +326,6 @@ export default function ServiceFormPage() {
         </div>
       </FormPage>
 
-      {cropSource && (
-        <ImageCropper
-          open
-          imageSrc={cropSource}
-          onClose={() => setCropSource(null)}
-          onCropComplete={(file) => {
-            setPendingFile(file);
-            setPendingPreview(URL.createObjectURL(file));
-          }}
-        />
-      )}
     </>
   );
 }

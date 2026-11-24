@@ -1,3 +1,4 @@
+import type { ServiceImageKind } from '@/features/service/service.types';
 import { api } from './api/api';
 import { API_ROUTES } from '@/common/constants/api.routes';
 import { buildUrl } from '@/common/utils/api.utils';
@@ -53,8 +54,8 @@ export const serviceService = {
     return api.patch<ApiResponse<Service>>(url);
   },
 
-  uploadImage(serviceId: string, file: File) {
-    const url = buildUrl(API_ROUTES.SERVICE.UPLOAD_IMAGE, { id: serviceId });
+  uploadImage(serviceId: string, file: File, kind: ServiceImageKind = 'card') {
+    const url = `${buildUrl(API_ROUTES.SERVICE.UPLOAD_IMAGE, { id: serviceId })}?kind=${kind}`;
     const formData = new FormData();
     formData.append('image', file);
 
@@ -65,8 +66,8 @@ export const serviceService = {
     });
   },
 
-  deleteImage(serviceId: string) {
-    const url = buildUrl(API_ROUTES.SERVICE.DELETE_IMAGE, { id: serviceId });
+  deleteImage(serviceId: string, kind: ServiceImageKind = 'card') {
+    const url = `${buildUrl(API_ROUTES.SERVICE.DELETE_IMAGE, { id: serviceId })}?kind=${kind}`;
     return api.delete<ApiResponse<Service>>(url);
   },
 

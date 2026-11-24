@@ -69,6 +69,7 @@ export default function ServiceDetailsPage() {
   const { reviews, isLoading: isLoadingReviews } = useAppSelector((state) => state.review);
 
   const [imageError, setImageError] = useState(false);
+  const heroImage = currentService?.detailImageUrl || currentService?.imageUrl;
   // Tagged with the service they were loaded for, so another service's list never shows
   const [related, setRelated] = useState<{ serviceId?: string; items: BranchServiceItem[] }>({
     items: [],
@@ -215,9 +216,9 @@ export default function ServiceDetailsPage() {
             {/* Service Image & Pricing Card */}
             <Card className="mb-8 overflow-hidden shadow-sm border-border">
               <div className="relative w-full overflow-hidden bg-muted h-[480px] ">
-                {currentService?.imageUrl && !imageError ? (
+                {heroImage && !imageError ? (
                   <img
-                    src={currentService.imageUrl}
+                    src={heroImage}
                     alt={currentService.name}
                     className="object-cover w-full h-full "
                     onError={() => setImageError(true)}

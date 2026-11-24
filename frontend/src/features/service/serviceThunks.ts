@@ -5,6 +5,7 @@ import type {
   ServiceStatus,
   ServiceQuery,
   PaginatedServiceResponse,
+  ServiceImageKind,
 } from './service.types';
 import { handleThunkError } from '@/common/utils/thunk.utils';
 import { ERROR_MESSAGES } from '@/common/constants/error.messages';
@@ -109,11 +110,11 @@ export const toggleServiceStatus = createAsyncThunk<
 ========================= */
 export const uploadServiceImage = createAsyncThunk<
   Service,
-  { serviceId: string; file: File },
+  { serviceId: string; file: File; kind?: ServiceImageKind },
   { rejectValue: string }
->('service/uploadServiceImage', async ({ serviceId, file }, { rejectWithValue }) => {
+>('service/uploadServiceImage', async ({ serviceId, file, kind }, { rejectWithValue }) => {
   try {
-    const res = await serviceService.uploadImage(serviceId, file);
+    const res = await serviceService.uploadImage(serviceId, file, kind);
     return res.data.data;
   } catch (err) {
     return handleThunkError(err, rejectWithValue, ERROR_MESSAGES.UPLOAD_PICTURE_FAILED);
@@ -123,11 +124,15 @@ export const uploadServiceImage = createAsyncThunk<
 /* =========================
    DELETE IMAGE
 ========================= */
-export const deleteServiceImage = createAsyncThunk<Service, string, { rejectValue: string }>(
+export const deleteServiceImage = createAsyncThunk<
+  Service,
+  { serviceId: string; kind?: ServiceImageKind },
+  { rejectValue: string }
+>(
   'service/deleteServiceImage',
-  async (serviceId, { rejectWithValue }) => {
+  async ({ serviceId, kind }, { rejectWithValue }) => {
     try {
-      const res = await serviceService.deleteImage(serviceId);
+      const res = await serviceService.deleteImage(serviceId, kind);
       return res.data.data;
     } catch (err) {
       return handleThunkError(err, rejectWithValue, ERROR_MESSAGES.DELETE_FAILED);

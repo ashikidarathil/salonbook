@@ -6,6 +6,7 @@ import { ApiResponse } from '../../../common/response/apiResponse';
 import { HttpStatus } from '../../../common/enums/httpStatus.enum';
 import { MESSAGES } from '../constants/service.messages';
 import type { IServiceService } from '../service/IServiceService';
+import type { ServiceImageField } from '../../../models/service.model';
 import type {
   ServicePaginationQueryDto,
   CreateServiceDto,
@@ -13,6 +14,10 @@ import type {
   SoftDeleteServiceDto,
   RestoreServiceDto,
 } from '../dto/service.request.dto';
+
+/** ?kind=detail targets the service page picture; anything else the card picture. */
+const imageField = (kind: unknown): ServiceImageField =>
+  kind === 'detail' ? 'detailImageUrl' : 'imageUrl';
 
 @injectable()
 export class ServiceController {
@@ -78,12 +83,16 @@ export class ServiceController {
   }
 
   async uploadImage(req: Request, res: Response): Promise<Response> {
-    const data = await this._service.uploadServiceImage(req.params.id, req.file!);
+    const data = await this._service.uploadServiceImage(
+      req.params.id,
+      req.file!,
+      imageField(req.query.kind),
+    );
     return ApiResponse.success(res, data, MESSAGES.SERVICE.IMAGE_UPLOADED);
   }
 
   async deleteImage(req: Request, res: Response): Promise<Response> {
-    const data = await this._service.deleteServiceImage(req.params.id);
+    const data = await this._service.deleteServiceImage(req.params.id, imageField(req.query.kind));
     return ApiResponse.success(res, data, MESSAGES.SERVICE.IMAGE_DELETED);
   }
 
