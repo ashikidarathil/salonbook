@@ -3,12 +3,14 @@ import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchMyBookings, cancelBooking } from '@/features/booking/booking.thunks';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@iconify/react';
 import { LoadingGate } from '@/components/common/LoadingGate';
 import { format } from 'date-fns';
+import { formatRupees } from '@/common/utils/money';
+import { bookingStatusClass, bookingStatusLabel } from '@/features/booking/bookingStatusStyle';
+import { cn } from '@/lib/utils';
 import { showApiError, showSuccess, showCancellationConfirm } from '@/common/utils/swal.utils';
 import { fetchUserRooms, initializeChatRoom } from '@/features/chat/chat.thunks';
 import type { ChatRoom } from '@/features/chat/chat.types';
@@ -21,6 +23,14 @@ import {
   BOOKING_RULES,
 } from '@/features/booking/booking.constants';
 import { PaymentCountdown } from '@/components/common/PaymentCountdown';
+
+/** PAID → Paid, ADVANCE_PAID → Advance Paid */
+const paymentLabel = (status?: string) =>
+  (status ?? '')
+    .toLowerCase()
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 
 export default function BookingsPage() {
   const dispatch = useAppDispatch();
@@ -83,25 +93,6 @@ export default function BookingsPage() {
     }
   }, [searchParams, rooms, myBookings, dispatch, setSearchParams, navigate]);
 
-  const getStatusColor = (status: BookingStatus) => {
-    switch (status) {
-      case BookingStatus.CONFIRMED:
-        return 'bg-green-100 text-green-700 border-green-200';
-      case BookingStatus.PENDING_PAYMENT:
-        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case BookingStatus.CANCELLED:
-        return 'bg-red-100 text-red-700 border-red-200';
-      case BookingStatus.COMPLETED:
-        return 'bg-purple-100 text-purple-700 border-purple-200';
-      case BookingStatus.NO_SHOW:
-        return 'bg-gray-200 text-gray-600 border-gray-300';
-      case BookingStatus.FAILED:
-        return 'bg-red-50 text-red-500 border-red-100';
-      default:
-        return 'bg-gray-100 text-gray-700 border-gray-200';
-    }
-  };
-
   const checkLeadTime = (bookingDate: string, startTime: string) => {
     try {
       // 1. Parse booking date (e.g., "2026-02-28T00:00:00.000Z")
@@ -158,7 +149,9 @@ export default function BookingsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="break-words text-2xl font-bold sm:text-3xl">My Bookings</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Manage and track your salon appointments</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Manage and track your salon appointments
+          </p>
         </div>
       </div>
 
@@ -169,195 +162,148 @@ export default function BookingsPage() {
         emptyMessage="You don't have any bookings yet."
         emptyIcon="solar:calendar-minimalistic-broken"
       >
-        <div className="grid gap-4">
-          {myBookings.map((booking) => (
-            <Card
-              key={booking.id}
-              className="overflow-hidden transition-all hover:shadow-md border-border/60"
-            >
-              <div className="flex flex-col md:flex-row">
-                <div className="p-4 sm:p-6 flex-1">
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-4 gap-3">
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono font-bold bg-muted px-2 py-0.5 rounded border text-muted-foreground w-fit">
-                          #{booking.bookingNumber}
-                        </span>
-                        <Badge className={`sm:hidden ${getStatusColor(booking.status as BookingStatus)}`}>
-                          {booking.status}
-                        </Badge>
-                      </div>
-                      <div className="flex items-start sm:items-center gap-2">
-                        <Icon icon="solar:calendar-bold-duotone" className="size-5 text-primary shrink-0 mt-0.5 sm:mt-0" />
-                        <span className="font-semibold leading-tight text-sm sm:text-base">
-                          {booking.date
-                            ? format(new Date(booking.date), 'EEEE, MMMM do, yyyy')
-                            : 'Date not set'}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="hidden sm:flex flex-col items-end gap-2">
-                      <Badge className={getStatusColor(booking.status as BookingStatus)}>
-                        {booking.status}
-                      </Badge>
-                    </div>
+        <ul className="grid gap-3 lg:grid-cols-2">
+          {myBookings.map((booking) => {
+            const items = booking.items ?? [];
+            const services =
+              items
+                .map((item) => item.serviceName)
+                .filter(Boolean)
+                .join(' + ') || 'Salon appointment';
+            const stylists =
+              [...new Set(items.map((item) => item.stylistName).filter(Boolean))].join(', ') ||
+              booking.stylistName ||
+              'Expert Stylist';
+            const pending = booking.status === BookingStatus.PENDING_PAYMENT;
+            const advancePaid = booking.paymentStatus === PaymentStatus.ADVANCE_PAID;
+            const paymentOpen =
+              !!booking.paymentWindowExpiresAt &&
+              new Date(booking.paymentWindowExpiresAt) > new Date();
+            const amountLabel = pending
+              ? 'Advance due (20%)'
+              : advancePaid
+                ? 'Advance paid (20%)'
+                : 'Total amount';
+            const amount = pending || advancePaid ? booking.advanceAmount : booking.totalPrice;
+            return (
+              <li
+                key={booking.id}
+                className="flex min-w-0 flex-col gap-4 rounded-2xl border bg-white p-4 shadow-sm sm:p-5"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="break-all font-mono text-xs font-bold text-muted-foreground">
+                      #{booking.bookingNumber}
+                    </p>
+                    <p className="mt-1 font-semibold">
+                      {booking.date
+                        ? format(new Date(booking.date), 'EEE, d MMM yyyy')
+                        : 'Date not set'}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {booking.startTime} – {booking.endTime}
+                    </p>
                   </div>
+                  <Badge
+                    variant="outline"
+                    className={cn('shrink-0', bookingStatusClass(booking.status as BookingStatus))}
+                  >
+                    {bookingStatusLabel(booking.status as BookingStatus)}
+                  </Badge>
+                </div>
 
-                  <div className="space-y-4">
-                    {booking.items && booking.items.length > 0 ? (
-                      booking.items.map((item, idx) => (
-                        <div
-                          key={idx}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-lg bg-muted/40 border border-border/40 gap-3"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                              <Icon
-                                icon="solar:scissors-square-bold-duotone"
-                                className="size-6 text-primary"
-                              />
-                            </div>
-                            <div>
-                              <p className="font-semibold text-sm">
-                                {item.serviceName || 'Professional Service'}
-                              </p>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <Icon icon="solar:user-bold-duotone" className="size-3" />
-                                <span>{item.stylistName || 'Expert Stylist'}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex flex-row sm:flex-col justify-between sm:justify-center items-center sm:items-end gap-1 w-full sm:w-auto mt-1 sm:mt-0 px-1 sm:px-0">
-                            <span className="text-xs text-muted-foreground font-normal">
-                              {item.date ? format(new Date(item.date), 'dd MMM') : ''} ·{' '}
-                              {item.startTime} – {item.endTime}
-                            </span>
-                            <span className="font-bold">₹{item.price.toLocaleString('en-IN')}</span>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/40">
-                        <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Icon icon="solar:user-bold-duotone" className="size-6 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground font-medium uppercase">
-                            Stylist
-                          </p>
-                          <p className="font-semibold text-sm">
-                            {booking.stylistName || 'Professional Stylist'}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between pt-4 mt-2 border-t border-border/40">
-                      <div className="flex-1">
-                        <p className="text-xs text-muted-foreground uppercase text-[10px] font-bold tracking-wider">
-                          Payment Status
-                        </p>
-                        <Badge variant="outline" className="mt-1 text-[10px] h-5">
-                          {booking.paymentStatus}
-                        </Badge>
-                      </div>
-                      <div className="text-right">
-                        {booking.status === BookingStatus.PENDING_PAYMENT ? (
-                          <>
-                            <p className="text-xs text-muted-foreground uppercase text-[10px] font-bold tracking-wider">
-                              Advance Due (20%)
-                            </p>
-                            <p className="text-xl font-bold text-primary">
-                              ₹{booking.advanceAmount.toLocaleString('en-IN')}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground">
-                              of ₹{booking.totalPrice.toLocaleString('en-IN')} total
-                            </p>
-                          </>
-                        ) : booking.paymentStatus === PaymentStatus.ADVANCE_PAID ? (
-                          <>
-                            <p className="text-xs text-muted-foreground uppercase text-[10px] font-bold tracking-wider">
-                              Advance Paid (20%)
-                            </p>
-                            <p className="text-xl font-bold text-green-600">
-                              ₹{booking.advanceAmount.toLocaleString('en-IN')}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground">
-                              of ₹{booking.totalPrice.toLocaleString('en-IN')} total
-                            </p>
-                          </>
-                        ) : (
-                          <>
-                            <p className="text-xs text-muted-foreground uppercase text-[10px] font-bold tracking-wider">
-                              Total Amount
-                            </p>
-                            <p className="text-xl font-bold text-primary">
-                              ₹{booking.totalPrice.toLocaleString('en-IN')}
-                            </p>
-                          </>
-                        )}
-                      </div>
-                    </div>
+                <div className="flex items-center gap-3 rounded-xl bg-muted/50 p-3">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                    <Icon
+                      icon="solar:scissors-square-bold-duotone"
+                      className="size-6 text-primary"
+                    />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="break-words text-sm font-semibold">{services}</p>
+                    <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Icon icon="solar:user-bold-duotone" className="size-3 shrink-0" />
+                      <span className="truncate">{stylists}</span>
+                    </p>
                   </div>
                 </div>
 
-                <div className="bg-muted/30 p-4 sm:px-6 sm:py-4 md:w-64 border-t md:border-t-0 md:border-l border-border/40 flex flex-col justify-center gap-2">
-                  {booking.status === BookingStatus.PENDING_PAYMENT && (
-                    <>
-                      {booking.paymentWindowExpiresAt && (
-                        <PaymentCountdown expiresAt={booking.paymentWindowExpiresAt} />
+                <div className="flex items-end justify-between gap-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Payment</p>
+                    <Badge variant="outline" className="mt-1">
+                      {paymentLabel(booking.paymentStatus)}
+                    </Badge>
+                  </div>
+                  <div className="min-w-0 text-right">
+                    <p className="text-xs text-muted-foreground">{amountLabel}</p>
+                    <p
+                      className={cn(
+                        'break-all text-xl font-bold',
+                        advancePaid ? 'text-green-600' : 'text-primary',
                       )}
-                      {booking.paymentWindowExpiresAt &&
-                      new Date(booking.paymentWindowExpiresAt) > new Date() ? (
+                    >
+                      {formatRupees(amount)}
+                    </p>
+                    {(pending || advancePaid) && (
+                      <p className="text-xs text-muted-foreground">
+                        of {formatRupees(booking.totalPrice)} total
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-auto grid grid-cols-2 gap-2">
+                  {pending &&
+                    (paymentOpen ? (
+                      <>
+                        {booking.paymentWindowExpiresAt && (
+                          <div className="col-span-2">
+                            <PaymentCountdown expiresAt={booking.paymentWindowExpiresAt} />
+                          </div>
+                        )}
                         <Button
-                          className="w-full justify-start gap-2 h-10 bg-primary hover:bg-primary/90 text-white"
+                          className="col-span-2 h-10 gap-2"
                           onClick={() => navigate(`/checkout/${bookingRef(booking)}`)}
                         >
                           <Icon icon="solar:card-2-bold" className="size-4" />
                           Pay Advance Now
                         </Button>
-                      ) : (
-                        <div className="flex flex-col gap-1 items-center p-2 rounded-lg bg-red-50 border border-red-100 mb-2">
-                          <span className="text-[10px] text-red-600 font-bold uppercase tracking-tight">
-                            Payment Expired
-                          </span>
-                          <span className="text-[10px] text-red-500 text-center">
-                            Slot released
-                          </span>
-                        </div>
-                      )}
-                    </>
-                  )}
+                      </>
+                    ) : (
+                      <p className="col-span-2 rounded-lg border border-red-100 bg-red-50 p-2 text-center text-sm text-red-600">
+                        Payment time ran out, so the slot was released.
+                      </p>
+                    ))}
 
-                  {booking.status === BookingStatus.COMPLETED &&
-                    booking.paymentStatus === PaymentStatus.ADVANCE_PAID && (
-                      <Button
-                        className="w-full justify-start gap-2 h-10 bg-primary hover:bg-primary/90 text-white shadow-sm"
-                        onClick={() => navigate(`/profile/bookings/${bookingRef(booking)}`)}
-                      >
-                        <Icon icon="solar:wallet-money-bold" className="size-4" />
-                        Pay Remaining
-                      </Button>
-                    )}
+                  {booking.status === BookingStatus.COMPLETED && advancePaid && (
+                    <Button
+                      className="col-span-2 h-10 gap-2"
+                      onClick={() => navigate(`/profile/bookings/${bookingRef(booking)}`)}
+                    >
+                      <Icon icon="solar:wallet-money-bold" className="size-4" />
+                      Pay Remaining
+                    </Button>
+                  )}
 
                   <Button
                     variant="outline"
-                    className="w-full justify-start gap-2 h-10"
+                    className="h-10 min-w-0 gap-2 px-2"
                     onClick={() => navigate(`/profile/bookings/${bookingRef(booking)}`)}
                   >
-                    <Icon icon="solar:document-text-linear" className="size-4" />
-                    View Details
+                    <Icon icon="solar:document-text-linear" className="size-4 shrink-0" />
+                    Details
                   </Button>
 
                   {(booking.status === BookingStatus.CONFIRMED ||
                     booking.status === BookingStatus.COMPLETED) && (
                     <Button
                       variant="outline"
-                      className="w-full justify-start gap-2 h-10 text-primary hover:text-primary/90 hover:bg-primary/5 border-primary/10"
+                      className="h-10 min-w-0 gap-2 border-primary/20 px-2 text-primary hover:bg-primary/5 hover:text-primary"
                       onClick={() => handleOpenChat(booking.id)}
                     >
-                      <Icon icon="solar:chat-round-bold-duotone" className="size-4" />
-                      Chat with Stylist
+                      <Icon icon="solar:chat-round-bold-duotone" className="size-4 shrink-0" />
+                      Chat
                     </Button>
                   )}
 
@@ -365,7 +311,7 @@ export default function BookingsPage() {
                     <>
                       <Button
                         variant="outline"
-                        className="w-full justify-start gap-2 h-10 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-100"
+                        className="h-10 min-w-0 gap-2 px-2"
                         onClick={() => handleRescheduleClick(booking)}
                         disabled={
                           booking.rescheduleCount
@@ -373,26 +319,25 @@ export default function BookingsPage() {
                             : false
                         }
                       >
-                        <Icon icon="solar:calendar-rotate-linear" className="size-4" />
+                        <Icon icon="solar:calendar-rotate-linear" className="size-4 shrink-0" />
                         Reschedule
                       </Button>
                       <Button
                         variant="outline"
-                        className="w-full justify-start gap-2 h-10 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-100"
+                        className="h-10 min-w-0 gap-2 border-red-200 px-2 text-red-600 hover:bg-red-50 hover:text-red-600"
                         onClick={() => handleCancelClick(booking)}
                       >
-                        <Icon icon="solar:close-circle-linear" className="size-4" />
-                        Cancel Booking
+                        <Icon icon="solar:close-circle-linear" className="size-4 shrink-0" />
+                        Cancel
                       </Button>
                     </>
                   )}
                 </div>
-              </div>
-            </Card>
-          ))}
-        </div>
+              </li>
+            );
+          })}
+        </ul>
       </LoadingGate>
-
     </div>
   );
 }

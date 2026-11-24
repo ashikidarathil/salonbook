@@ -208,3 +208,7 @@
 - 2026-11-24 — Customer responsive pass, Cart and payment: all amounts as ₹1,00,000 (cart, checkout, payment
   result) through a shared formatRupees helper; chosen slot shown as Thu, 26 Nov · 11:00; long service names
   wrap; bigger Remove and Change buttons; readable notes; readable cart count bubble in the header.
+- 2026-11-24 — Customer responsive pass, My Bookings: one compact card per booking (services on one line,
+  readable status and payment, amount as ₹1,00,000, two-column buttons), two cards per row on laptops; booking
+  page with readable labels, tidy service rows and a coral Reschedule button. Phone list about 4,600 px to
+  2,700 px. Reschedule and review pages already fit.

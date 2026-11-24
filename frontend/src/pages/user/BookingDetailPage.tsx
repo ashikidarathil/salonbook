@@ -224,21 +224,22 @@ export default function BookingDetailPage() {
                 {currentBooking.items.map((item: BookingDetailsItem, idx: number) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/40 border border-border/40"
+                    className="flex items-center justify-between gap-3 rounded-lg border border-border/40 bg-muted/40 p-3"
                   >
-                    <div>
+                    <div className="min-w-0">
                       <p className="font-medium text-sm">
                         {item.serviceName || 'Professional Service'}
                       </p>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                        <Icon icon="solar:user-bold-duotone" className="size-3" />
-                        {item.stylistName}
-                        <span className="mx-1">·</span>
-                        {item.date ? format(new Date(item.date), 'dd MMM') : ''} {item.startTime}–
+                      <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                        <Icon icon="solar:user-bold-duotone" className="size-3 shrink-0" />
+                        <span className="truncate">{item.stylistName}</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.date ? format(new Date(item.date), 'd MMM') : ''} · {item.startTime} –{' '}
                         {item.endTime}
                       </p>
                     </div>
-                    <div className="text-right">
+                    <div className="shrink-0 text-right">
                       <p className="font-semibold text-sm">₹{item.price.toLocaleString('en-IN')}</p>
                       <p className="text-xs text-muted-foreground">{item.duration} min</p>
                     </div>
@@ -324,7 +325,7 @@ export default function BookingDetailPage() {
 
                 <div className="grid grid-cols-2 gap-3 pt-2">
                   <div className="p-3 rounded-xl bg-primary/5 border border-primary/10">
-                    <p className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">
+                    <p className="text-xs font-bold text-primary uppercase tracking-wider mb-1">
                       Advance Paid (20%)
                     </p>
                     <p className="text-xl font-black text-primary">
@@ -332,7 +333,7 @@ export default function BookingDetailPage() {
                     </p>
                   </div>
                   <div className="p-3 rounded-xl bg-muted/50 border border-border/50">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">
                       To Pay at Salon (80%)
                     </p>
                     <p className="text-xl font-black text-slate-700">
@@ -348,7 +349,7 @@ export default function BookingDetailPage() {
                   <span className="text-muted-foreground italic">Payment Status</span>
                   <Badge
                     variant="outline"
-                    className="font-bold uppercase tracking-tight text-[10px]"
+                    className="font-bold uppercase tracking-tight text-xs"
                   >
                     {currentBooking.paymentStatus.replace('_', ' ')}
                   </Badge>
@@ -360,7 +361,7 @@ export default function BookingDetailPage() {
             {currentBooking.notes && (
               <Card className="bg-yellow-50/50 border-yellow-100">
                 <CardContent className="p-4">
-                  <p className="text-[10px] font-bold text-yellow-700 uppercase tracking-widest mb-1">
+                  <p className="text-xs font-bold text-yellow-700 uppercase tracking-widest mb-1">
                     Customer Notes
                   </p>
                   <p className="text-sm text-slate-600">"{currentBooking.notes}"</p>
@@ -445,7 +446,7 @@ export default function BookingDetailPage() {
                   <>
                     <Button
                       variant="outline"
-                      className="flex-1 gap-2 text-blue-600 hover:bg-blue-50 border-blue-100"
+                      className="flex-1 gap-2"
                       onClick={handleReschedule}
                       disabled={
                         (currentBooking.rescheduleCount ?? 0) >= BOOKING_RULES.MAX_RESCHEDULES
