@@ -180,3 +180,6 @@
 - 2026-11-24 — Stylist responsive pass, Appointments: Today / All / day / search kept in the address, one clean
   card per booking (price and status once), two-column action buttons, two cards per row on laptops; detail
   page with amounts as ₹1,00,000 and actions beside the details on laptops. Today now uses the local date.
+- 2026-11-24 — Stylist responsive pass, My Schedule: three tabs side by side on phones (Weekly / Daily / Breaks),
+  readable Daily calendar with a key and coloured bars on small screens, bigger break delete button, break
+  reasons wrap. Shared with the admin stylist schedule.

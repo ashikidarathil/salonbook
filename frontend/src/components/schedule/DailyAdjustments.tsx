@@ -87,7 +87,7 @@ export default function DailyAdjustments({
                     className="size-6 text-primary/80"
                   />
                 </div>
-                Daily Overrides
+                Daily Adjustments
               </CardTitle>
               <CardDescription className="text-sm font-medium text-muted-foreground/50 mt-1 md:ml-12">
                 Override your standard routine for specific dates like holidays.
@@ -156,7 +156,7 @@ export default function DailyAdjustments({
                   className={cn(
                     'min-h-[56px] min-w-0 sm:min-h-[80px] rounded-xl sm:rounded-2xl p-1 sm:p-2 transition-all group flex flex-col items-center justify-between border overflow-hidden',
                     past
-                      ? 'opacity-20 cursor-not-allowed bg-muted/10 border-transparent scale-95'
+                      ? 'opacity-40 cursor-not-allowed bg-muted/10 border-transparent'
                       : 'hover:border-primary/50 hover:shadow-md hover:shadow-primary/5 hover:-translate-y-0.5 active:scale-95',
                     isTodayDate
                       ? 'border-primary bg-primary/[0.03]'
@@ -182,7 +182,7 @@ export default function DailyAdjustments({
                       {format(date, 'd')}
                     </span>
                     {isTodayDate && (
-                      <span className="text-[6px] sm:text-[8px] font-bold uppercase tracking-tighter px-1 py-0.5 rounded bg-primary text-white leading-none">
+                      <span className="hidden rounded bg-primary px-1 py-0.5 text-[10px] font-bold uppercase leading-none text-white lg:inline">
                         Today
                       </span>
                     )}
@@ -192,13 +192,13 @@ export default function DailyAdjustments({
                     <div className="w-full flex flex-col items-center sm:items-start gap-1">
                       <div
                         className={cn(
-                          'h-1 w-4 sm:h-1.5 sm:w-8 rounded-full mb-0.5 sm:mb-1',
+                          'mb-0.5 h-1.5 w-5 rounded-full sm:mb-1 sm:w-8',
                           override.isWorkingDay ? 'bg-green-400' : 'bg-destructive/60',
                         )}
                       />
                       <span
                         className={cn(
-                          'text-[7px] sm:text-[9px] font-semibold truncate w-full text-center sm:text-left uppercase tracking-tighter opacity-70',
+                          'hidden w-full truncate text-center text-[10px] font-semibold uppercase lg:block lg:text-left',
                           override.isWorkingDay ? 'text-green-700' : 'text-destructive',
                         )}
                       >
@@ -216,6 +216,20 @@ export default function DailyAdjustments({
               );
             })}
           </div>
+          )}
+          {isLoaded && (
+            <ul className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 px-2 text-xs text-muted-foreground sm:px-0">
+              <li className="flex items-center gap-1.5">
+                <span className="size-3 rounded border border-primary bg-primary/10" /> Today
+              </li>
+              <li className="flex items-center gap-1.5">
+                <span className="h-1.5 w-5 rounded-full bg-green-400" /> Changed hours
+              </li>
+              <li className="flex items-center gap-1.5">
+                <span className="h-1.5 w-5 rounded-full bg-destructive/60" /> Day off
+              </li>
+              <li>Tap a day to change it.</li>
+            </ul>
           )}
         </CardContent>
       </Card>
