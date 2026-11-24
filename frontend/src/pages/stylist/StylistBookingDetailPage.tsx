@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { matchesBookingRef } from '@/common/utils/bookingRef';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchBookingDetails, updateBookingStatus } from '@/features/booking/booking.thunks';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@iconify/react';
@@ -110,116 +110,98 @@ export default function StylistBookingDetailPage() {
           )}
         </div>
 
-        <div
-          className={cn(
-            'grid gap-4',
-            b?.status === BookingStatus.CONFIRMED && 'xl:grid-cols-[minmax(0,1fr)_22rem]',
-          )}
-        >
-          <div className="min-w-0 space-y-4">
-            <Card className="border-border/60 shadow-sm">
-              <CardContent className="grid grid-cols-1 gap-4 !p-4 sm:grid-cols-3 sm:!p-6">
-                <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    Date
-                  </p>
-                  <p className="mt-1 font-bold">
-                    {b?.date ? format(new Date(b.date), 'EEE, d MMM yyyy') : ''}
-                  </p>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    Time
-                  </p>
-                  <p className="mt-1 font-bold">
-                    {b?.startTime} – {b?.endTime}
-                  </p>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    Customer
-                  </p>
-                  <p className="mt-1 break-words font-bold">{b?.userName || 'Customer'}</p>
-                </div>
-              </CardContent>
-            </Card>
+        {/* Everything about the booking in one card, like the other detail pages */}
+        <Card className="overflow-hidden border-border/60 shadow-sm">
+          <CardContent className="divide-y divide-border/60 !p-0">
+            <dl className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-3 sm:p-6">
+              <div className="min-w-0">
+                <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Date</dt>
+                <dd className="mt-1 font-bold">
+                  {b?.date ? format(new Date(b.date), 'EEE, d MMM yyyy') : ''}
+                </dd>
+              </div>
+              <div className="min-w-0">
+                <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Time</dt>
+                <dd className="mt-1 font-bold">
+                  {b?.startTime} – {b?.endTime}
+                </dd>
+              </div>
+              <div className="min-w-0">
+                <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Customer</dt>
+                <dd className="mt-1 break-words font-bold">{b?.userName || 'Customer'}</dd>
+              </div>
+            </dl>
 
-            <Card className="border-border/60 shadow-sm">
-              <CardHeader className="!p-4 !pb-3 sm:!px-6">
-                <CardTitle className="flex items-center gap-2 text-base font-bold">
-                  <Icon icon="solar:scissors-square-bold-duotone" className="size-5 text-primary" />
-                  Services requested
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 !p-4 !pt-0 sm:!px-6 sm:!pb-6">
-                <ul className="space-y-2">
-                  {b?.items.map((item, idx) => (
-                    <li
-                      key={idx}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-muted/30 p-3"
-                    >
-                      <div className="min-w-0">
-                        <p className="break-words text-sm font-bold">
-                          {item.serviceName || 'Service'}
-                        </p>
-                        <p className="mt-0.5 text-xs text-muted-foreground">
-                          {item.duration} min · {item.startTime} – {item.endTime}
-                        </p>
-                      </div>
-                      <span className="shrink-0 text-sm font-bold">{rupees(item.price)}</span>
-                    </li>
-                  ))}
-                </ul>
-                <dl className="space-y-2 border-t border-dashed pt-4 text-sm">
-                  <div className="flex justify-between gap-3 text-muted-foreground">
-                    <dt>Subtotal</dt>
-                    <dd>{rupees(b?.totalPrice)}</dd>
-                  </div>
-                  {(b?.discountAmount ?? 0) > 0 && (
-                    <div className="flex justify-between gap-3 text-red-600">
-                      <dt>Discount</dt>
-                      <dd>- {rupees(b?.discountAmount)}</dd>
+            <section className="space-y-4 p-4 sm:p-6">
+              <h2 className="flex items-center gap-2 text-base font-bold">
+                <Icon icon="solar:scissors-square-bold-duotone" className="size-5 text-primary" />
+                Services requested
+              </h2>
+              <ul className="space-y-2">
+                {b?.items.map((item, idx) => (
+                  <li
+                    key={idx}
+                    className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-muted/30 p-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="break-words text-sm font-bold">
+                        {item.serviceName || 'Service'}
+                      </p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {item.duration} min · {item.startTime} – {item.endTime}
+                      </p>
                     </div>
-                  )}
-                  <div className="flex items-center justify-between gap-3">
-                    <dt className="font-bold">Net Total</dt>
-                    <dd className="break-all text-xl font-bold text-primary sm:text-2xl">
-                      {rupees(b?.payableAmount)}
-                    </dd>
+                    <span className="shrink-0 text-sm font-bold">{rupees(item.price)}</span>
+                  </li>
+                ))}
+              </ul>
+              <dl className="space-y-2 border-t border-dashed pt-4 text-sm">
+                <div className="flex justify-between gap-3 text-muted-foreground">
+                  <dt>Subtotal</dt>
+                  <dd>{rupees(b?.totalPrice)}</dd>
+                </div>
+                {(b?.discountAmount ?? 0) > 0 && (
+                  <div className="flex justify-between gap-3 text-red-600">
+                    <dt>Discount</dt>
+                    <dd>- {rupees(b?.discountAmount)}</dd>
                   </div>
-                  <div className="flex justify-between gap-3 text-xs text-muted-foreground">
-                    <dt>Advance received (20%)</dt>
-                    <dd>{rupees(b?.advanceAmount)}</dd>
-                  </div>
-                </dl>
-              </CardContent>
-            </Card>
+                )}
+                <div className="flex items-center justify-between gap-3">
+                  <dt className="font-bold">Net Total</dt>
+                  <dd className="break-all text-xl font-bold text-primary sm:text-2xl">
+                    {rupees(b?.payableAmount)}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-3 text-xs text-muted-foreground">
+                  <dt>Advance received (20%)</dt>
+                  <dd>{rupees(b?.advanceAmount)}</dd>
+                </div>
+              </dl>
+            </section>
 
             {b?.notes && (
-              <Card className="border-yellow-100 bg-yellow-50/40">
-                <CardContent className="!p-4">
+              <section className="p-4 sm:p-6">
+                <div className="rounded-xl border border-yellow-100 bg-yellow-50/60 p-4">
                   <p className="mb-1 text-[11px] font-bold uppercase text-yellow-700">
                     Customer note
                   </p>
                   <p className="break-words text-sm">“{b.notes}”</p>
-                </CardContent>
-              </Card>
+                </div>
+              </section>
             )}
-          </div>
 
-          {b?.status === BookingStatus.CONFIRMED && (
-            <div className="space-y-3 xl:sticky xl:top-4 xl:self-start">
-              <Button
-                className="h-12 w-full gap-2 bg-emerald-600 text-base font-bold text-white hover:bg-emerald-700"
-                onClick={() => handleStatusUpdate(BookingStatus.COMPLETED, 'Completed')}
-              >
-                <Icon icon="solar:check-circle-bold-duotone" className="size-5" />
-                Mark as Completed
-              </Button>
-              <div className="grid grid-cols-2 gap-3">
+            {b?.status === BookingStatus.CONFIRMED && (
+              <div className="grid gap-3 bg-muted/20 p-4 sm:grid-cols-3 sm:p-6">
+                <Button
+                  className="h-11 gap-2 bg-emerald-600 font-bold text-white hover:bg-emerald-700"
+                  onClick={() => handleStatusUpdate(BookingStatus.COMPLETED, 'Completed')}
+                >
+                  <Icon icon="solar:check-circle-bold-duotone" className="size-5" />
+                  Mark as Completed
+                </Button>
                 <Button
                   variant="outline"
-                  className="h-10 min-w-0 gap-2"
+                  className="h-11 min-w-0 gap-2"
                   onClick={() => handleStatusUpdate(BookingStatus.NO_SHOW, 'No Show')}
                 >
                   <Icon icon="solar:ghost-bold-duotone" className="size-4 shrink-0" />
@@ -227,16 +209,16 @@ export default function StylistBookingDetailPage() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="h-10 min-w-0 gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-600"
+                  className="h-11 min-w-0 gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-600"
                   onClick={handleCancel}
                 >
                   <Icon icon="solar:close-circle-bold-duotone" className="size-4 shrink-0" />
                   Cancel
                 </Button>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </LoadingGate>
   );

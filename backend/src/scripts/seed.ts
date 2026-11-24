@@ -112,6 +112,14 @@ async function main(): Promise<void> {
         { $set: { imageUrl: image.url } },
       );
     }
+    // Same picture for the service page until the admin uploads a separate one
+    const saved = await ServiceModel.findById(doc._id).select('imageUrl').lean();
+    if (saved?.imageUrl) {
+      await ServiceModel.updateOne(
+        { _id: doc._id, ...replaceableImage('detailImageUrl') },
+        { $set: { detailImageUrl: saved.imageUrl } },
+      );
+    }
   }
 
   // Branches + every category and service enabled at each branch

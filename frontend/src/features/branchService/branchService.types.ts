@@ -10,6 +10,7 @@ export interface BranchServiceItem {
   price: number;
   duration: number;
   imageUrl?: string;
+  detailImageUrl?: string;
   description?: string;
   whatIncluded?: string[];
   isActive: boolean;

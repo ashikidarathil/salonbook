@@ -9,6 +9,8 @@ export interface Service {
   description?: string;
   categoryId: string;
   imageUrl?: string;
+  /** Picture for the service page; falls back to imageUrl. */
+  detailImageUrl?: string;
   whatIncluded?: string[];
   status: ServiceStatus;
   isDeleted: boolean;
@@ -40,3 +42,6 @@ export interface PaginatedServiceResponse {
   data: Service[];
   pagination: PaginationMetadata;
 }
+
+/** card = picture in service lists, detail = picture on the service page. */
+export type ServiceImageKind = 'card' | 'detail';

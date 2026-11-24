@@ -10,6 +10,7 @@ export class ServiceMapper {
       description: doc.description,
       categoryId: doc.categoryId?._id ? doc.categoryId._id.toString() : doc.categoryId?.toString(),
       imageUrl: doc.imageUrl,
+      detailImageUrl: doc.detailImageUrl,
       whatIncluded: doc.whatIncluded || [],
       status: doc.status,
       isDeleted: doc.isDeleted,

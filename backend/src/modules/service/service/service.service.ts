@@ -1,5 +1,5 @@
 import { assertSlugAvailable } from '../../../common/utils/slug.util';
-import { ServiceModel } from '../../../models/service.model';
+import { ServiceModel, type ServiceImageField } from '../../../models/service.model';
 import { injectable, inject } from 'tsyringe';
 import { TOKENS } from '../../../common/di/tokens';
 import { AppError } from '../../../common/errors/appError';
@@ -99,6 +99,7 @@ export class ServiceService implements IServiceService {
   async uploadServiceImage(
     serviceId: string,
     file: Express.Multer.File,
+    field: ServiceImageField = 'imageUrl',
   ): Promise<ServiceResponseDto> {
     const service = await this._repo.findById(serviceId);
     if (!service) {
@@ -112,15 +113,18 @@ export class ServiceService implements IServiceService {
       serviceId,
     });
 
-    if (service.imageUrl) {
+    const oldUrl = service[field];
+    // The card and page pictures may share one upload, so only remove it when unused
+    const otherUrl = service[field === 'imageUrl' ? 'detailImageUrl' : 'imageUrl'];
+    if (oldUrl && oldUrl !== otherUrl) {
       try {
-        await this._imageService.deleteServiceImage(service.imageUrl);
+        await this._imageService.deleteServiceImage(oldUrl);
       } catch (error) {
         console.error('Failed to delete old image:', error);
       }
     }
 
-    const updatedService = await this._repo.updateImageUrl(serviceId, imageUrl);
+    const updatedService = await this._repo.updateImageUrl(serviceId, imageUrl, field);
     if (!updatedService) {
       throw new AppError(MESSAGES.SERVICE.NOT_FOUND, HttpStatus.NOT_FOUND);
     }
@@ -128,19 +132,24 @@ export class ServiceService implements IServiceService {
     return ServiceMapper.toDto(updatedService);
   }
 
-  async deleteServiceImage(serviceId: string): Promise<ServiceResponseDto> {
+  async deleteServiceImage(
+    serviceId: string,
+    field: ServiceImageField = 'imageUrl',
+  ): Promise<ServiceResponseDto> {
     const service = await this._repo.findById(serviceId);
     if (!service) {
       throw new AppError(MESSAGES.SERVICE.NOT_FOUND, HttpStatus.NOT_FOUND);
     }
 
-    if (!service.imageUrl) {
+    const url = service[field];
+    if (!url) {
       throw new AppError(MESSAGES.SERVICE.NO_IMAGE_FOUND, HttpStatus.BAD_REQUEST);
     }
 
-    await this._imageService.deleteServiceImage(service.imageUrl);
+    const otherUrl = service[field === 'imageUrl' ? 'detailImageUrl' : 'imageUrl'];
+    if (url !== otherUrl) await this._imageService.deleteServiceImage(url);
 
-    const updatedService = await this._repo.updateImageUrl(serviceId, '');
+    const updatedService = await this._repo.updateImageUrl(serviceId, '', field);
     if (!updatedService) {
       throw new AppError(MESSAGES.SERVICE.NOT_FOUND, HttpStatus.NOT_FOUND);
     }

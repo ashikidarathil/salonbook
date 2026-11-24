@@ -1,4 +1,4 @@
-import type { ServiceDocument } from '../../../models/service.model';
+import type { ServiceDocument, ServiceImageField } from '../../../models/service.model';
 import type { ServicePaginationQueryDto } from '../dto/service.request.dto';
 import type { ServicePaginatedResponse } from '../dto/service.response.dto';
 
@@ -28,7 +28,11 @@ export interface IServiceRepository {
     }>,
   ): Promise<ServiceDocument | null>;
 
-  updateImageUrl(id: string, imageUrl: string): Promise<ServiceDocument | null>;
+  updateImageUrl(
+    id: string,
+    imageUrl: string,
+    field?: ServiceImageField,
+  ): Promise<ServiceDocument | null>;
 
   softDelete(id: string): Promise<ServiceDocument | null>;
   restore(id: string): Promise<ServiceDocument | null>;
