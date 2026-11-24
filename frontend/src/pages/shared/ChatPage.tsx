@@ -173,7 +173,7 @@ export default function ChatPage() {
       />
 
       <div
-        className={`flex-1 flex flex-col w-full h-full bg-muted/10 relative ${!activeRoomId ? 'hidden md:flex' : 'flex'}`}
+        className={`flex-1 min-w-0 flex flex-col w-full h-full bg-muted/10 relative ${!activeRoomId ? 'hidden md:flex' : 'flex'}`}
       >
         {!activeRoomId ? (
           <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground mt-10">
@@ -216,7 +216,7 @@ export default function ChatPage() {
                             <p className="text-xs text-muted-foreground mt-0.5">
                               Booking #{bookingRef}
                               {isClosed && (
-                                <span className="ml-2 text-[10px] bg-red-50 text-red-500 border border-red-200 px-1.5 py-0.5 rounded-full">
+                                <span className="ml-2 text-[11px] bg-red-50 text-red-500 border border-red-200 px-1.5 py-0.5 rounded-full">
                                   Closed
                                 </span>
                               )}

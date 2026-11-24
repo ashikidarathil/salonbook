@@ -140,7 +140,7 @@ export function ChatSidebar({
                       <div className="flex items-center gap-1.5 shrink-0">
                         {room.lastMessageAt && (
                           <span
-                            className={`text-[10px] whitespace-nowrap ${
+                            className={`text-[11px] whitespace-nowrap ${
                               hasUnread ? 'text-primary font-medium' : 'text-muted-foreground'
                             }`}
                           >
@@ -151,10 +151,10 @@ export function ChatSidebar({
                     </div>
 
                     {ref && (
-                      <p className="text-[10px] text-muted-foreground font-mono mb-0.5">
+                      <p className="text-[11px] text-muted-foreground font-mono mb-0.5">
                         #{ref}
                         {closed && (
-                          <span className="ml-1.5 text-[9px] bg-muted/80 px-1.5 py-0.5 rounded-full text-muted-foreground border border-border/40">
+                          <span className="ml-1.5 text-[11px] bg-muted/80 px-1.5 py-0.5 rounded-full text-muted-foreground border border-border/40">
                             Closed
                           </span>
                         )}
@@ -177,7 +177,7 @@ export function ChatSidebar({
 
                       {/* Unread count badge */}
                       {hasUnread && (
-                        <span className="shrink-0 min-w-[20px] h-5 bg-primary text-[10px] text-white font-bold rounded-full flex items-center justify-center px-1.5 ring-2 ring-background animate-in zoom-in-50 duration-300">
+                        <span className="shrink-0 min-w-[20px] h-5 bg-primary text-[11px] text-white font-bold rounded-full flex items-center justify-center px-1.5 ring-2 ring-background animate-in zoom-in-50 duration-300">
                           {(room.unreadCount ?? 0) > 99 ? '99+' : room.unreadCount}
                         </span>
                       )}
