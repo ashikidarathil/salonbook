@@ -245,15 +245,15 @@ export default function ServicesListingPage() {
                 >
                   {/* Service Image */}
                   {/* Phones: small photo beside the details; wider screens: photo on top */}
-                  <div className="relative flex w-28 shrink-0 items-center justify-center overflow-hidden bg-muted/30 sm:w-36 md:h-64 md:w-auto md:p-8">
+                  <div className="relative flex w-28 shrink-0 items-center justify-center overflow-hidden bg-muted/30 sm:w-36 md:w-auto md:p-8">
                     {service.imageUrl ? (
                       <img
                         src={service.imageUrl}
                         alt={service.name}
-                        className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+                        className="size-full object-cover transition-transform duration-300 group-hover:scale-105 md:aspect-[4/3] md:h-auto"
                       />
                     ) : (
-                      <div className="flex items-center justify-center w-full h-full bg-white rounded-lg shadow-sm opacity-50">
+                      <div className="flex size-full items-center justify-center rounded-lg bg-white opacity-50 shadow-sm md:aspect-[4/3] md:h-auto">
                         <Icon
                           icon="solar:scissors-square-bold-duotone"
                           className="size-16 text-muted-foreground/30"

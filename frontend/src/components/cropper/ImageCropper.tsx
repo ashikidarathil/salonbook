@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { cn } from '@/lib/utils';
 import 'react-easy-crop/react-easy-crop.css';
 
 interface ImageCropperProps {
@@ -20,7 +21,21 @@ interface ImageCropperProps {
   onClose: () => void;
   imageSrc: string;
   onCropComplete: (croppedFile: File) => void;
+  /** Ratio picked when the cropper opens; 'original' keeps the photo's own shape. */
+  defaultAspect?: AspectKey;
 }
+
+export type AspectKey = 'original' | '1:1' | '4:3' | '3:4' | '3:2' | '16:9' | '9:16';
+
+const ASPECTS: { key: AspectKey; label: string; value?: number }[] = [
+  { key: 'original', label: 'Original' },
+  { key: '1:1', label: '1:1', value: 1 },
+  { key: '4:3', label: '4:3', value: 4 / 3 },
+  { key: '3:4', label: '3:4', value: 3 / 4 },
+  { key: '3:2', label: '3:2', value: 3 / 2 },
+  { key: '16:9', label: '16:9', value: 16 / 9 },
+  { key: '9:16', label: '9:16', value: 9 / 16 },
+];
 
 interface CroppedAreaPixels {
   width: number;
@@ -33,7 +48,26 @@ const getRadianAngle = (degreeValue: number): number => {
   return (degreeValue * Math.PI) / 180;
 };
 
-export function ImageCropper({ open, onClose, imageSrc, onCropComplete }: ImageCropperProps) {
+/** Size of the box that holds the image once rotated. */
+const rotatedSize = (width: number, height: number, rotation: number) => {
+  const rad = getRadianAngle(rotation);
+  return {
+    width: Math.abs(Math.cos(rad) * width) + Math.abs(Math.sin(rad) * height),
+    height: Math.abs(Math.sin(rad) * width) + Math.abs(Math.cos(rad) * height),
+  };
+};
+
+export function ImageCropper({
+  open,
+  onClose,
+  imageSrc,
+  onCropComplete,
+  defaultAspect = '4:3',
+}: ImageCropperProps) {
+  const [aspectKey, setAspectKey] = useState<AspectKey>(defaultAspect);
+  const [originalAspect, setOriginalAspect] = useState(4 / 3);
+  const aspect =
+    ASPECTS.find((item) => item.key === aspectKey)?.value ?? originalAspect;
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
@@ -81,15 +115,25 @@ export function ImageCropper({ open, onClose, imageSrc, onCropComplete }: ImageC
         throw new Error('Canvas context not found');
       }
 
+      // Draw the whole rotated photo, then cut out the chosen area.
+      // croppedAreaPixels is already in photo pixels, so zoom needs no extra scaling.
+      const box = rotatedSize(image.width, image.height, rotation);
+      canvas.width = box.width;
+      canvas.height = box.height;
+      ctx.translate(box.width / 2, box.height / 2);
+      ctx.rotate(getRadianAngle(rotation));
+      ctx.translate(-image.width / 2, -image.height / 2);
+      ctx.drawImage(image, 0, 0);
+
+      const area = ctx.getImageData(
+        croppedAreaPixels.x,
+        croppedAreaPixels.y,
+        croppedAreaPixels.width,
+        croppedAreaPixels.height,
+      );
       canvas.width = croppedAreaPixels.width;
       canvas.height = croppedAreaPixels.height;
-
-      ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.rotate(getRadianAngle(rotation));
-      ctx.scale(zoom, zoom);
-      ctx.translate(-croppedAreaPixels.width / 2, -croppedAreaPixels.height / 2);
-
-      ctx.drawImage(image, -croppedAreaPixels.x, -croppedAreaPixels.y);
+      ctx.putImageData(area, 0, 0);
 
       canvas.toBlob(
         (blob) => {
@@ -116,6 +160,7 @@ export function ImageCropper({ open, onClose, imageSrc, onCropComplete }: ImageC
     setZoom(1);
     setRotation(0);
     setCroppedAreaPixels(null);
+    setAspectKey(defaultAspect);
     onClose();
   };
 
@@ -125,26 +170,46 @@ export function ImageCropper({ open, onClose, imageSrc, onCropComplete }: ImageC
         <DialogHeader>
           <DialogTitle>Crop Image</DialogTitle>
           <DialogDescription className="sr-only">
-            Adjust and crop your profile picture
+            Choose a shape, then drag and zoom to frame the photo
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Shape */}
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Crop shape">
+            {ASPECTS.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                aria-pressed={aspectKey === item.key}
+                onClick={() => setAspectKey(item.key)}
+                className={cn(
+                  'h-9 rounded-full border px-3 text-sm font-medium transition-colors',
+                  aspectKey === item.key
+                    ? 'border-primary bg-primary text-primary-foreground'
+                    : 'bg-white hover:bg-muted',
+                )}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
           {/* Cropper Container */}
-          <div className="relative w-full overflow-hidden bg-gray-900 rounded-lg h-96">
+          <div className="relative h-72 w-full overflow-hidden rounded-lg bg-gray-900 sm:h-96">
             <Cropper
               image={imageSrc}
               crop={crop}
               zoom={zoom}
               rotation={rotation}
-              aspect={4 / 3}
+              aspect={aspect}
               cropShape="rect"
               showGrid
               onCropChange={onCropMove}
               onCropAreaChange={onCropAreaChange}
               onZoomChange={setZoom}
               onRotationChange={setRotation}
-              restrictPosition={false}
+              onMediaLoaded={(media) => setOriginalAspect(media.naturalWidth / media.naturalHeight)}
             />
           </div>
 
