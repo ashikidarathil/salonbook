@@ -5,6 +5,12 @@ import WeeklyRoutine from '@/components/schedule/WeeklyRoutine';
 import DailyAdjustments from '@/components/schedule/DailyAdjustments';
 import BreakManagement from '@/components/schedule/BreakManagement';
 
+const TABS = [
+  { value: 'weekly', label: 'Weekly Routine', short: 'Weekly' },
+  { value: 'daily', label: 'Daily Adjustments', short: 'Daily' },
+  { value: 'breaks', label: 'Break Times', short: 'Breaks' },
+];
+
 export default function StylistSchedulePage() {
   const [params, setParams] = useSearchParams();
   const activeTab = params.get('tab') || 'weekly';
@@ -22,28 +28,18 @@ export default function StylistSchedulePage() {
         onValueChange={(tab) => setParams({ tab }, { replace: true })}
         className="space-y-6"
       >
-        <div className="bg-muted/50 p-1 rounded-2xl w-full md:w-fit overflow-x-auto no-scrollbar border border-border/20 shadow-sm">
-          <TabsList className="flex h-10 w-max min-w-full !justify-start gap-1 bg-transparent md:inline-flex md:w-fit md:min-w-0">
+        <TabsList className="grid h-auto w-full grid-cols-3 gap-1 rounded-2xl border border-border/20 bg-muted/50 p-1 shadow-sm sm:inline-grid sm:w-auto">
+          {TABS.map((tab) => (
             <TabsTrigger
-              value="weekly"
-              className="flex-1 md:flex-none rounded-xl px-4 sm:px-6 h-8 text-[11px] sm:text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all whitespace-nowrap"
+              key={tab.value}
+              value={tab.value}
+              className="h-9 min-w-0 rounded-xl px-2 text-xs font-semibold transition-all data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm sm:px-6"
             >
-              Weekly Routine
+              <span className="sm:hidden">{tab.short}</span>
+              <span className="hidden sm:inline">{tab.label}</span>
             </TabsTrigger>
-            <TabsTrigger
-              value="daily"
-              className="flex-1 md:flex-none rounded-xl px-4 sm:px-6 h-8 text-[11px] sm:text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all whitespace-nowrap"
-            >
-              Daily Adjustments
-            </TabsTrigger>
-            <TabsTrigger
-              value="breaks"
-              className="flex-1 md:flex-none rounded-xl px-4 sm:px-6 h-8 text-[11px] sm:text-xs font-semibold data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all whitespace-nowrap"
-            >
-              Break Times
-            </TabsTrigger>
-          </TabsList>
-        </div>
+          ))}
+        </TabsList>
 
         <TabsContent value="weekly" className="space-y-4 animate-in fade-in duration-300">
           <WeeklyRoutine />

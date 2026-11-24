@@ -117,7 +117,7 @@ export default function BreakManagement({
               }}
             />
           ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2 2xl:grid-cols-3">
             {upcomingBreaks.length > 0 ? (
               upcomingBreaks.map((item) => (
                 <div
@@ -137,7 +137,7 @@ export default function BreakManagement({
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDeleteBreak(item.id)}
-                      className="size-8 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 focus-visible:opacity-100"
+                      className="size-10 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 focus-visible:opacity-100"
                       aria-label="Remove break"
                     >
                       <Icon icon="solar:trash-bin-trash-bold-duotone" className="size-4" />
@@ -165,9 +165,9 @@ export default function BreakManagement({
                     </div>
 
                     {item.description && (
-                      <div className="flex items-center gap-2 px-3 py-1">
-                        <div className="size-1.5 rounded-full bg-primary/40 shrink-0" />
-                        <p className="text-xs text-muted-foreground font-semibold italic truncate">
+                      <div className="flex items-start gap-2 px-3 py-1">
+                        <div className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary/40" />
+                        <p className="line-clamp-2 break-words text-xs font-semibold italic text-muted-foreground">
                           {item.description}
                         </p>
                       </div>
