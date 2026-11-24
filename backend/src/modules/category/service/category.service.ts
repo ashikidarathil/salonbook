@@ -39,7 +39,7 @@ export class CategoryService implements ICategoryService {
     }> = {};
 
     if (dto.name?.trim()) {
-      update.name = dto.name.trim().toLowerCase();
+      update.name = dto.name.trim();
     }
 
     if (dto.description !== undefined) {

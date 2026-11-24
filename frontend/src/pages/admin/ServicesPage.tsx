@@ -187,7 +187,7 @@ export default function ServicesPage() {
   };
 
   const capitalizeFirst = (text: string) =>
-    text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+    text.charAt(0).toUpperCase() + text.slice(1);
 
   const getCategoryName = (categoryId: string) => {
     return categories.find((c) => c.id === categoryId)?.name || '-';

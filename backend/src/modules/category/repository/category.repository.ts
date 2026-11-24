@@ -12,7 +12,7 @@ import type { CategoryPaginatedResponse } from '../dto/category.response.dto';
 export class CategoryRepository implements ICategoryRepository {
   async create(data: { name: string; description?: string }): Promise<CategoryDocument> {
     const doc = new CategoryModel({
-      name: data.name.trim().toLowerCase(),
+      name: data.name.trim(),
       description: data.description?.trim(),
     });
     await doc.save();
@@ -20,7 +20,8 @@ export class CategoryRepository implements ICategoryRepository {
   }
 
   async findByName(name: string): Promise<CategoryDocument | null> {
-    return CategoryModel.findOne({ name: name.trim().toLowerCase() });
+    // Names keep the admin's capitals; matching ignores case, like the unique index
+    return CategoryModel.findOne({ name: name.trim() }).collation({ locale: 'en', strength: 2 });
   }
 
   async findById(id: string): Promise<CategoryDocument | null> {
@@ -108,7 +109,7 @@ export class CategoryRepository implements ICategoryRepository {
   async restore(id: string): Promise<CategoryDocument | null> {
     return CategoryModel.findByIdAndUpdate(
       id,
-      { isDeleted: false, deletedAt: null },
+      { isDeleted: false, deletedAt: null, status: 'ACTIVE' },
       { new: true },
     );
   }

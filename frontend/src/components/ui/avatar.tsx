@@ -10,8 +10,18 @@ export function Avatar({ children, className }: UIProps) {
   );
 }
 
+/** Covers the fallback. With no photo, or one that fails to load, the fallback shows instead. */
 export function AvatarImage({ src }: { src?: string }) {
-  return <img src={src} alt="" className="object-cover w-full h-full" />;
+  const [failedSrc, setFailedSrc] = React.useState<string>();
+  if (!src || failedSrc === src) return null;
+  return (
+    <img
+      src={src}
+      alt=""
+      className="absolute inset-0 z-10 h-full w-full object-cover"
+      onError={() => setFailedSrc(src)}
+    />
+  );
 }
 
 export function AvatarFallback({ children, className }: UIProps) {

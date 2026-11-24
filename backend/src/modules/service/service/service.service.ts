@@ -39,7 +39,7 @@ export class ServiceService implements IServiceService {
       throw new AppError(MESSAGES.SERVICE.INVALID_CATEGORY, HttpStatus.BAD_REQUEST);
     }
 
-    const exists = await this._repo.findByNameAndCategory(dto.name.toLowerCase(), dto.categoryId);
+    const exists = await this._repo.findByNameAndCategory(dto.name, dto.categoryId);
     if (exists) {
       throw new AppError(MESSAGES.SERVICE.ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
     }
@@ -52,7 +52,7 @@ export class ServiceService implements IServiceService {
   async update(id: string, dto: UpdateServiceDto) {
     const update: ServiceUpdatePayload = {};
 
-    if (dto.name?.trim()) update.name = dto.name.trim().toLowerCase();
+    if (dto.name?.trim()) update.name = dto.name.trim();
     if (dto.description !== undefined) update.description = dto.description?.trim();
     if (dto.status) update.status = dto.status;
     if (dto.imageUrl) update.imageUrl = dto.imageUrl;

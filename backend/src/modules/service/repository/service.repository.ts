@@ -18,7 +18,7 @@ export class ServiceRepository implements IServiceRepository {
     whatIncluded?: string[];
   }): Promise<ServiceDocument> {
     const doc = new ServiceModel({
-      name: data.name.trim().toLowerCase(),
+      name: data.name.trim(),
       description: data.description?.trim(),
       categoryId: data.categoryId,
       imageUrl: data.imageUrl,
@@ -34,10 +34,11 @@ export class ServiceRepository implements IServiceRepository {
   }
 
   async findByNameAndCategory(name: string, categoryId: string): Promise<ServiceDocument | null> {
+    // Matching ignores case, like the unique index
     return ServiceModel.findOne({
       name: name.trim(),
       categoryId,
-    });
+    }).collation({ locale: 'en', strength: 2 });
   }
 
   async listAll(includeDeleted = false): Promise<ServiceDocument[]> {
@@ -74,7 +75,11 @@ export class ServiceRepository implements IServiceRepository {
   }
 
   async restore(id: string): Promise<ServiceDocument | null> {
-    return ServiceModel.findByIdAndUpdate(id, { isDeleted: false, deletedAt: null }, { new: true });
+    return ServiceModel.findByIdAndUpdate(
+      id,
+      { isDeleted: false, deletedAt: null, status: 'ACTIVE' },
+      { new: true },
+    );
   }
 
   async getPaginatedServices(query: ServicePaginationQueryDto): Promise<ServicePaginatedResponse> {
