@@ -161,3 +161,6 @@
 - 2026-11-24 — Admin responsive pass, Platform Wallet: shared header and breadcrumbs, filters kept in the address,
   escrow cards with booking links. Fixed wallet pagination (frontend read total/pages; server sends
   totalItems/totalPages), so records after the first 10 are reachable on admin and stylist wallets.
+- 2026-11-24 — Admin responsive pass, Notifications (shared by customer, stylist and admin): shared header and
+  breadcrumbs shown once, status and day filters kept in the address, notification cards that wrap long text.
+  Admin responsive pass complete: Dashboard through Notifications.
