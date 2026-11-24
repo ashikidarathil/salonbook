@@ -200,3 +200,6 @@
   Hairstyles three per row from tablet width. Phone page height about 10,400 px to 6,100 px.
 - 2026-11-24 — Customer responsive pass, Branches: plain-words note when location is off (not the browser's
   error text), working search icon, the chosen branch is marked Selected, slightly tighter cards on phones.
+- 2026-11-24 — Customer responsive pass, Services: compact rows on phones and small tablets (photo beside the
+  details; buttons stack below 360 px), photo cards from tablet width; service details puts the category above
+  the title and gives review dates readable text. Phone list height about 6,250 px to 4,000 px.

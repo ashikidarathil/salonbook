@@ -236,14 +236,15 @@ export default function ServicesListingPage() {
             resetError={() => dispatch(clearError())}
             backPath="/services"
           >
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
               {services.map((service) => (
                 <Card
                   key={service.serviceId}
-                  className="overflow-hidden transition-colors border-border/60 hover:border-primary/50 group"
+                  className="group flex overflow-hidden border-border/60 transition-colors hover:border-primary/50 md:block"
                 >
                   {/* Service Image */}
-                  <div className="relative flex items-center justify-center h-64 p-8 overflow-hidden bg-muted/30">
+                  {/* Phones: small photo beside the details; wider screens: photo on top */}
+                  <div className="relative flex w-28 shrink-0 items-center justify-center overflow-hidden bg-muted/30 sm:w-36 md:h-64 md:w-auto md:p-8">
                     {service.imageUrl ? (
                       <img
                         src={service.imageUrl}
@@ -261,9 +262,9 @@ export default function ServicesListingPage() {
                   </div>
 
                   {/* Service Details */}
-                  <div className="p-6 pt-6">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-lg font-bold">
+                  <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4 md:p-6">
+                    <div className="mb-2 flex flex-wrap items-start justify-between gap-x-2 gap-y-1">
+                      <h3 className="min-w-0 break-words text-base font-bold md:text-lg">
                         {service.name.charAt(0).toUpperCase() + service.name.slice(1)}
                       </h3>
                       {service.categoryName && (
@@ -274,7 +275,7 @@ export default function ServicesListingPage() {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1">
                       <div className="flex items-center">
                         {[...Array(5)].map((_, i) => (
                           <Icon
@@ -298,29 +299,29 @@ export default function ServicesListingPage() {
                     </div>
 
                     {service.description && (
-                      <p className="mb-4 text-sm text-muted-foreground line-clamp-2">
+                      <p className="mb-3 line-clamp-2 text-sm text-muted-foreground md:mb-4">
                         {service.description}
                       </p>
                     )}
 
                     {service.duration && (
-                      <div className="flex items-center mb-4 text-sm text-muted-foreground">
+                      <div className="mb-3 flex items-center text-sm text-muted-foreground md:mb-4">
                         <Icon icon="solar:clock-circle-linear" className="mr-2 size-4" />
                         <span>{service.duration} minutes</span>
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between mt-auto">
-                      <span className="text-2xl font-bold text-foreground">
+                    <div className="mt-auto flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                      <span className="text-xl font-bold text-foreground md:text-2xl">
                         {service.price
                           ? `₹${service.price.toLocaleString('en-IN')}`
                           : 'Price on request'}
                       </span>
-                      <div className="flex items-center gap-2 mt-auto">
+                      <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 md:flex md:items-center">
                         <Button
                           variant="outline"
                           className={cn(
-                            'flex-1',
+                            'h-9 min-w-0 px-2 md:h-10 md:flex-1 md:px-4',
                             cart.items.some((i) => i.serviceId === service.serviceId)
                               ? 'bg-primary/10 border-primary text-primary'
                               : '',
@@ -354,7 +355,7 @@ export default function ServicesListingPage() {
                             : 'Add to Cart'}
                         </Button>
                         <Button
-                          className="shadow-md bg-primary hover:bg-primary/90 shadow-primary/20"
+                          className="h-9 min-w-0 bg-primary px-2 shadow-md shadow-primary/20 hover:bg-primary/90 md:h-10 md:px-4"
                           onClick={() => handleViewDetails(service)}
                         >
                           Details

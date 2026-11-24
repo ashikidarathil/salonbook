@@ -202,8 +202,8 @@ export default function ServiceDetailsPage() {
             </div>
 
             <div className="mb-8">
-              {/* Category badge — full row on mobile, inline on desktop */}
-              <div className="flex flex-col gap-2 mb-2 sm:flex-row sm:items-center sm:gap-4">
+              {/* Category badge above the title */}
+              <div className="mb-2 flex flex-col gap-2">
                 {currentService?.categoryName && (
                   <Badge className="self-start px-3 py-1 text-xs font-semibold tracking-wider uppercase bg-accent text-accent-foreground hover:bg-primary/10 hover:text-primary">
                     {currentService.categoryName}
@@ -420,7 +420,7 @@ export default function ServiceDetailsPage() {
                                 "{review.comment}"
                               </p>
                             )}
-                            <p className="mt-2 text-[10px] text-muted-foreground/60 uppercase tracking-wider">
+                            <p className="mt-2 text-xs text-muted-foreground">
                               {new Date(review.createdAt).toLocaleDateString('en-IN', {
                                 month: 'long',
                                 day: 'numeric',
