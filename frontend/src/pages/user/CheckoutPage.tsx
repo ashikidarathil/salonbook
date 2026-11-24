@@ -1,4 +1,5 @@
 import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
+import { formatRupees } from '@/common/utils/money';
 import { Loader } from '@/components/common/Loader';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -183,24 +184,24 @@ export default function CheckoutPage() {
                   {currentBooking.items.map((item, idx) => (
                     <div key={idx} className="flex justify-between text-sm">
                       <span className="text-muted-foreground">{item.serviceName}</span>
-                      <span className="font-medium">₹{item.price}</span>
+                      <span className="font-medium">{formatRupees(item.price)}</span>
                     </div>
                   ))}
 
                   <div className="border-t border-dashed pt-3 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Service Amount</span>
-                      <span className="font-medium">₹{currentBooking.totalPrice}</span>
+                      <span className="font-medium">{formatRupees(currentBooking.totalPrice)}</span>
                     </div>
                     {(currentBooking.discountAmount ?? 0) > 0 && (
                       <div className="flex justify-between text-red-600 text-sm font-medium">
                         <span>Coupon Discount</span>
-                        <span>- ₹{currentBooking.discountAmount}</span>
+                        <span>- {formatRupees(currentBooking.discountAmount)}</span>
                       </div>
                     )}
                     <div className="flex justify-between font-bold text-slate-900 border-t pt-2">
                       <span>Net Total</span>
-                      <span>₹{currentBooking.payableAmount}</span>
+                      <span>{formatRupees(currentBooking.payableAmount)}</span>
                     </div>
                   </div>
 
@@ -209,13 +210,17 @@ export default function CheckoutPage() {
                       <span className="text-sm font-bold uppercase tracking-tight">
                         Advance to Pay (20%)
                       </span>
-                      <span className="text-2xl font-black">₹{currentBooking.advanceAmount}</span>
+                      <span className="text-2xl font-black">
+                        {formatRupees(currentBooking.advanceAmount)}
+                      </span>
                     </div>
-                    <div className="flex justify-between text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">
+                    <div className="flex justify-between text-xs text-muted-foreground font-semibold uppercase tracking-wider">
                       <span>Remaining at Salon (80%)</span>
-                      <span>₹{currentBooking.payableAmount - currentBooking.advanceAmount}</span>
+                      <span>
+                        {formatRupees(currentBooking.payableAmount - currentBooking.advanceAmount)}
+                      </span>
                     </div>
-                    <p className="text-[10px] text-muted-foreground/60 mt-2 border-t border-primary/10 pt-2 leading-relaxed">
+                    <p className="text-xs text-muted-foreground/60 mt-2 border-t border-primary/10 pt-2 leading-relaxed">
                       Secure your slot by paying the 20% advance now. The remaining 80% balance is
                       payable after your service.
                     </p>
@@ -305,14 +310,14 @@ export default function CheckoutPage() {
                               <span className="font-bold text-sm tracking-tight group-hover:text-primary">
                                 {coupon.code}
                               </span>
-                              <Badge variant="secondary" className="text-[10px] h-4">
+                              <Badge variant="secondary" className="text-xs h-4">
                                 {coupon.discountType === 'PERCENTAGE'
                                   ? `${coupon.discountValue}% OFF`
-                                  : `₹${coupon.discountValue} OFF`}
+                                  : `${formatRupees(coupon.discountValue)} OFF`}
                               </Badge>
                             </div>
-                            <p className="text-[10px] text-muted-foreground">
-                              Min order: ₹{coupon.minBookingAmount}
+                            <p className="text-xs text-muted-foreground">
+                              Min order: {formatRupees(coupon.minBookingAmount)}
                             </p>
                           </div>
                         ))}
@@ -336,7 +341,7 @@ export default function CheckoutPage() {
                   be paid at the saloon.
                 </p>
                 <div className="text-3xl font-extrabold text-primary">
-                  ₹{currentBooking.advanceAmount}
+                  {formatRupees(currentBooking.advanceAmount)}
                 </div>
               </Card>
 
@@ -376,7 +381,7 @@ export default function CheckoutPage() {
                     <div className="flex-1 min-w-0">
                       <div className="font-medium">Wallet Balance</div>
                       <div className="text-xs text-muted-foreground">
-                        Available: ₹{wallet?.balance ?? '...'}
+                        Available: {wallet ? formatRupees(wallet.balance) : '...'}
                       </div>
                     </div>
                     {paymentMethod === 'wallet' && (
@@ -395,7 +400,7 @@ export default function CheckoutPage() {
                   ) : isExpired ? (
                     'Expired'
                   ) : (
-                    `Pay ₹${currentBooking.advanceAmount}`
+                    `Pay ${formatRupees(currentBooking.advanceAmount)}`
                   )}
                 </Button>
               </Card>
