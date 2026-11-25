@@ -267,6 +267,10 @@
   reason, a live countdown while the 15-minute hold lasts with Try payment again (straight to checkout), or a
   "slot released" note with Book a new time once it ends. Fixed the old "10 minutes" text (real hold is 15) and
   Retry Payment going to My Bookings. Breadcrumbs removed from these two pages.
+- 2026-11-25 — More payment result pages in the new design (shared ResultHero + BookingSummaryCard): wallet
+  top-up success/failure (/profile/wallet/add/success|failed: amount, new balance, Try again refills the
+  amount) and remaining 80% payment success/failure (/profile/bookings/:id/paid|payment-failed, card or
+  wallet). These replace the small popups. Closing the Razorpay window on purpose still just stays put.
 - 2026-11-25 — Stylist wallet restyled like the customer wallet: big blue Available balance card, with Held
   (escrow) and Lifetime earnings as smaller cards beside it (below it on phones). List renamed Earnings and
   fades while it reloads after a filter or search.
