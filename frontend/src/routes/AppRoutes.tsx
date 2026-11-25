@@ -23,6 +23,8 @@ import BookingsPage from '@/pages/user/BookingsPage';
 import BookingDetailPage from '@/pages/user/BookingDetailPage';
 import WalletPage from '@/pages/user/WalletPage';
 import WalletTopupPage from '@/pages/user/WalletTopupPage';
+import WalletTopupResultPage from '@/pages/user/WalletTopupResultPage';
+import RemainingPaymentResultPage from '@/pages/user/RemainingPaymentResultPage';
 import BookingReviewPage from '@/pages/user/BookingReviewPage';
 import StylistApplyPage from '@/pages/user/StylistApplyPage';
 import PaymentSuccessPage from '@/pages/user/PaymentSuccessPage';
@@ -141,8 +143,18 @@ export default function AppRoutes() {
           <Route path="bookings/:id" element={<BookingDetailPage />} />
           <Route path="bookings/:id/reschedule" element={<RescheduleBookingPage />} />
           <Route path="bookings/:id/review" element={<BookingReviewPage />} />
+          <Route
+            path="bookings/:id/paid"
+            element={<RemainingPaymentResultPage outcome="success" />}
+          />
+          <Route
+            path="bookings/:id/payment-failed"
+            element={<RemainingPaymentResultPage outcome="failure" />}
+          />
           <Route path="wallet" element={<WalletPage />} />
           <Route path="wallet/add" element={<WalletTopupPage />} />
+          <Route path="wallet/add/success" element={<WalletTopupResultPage outcome="success" />} />
+          <Route path="wallet/add/failed" element={<WalletTopupResultPage outcome="failure" />} />
         </Route>
       </Route>
 
