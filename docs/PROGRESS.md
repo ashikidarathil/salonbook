@@ -293,3 +293,7 @@
   Dashboard; hidden from tablet width up.
 - 2026-11-25 — Home buttons on phones are plain grey icons like chat and the bell, on all three sides: customer
   profile (goes to the home page), stylist and admin (go to their Dashboard; admin one is new).
+- 2026-11-25 — About page (/about, linked from the header): intro with Book a service / Find a branch, live
+  branch and stylist counts, "Why book with us" (pick your stylist, live slots, 20% advance, one reschedule up
+  to 24h before, chat, wallet refunds), How it works, top stylists and a Become a stylist banner. Footer links
+  now work: Services column → /services; Our Team → /stylists, About, Careers → /contact/apply, Contact.

@@ -61,6 +61,7 @@ const ROUTES: CrumbRoute[] = [
     ({ stylistId }) => [{ label: 'Stylists', href: '/stylists' }, { label: fromSlug(stylistId) }],
   ],
   ['/contact', single('Contact')],
+  ['/about', single('About')],
   ['/cart', single('Cart')],
   ['/checkout/:bookingId', () => [{ label: 'Cart', href: '/cart' }, { label: 'Checkout' }]],
   ['/payment/success/:bookingId', single('Payment Successful')],

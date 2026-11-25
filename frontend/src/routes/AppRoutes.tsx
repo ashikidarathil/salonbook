@@ -24,6 +24,7 @@ import BookingDetailPage from '@/pages/user/BookingDetailPage';
 import WalletPage from '@/pages/user/WalletPage';
 import WalletTopupPage from '@/pages/user/WalletTopupPage';
 import WalletTopupResultPage from '@/pages/user/WalletTopupResultPage';
+import AboutPage from '@/pages/user/AboutPage';
 import RemainingPaymentResultPage from '@/pages/user/RemainingPaymentResultPage';
 import BookingReviewPage from '@/pages/user/BookingReviewPage';
 import StylistApplyPage from '@/pages/user/StylistApplyPage';
@@ -111,6 +112,7 @@ export default function AppRoutes() {
       <Route path={APP_ROUTES.PUBLIC.VERIFY_PHONE_OTP} element={<VerifyPhoneOtpPage />} />
       <Route path={APP_ROUTES.PUBLIC.HOME} element={<HomePage />} />
       <Route path={APP_ROUTES.PUBLIC.CONTACT} element={<ContactPage />} />
+      <Route path="/about" element={<AboutPage />} />
       <Route path="/contact/apply" element={<StylistApplyPage />} />
       <Route path={APP_ROUTES.PUBLIC.VERIFY_RESET_OTP} element={<VerifyResetOtpPage />} />
       <Route path={APP_ROUTES.PUBLIC.NEW_PASSWORD} element={<NewPasswordPage />} />

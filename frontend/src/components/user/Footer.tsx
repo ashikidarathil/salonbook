@@ -1,4 +1,5 @@
 'use client';
+import { Link } from 'react-router-dom';
 
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
@@ -37,29 +38,29 @@ export function Footer() {
             <h4 className="mb-4 font-semibold">Services</h4>
             <ul className="space-y-2 text-sm text-gray-300">
               <li>
-                <a href="#" className="hover:text-[#FF6B6B] transition-colors">
+                <Link to="/services" className="hover:text-[#FF6B6B] transition-colors">
                   Hair Cut
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-[#FF6B6B] transition-colors">
+                <Link to="/services" className="hover:text-[#FF6B6B] transition-colors">
                   Coloring
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-[#FF6B6B] transition-colors">
+                <Link to="/services" className="hover:text-[#FF6B6B] transition-colors">
                   Treatment
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-[#FF6B6B] transition-colors">
+                <Link to="/services" className="hover:text-[#FF6B6B] transition-colors">
                   Styling
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-[#FF6B6B] transition-colors">
+                <Link to="/services" className="hover:text-[#FF6B6B] transition-colors">
                   Spa
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -69,24 +70,24 @@ export function Footer() {
             <h4 className="mb-4 font-semibold">Company</h4>
             <ul className="space-y-2 text-sm text-gray-300">
               <li>
-                <a href="#" className="hover:text-[#FF6B6B] transition-colors">
+                <Link to="/stylists" className="hover:text-[#FF6B6B] transition-colors">
                   Our Team
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-[#FF6B6B] transition-colors">
+                <Link to="/about" className="hover:text-[#FF6B6B] transition-colors">
                   About
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-[#FF6B6B] transition-colors">
+                <Link to="/contact/apply" className="hover:text-[#FF6B6B] transition-colors">
                   Careers
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-[#FF6B6B] transition-colors">
+                <Link to="/contact" className="hover:text-[#FF6B6B] transition-colors">
                   Contact
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
