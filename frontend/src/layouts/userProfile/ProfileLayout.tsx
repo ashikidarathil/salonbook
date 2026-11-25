@@ -210,7 +210,7 @@ export default function ProfileLayout() {
             <Link
               to="/"
               aria-label="Go to home page"
-              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors hover:bg-primary/20 md:hidden"
+              className="flex size-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-primary md:hidden"
             >
               <Icon icon="solar:home-2-bold-duotone" className="size-6" />
             </Link>

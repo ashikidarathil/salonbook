@@ -291,3 +291,5 @@
   page (hidden from tablet width up).
 - 2026-11-25 — Stylist portal on phones: blue home button in the top bar (before chat) goes to the stylist
   Dashboard; hidden from tablet width up.
+- 2026-11-25 — Home buttons on phones are plain grey icons like chat and the bell, on all three sides: customer
+  profile (goes to the home page), stylist and admin (go to their Dashboard; admin one is new).
