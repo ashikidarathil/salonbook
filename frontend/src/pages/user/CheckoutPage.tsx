@@ -19,6 +19,8 @@ import { PaymentCountdown } from '@/components/common/PaymentCountdown';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { PAYMENT_MESSAGES as PM } from '@/features/payment/payment.constants';
+import { StepHeader } from '@/components/common/StepHeader';
+import { format } from 'date-fns';
 
 export default function CheckoutPage() {
   // URL holds the booking number (or the id, for old links); API calls use the real id
@@ -40,6 +42,13 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'razorpay' | 'wallet'>('razorpay');
   const [isExpired, setIsExpired] = useState(false);
+  // Phones walk through Booking → Offers → Pay; laptops show everything side by side
+  const [step, setStep] = useState(1);
+  const goTo = (next: number) => {
+    setStep(next);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const onPhoneStep = (n: number) => (step === n ? '' : 'hidden md:block');
 
   useEffect(() => {
     if (urlRef) {
@@ -168,18 +177,48 @@ export default function CheckoutPage() {
           <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 flex items-center gap-3">
             <Icon icon="solar:danger-bold" className="size-6" />
             <p>
-              Your 10-minute payment window has expired. The slots have been released. Please start
+              Your 15-minute payment window has expired. The slots have been released. Please start
               a new booking.
             </p>
           </div>
         )}
 
+        <div className="mb-4 overflow-hidden rounded-xl border bg-white md:hidden">
+          <StepHeader
+            current={step}
+            onSelect={goTo}
+            steps={[
+              {
+                label: 'Booking',
+                value: currentBooking.date
+                  ? format(new Date(currentBooking.date), 'd MMM')
+                  : undefined,
+              },
+              {
+                label: 'Offers',
+                value: currentBooking.couponId
+                  ? availableCoupons.find((c) => c.id === currentBooking.couponId)?.code || 'Coupon'
+                  : 'None',
+              },
+              { label: 'Pay' },
+            ]}
+          />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 opacity-100 transition-opacity duration-300">
-          <div className={isExpired ? 'pointer-events-none opacity-50' : ''}>
+          <div
+            className={`${isExpired ? 'pointer-events-none opacity-50' : ''} ${step === 3 ? 'hidden md:block' : ''}`}
+          >
             {/* Summary Section */}
             <div className="space-y-6">
-              <Card className="p-6">
-                <h2 className="text-xl font-bold mb-4">Booking Summary</h2>
+              <Card className={`p-6 ${onPhoneStep(1)}`}>
+                <h2 className="text-xl font-bold mb-1">Booking Summary</h2>
+                {currentBooking.date && (
+                  <p className="mb-4 text-sm text-muted-foreground">
+                    {format(new Date(currentBooking.date), 'EEEE, d MMMM yyyy')} ·{' '}
+                    {currentBooking.startTime} – {currentBooking.endTime}
+                  </p>
+                )}
                 <div className="space-y-3">
                   {currentBooking.items.map((item, idx) => (
                     <div key={idx} className="flex justify-between text-sm">
@@ -228,7 +267,7 @@ export default function CheckoutPage() {
                 </div>
               </Card>
 
-              <Card className="p-6">
+              <Card className={`p-6 ${onPhoneStep(2)}`}>
                 <h2 className="text-lg font-bold mb-4">Apply Coupon</h2>
                 <div className="flex gap-2 mb-4">
                   <div className="relative flex-1">
@@ -328,7 +367,7 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <div className={isExpired ? 'pointer-events-none opacity-50' : ''}>
+          <div className={`${isExpired ? 'pointer-events-none opacity-50' : ''} ${onPhoneStep(3)}`}>
             {/* Payment Section */}
             <div className="space-y-6">
               <Card className="p-6 border-2 border-primary/20 bg-primary/5">
@@ -406,6 +445,23 @@ export default function CheckoutPage() {
               </Card>
             </div>
           </div>
+        </div>
+        {/* Phone step buttons; on step 3 the Pay button is the next action */}
+        <div className="mt-6 flex items-center justify-between gap-3 md:hidden">
+          {step > 1 ? (
+            <Button variant="outline" className="h-11 gap-1" onClick={() => goTo(step - 1)}>
+              <Icon icon="solar:alt-arrow-left-linear" className="size-4" />
+              Back
+            </Button>
+          ) : (
+            <span />
+          )}
+          {step < 3 && (
+            <Button className="h-11 gap-1 font-semibold" onClick={() => goTo(step + 1)}>
+              {step === 1 ? 'Next: offers' : currentBooking.couponId ? 'Next: pay' : 'Skip to pay'}
+              <Icon icon="solar:alt-arrow-right-linear" className="size-4" />
+            </Button>
+          )}
         </div>
       </main>
       <Footer />
