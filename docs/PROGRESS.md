@@ -278,3 +278,6 @@
   with the content): cart, checkout, stylist & time picker, book-from-stylist, Contact and Branches. The
   stylist & time picker is now 3 steps (date → stylist → time) with Back and tappable done steps; used by the
   cart, booking from a stylist page and rescheduling.
+- 2026-11-25 — Checkout on phones is 3 steps (Booking → Offers → Pay) with a step bar, Next / Skip to pay and
+  Back; laptops keep both columns. Summary now shows the appointment date and time. Fixed the old "10-minute"
+  expiry text (the window is 15 minutes). Shared StepHeader component for step bars.
