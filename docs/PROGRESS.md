@@ -284,3 +284,6 @@
 - 2026-11-25 — Reschedule picker is 2 steps (date → time): the booking keeps its stylist, so the stylist step is
   skipped (SlotPicker fixedStylist). Cart and booking-from-stylist keep 3 steps. The picker now uses the shared
   StepHeader.
+- 2026-11-25 — Fixed: after paying, View booking then back went to the "You're booked!" page again. Payment
+  success and the remaining-payment result pages now replace history (checkout → result → booking), and the
+  booking page's back arrow goes to My Bookings when opened from a payment result.

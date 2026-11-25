@@ -116,7 +116,7 @@ export default function CheckoutPage() {
     if (processRazorpayPayment.fulfilled.match(result)) {
       if (result.payload.status === 'success') {
         toast.success(PM.SUCCESS);
-        navigate(`/payment/success/${ref}`);
+        navigate(`/payment/success/${ref}`, { replace: true });
       }
     } else {
       // Pass Razorpay's reason so the failure page can show it
@@ -135,7 +135,7 @@ export default function CheckoutPage() {
     const result = await dispatch(payWithWallet({ bookingId }));
     if (payWithWallet.fulfilled.match(result)) {
       toast.success(PM.SUCCESS);
-      navigate(`/payment/success/${ref}`);
+      navigate(`/payment/success/${ref}`, { replace: true });
     } else {
       showError('Payment Failed', (result.payload as string) || PM.WALLET_PAY_FAILED);
     }
