@@ -63,28 +63,6 @@ export default function StylistWalletPage() {
     loadEscrows();
   };
 
-  const summary = [
-    {
-      label: 'Available Balance',
-      value: rupees(wallet?.withdrawableBalance),
-      note: 'Cleared funds in your wallet',
-      icon: Wallet,
-      accent: true,
-    },
-    {
-      label: 'Held Money (Escrow)',
-      value: rupees(heldBalance),
-      note: 'Moves to your balance every 2 minutes',
-      icon: Clock,
-    },
-    {
-      label: 'Lifetime Earnings',
-      value: rupees(wallet?.totalEarnings),
-      note: 'Total revenue generated',
-      icon: TrendingUp,
-    },
-  ];
-
   if (walletLoading && !wallet) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
@@ -108,34 +86,57 @@ export default function StylistWalletPage() {
         </Button>
       </div>
 
-      <div className="grid gap-3 lg:grid-cols-3">
-        {summary.map((item) => (
-          <div
-            key={item.label}
-            className={cn(
-              'min-w-0 rounded-2xl border p-4 shadow-sm sm:p-5',
-              item.accent ? 'border-primary bg-primary text-primary-foreground' : 'bg-white',
-            )}
-          >
-            <p
-              className={cn(
-                'flex items-center gap-2 text-sm font-medium',
-                item.accent ? 'opacity-90' : 'text-muted-foreground',
-              )}
-            >
-              <item.icon className="size-4 shrink-0" />
-              <span className="min-w-0 break-words">{item.label}</span>
-            </p>
-            <p className="mt-2 break-all text-2xl font-bold sm:text-3xl">{item.value}</p>
-            <p className={cn('mt-1 text-xs', item.accent ? 'opacity-80' : 'text-muted-foreground')}>
-              {item.note}
-            </p>
+      {/* Same balance card as the customer wallet, in the stylist colour */}
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="relative min-w-0 overflow-hidden rounded-2xl bg-primary p-5 text-primary-foreground shadow-lg sm:p-8">
+          <div className="pointer-events-none absolute inset-0 opacity-10">
+            <div className="absolute -right-10 -top-10 size-32 rounded-full bg-white sm:size-40" />
+            <div className="absolute -bottom-16 -left-10 size-40 rounded-full bg-white sm:size-48" />
           </div>
-        ))}
+          <div className="relative flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary-foreground/70">
+                Available balance
+              </p>
+              <p className="mt-1 truncate text-3xl font-black tracking-tight sm:text-5xl">
+                {rupees(wallet?.withdrawableBalance)}
+              </p>
+            </div>
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white/10 sm:size-14">
+              <Wallet className="size-6 sm:size-7" />
+            </span>
+          </div>
+          <p className="relative mt-4 text-sm text-primary-foreground/80 sm:mt-6">
+            Cleared earnings, paid out to you automatically
+          </p>
+        </div>
+
+        <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-1">
+          <div className="flex min-w-0 items-center gap-3 rounded-2xl border bg-white p-4 shadow-sm">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+              <Clock className="size-5" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm text-muted-foreground">Held (escrow)</p>
+              <p className="truncate text-xl font-bold">{rupees(heldBalance)}</p>
+              <p className="text-xs text-muted-foreground">Moves to your balance within minutes</p>
+            </div>
+          </div>
+          <div className="flex min-w-0 items-center gap-3 rounded-2xl border bg-white p-4 shadow-sm">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+              <TrendingUp className="size-5" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm text-muted-foreground">Lifetime earnings</p>
+              <p className="truncate text-xl font-bold">{rupees(wallet?.totalEarnings)}</p>
+              <p className="text-xs text-muted-foreground">Everything you have earned</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="space-y-3">
-        <h2 className="text-lg font-semibold">Escrow Transactions</h2>
+        <h2 className="text-lg font-semibold">Earnings</h2>
         <div className="grid gap-3 sm:grid-cols-[auto_minmax(0,1fr)]">
           <div
             className="grid grid-cols-3 gap-1 rounded-xl border bg-muted/40 p-1"
@@ -192,7 +193,13 @@ export default function StylistWalletPage() {
           </div>
         ) : (
           <>
-            <ul className="grid gap-3 lg:grid-cols-2">
+            <ul
+              className={cn(
+                'grid gap-3 transition-opacity lg:grid-cols-2',
+                escrowLoading && 'pointer-events-none opacity-50',
+              )}
+              aria-busy={escrowLoading}
+            >
               {escrows.map((escrow) => (
                 <EscrowCard
                   key={escrow.id}
