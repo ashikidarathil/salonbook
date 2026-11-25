@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
-import { showError, showSuccess } from '@/common/utils/swal.utils';
 import { getThemeColorByRole } from '@/features/wallet/wallet.constants';
-import { fetchTransactionHistory, topUpWallet } from '@/features/wallet/wallet.thunks';
+import { topUpWallet } from '@/features/wallet/wallet.thunks';
 import { FormPage } from '@/components/common/FormPage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,8 +17,14 @@ export default function WalletTopupPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { user } = useAppSelector((state) => state.auth);
-  const [quickAmount, setQuickAmount] = useState(500);
-  const [customAmount, setCustomAmount] = useState('');
+  // "Try again" from a failed top-up brings the amount back
+  const retryAmount = (useLocation().state as { amount?: number } | null)?.amount;
+  const [quickAmount, setQuickAmount] = useState(
+    retryAmount && QUICK_AMOUNTS.includes(retryAmount) ? retryAmount : 500,
+  );
+  const [customAmount, setCustomAmount] = useState(
+    retryAmount && !QUICK_AMOUNTS.includes(retryAmount) ? String(retryAmount) : '',
+  );
   const [amountError, setAmountError] = useState<string>();
   const [isPaying, setIsPaying] = useState(false);
   const amount = customAmount ? Number(customAmount) : quickAmount;
@@ -37,11 +42,10 @@ export default function WalletTopupPage() {
     setIsPaying(false);
 
     if (topUpWallet.fulfilled.match(result)) {
-      showSuccess('Top-Up Successful!', `₹${amount.toLocaleString('en-IN')} added to your wallet.`);
-      dispatch(fetchTransactionHistory());
-      navigate(WALLET);
+      navigate(`${WALLET}/add/success`, { state: { amount } });
     } else if (result.payload !== 'DISMISSED') {
-      showError('Top-Up Failed', (result.payload as string) || 'Payment could not be processed');
+      // Closing the Razorpay window on purpose just leaves the user here
+      navigate(`${WALLET}/add/failed`, { state: { amount, reason: result.payload } });
     }
   };
 

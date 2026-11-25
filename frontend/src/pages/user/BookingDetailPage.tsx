@@ -13,12 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Icon } from '@iconify/react';
 import { format } from 'date-fns';
-import {
-  showApiError,
-  showSuccess,
-  showCancellationConfirm,
-  showError,
-} from '@/common/utils/swal.utils';
+import { showApiError, showSuccess, showCancellationConfirm } from '@/common/utils/swal.utils';
 import {
   BookingStatus,
   PaymentStatus,
@@ -141,24 +136,29 @@ export default function BookingDetailPage() {
 
   const handlePayRemaining = async () => {
     if (!currentBooking?.id) return;
-    if (remainingPayMethod === 'wallet') {
-      const result = await dispatch(payRemainingWithWallet({ bookingId: currentBooking.id }));
-      if (payRemainingWithWallet.fulfilled.match(result)) {
-        showSuccess('Paid!', PM.REMAINING_WALLET_SUCCESS);
-        dispatch(fetchBookingDetails(currentBooking.id));
-      } else {
-        showError('Payment Failed', (result.payload as string) || PM.REMAINING_WALLET_FAILED);
-      }
+    const ref = currentBooking.bookingNumber || currentBooking.id;
+    const method = remainingPayMethod;
+    const result =
+      method === 'wallet'
+        ? await dispatch(payRemainingWithWallet({ bookingId: currentBooking.id }))
+        : await dispatch(processRemainingPayment({ bookingId: currentBooking.id }));
+
+    if (
+      payRemainingWithWallet.fulfilled.match(result) ||
+      processRemainingPayment.fulfilled.match(result)
+    ) {
+      // Closing the Razorpay window without paying just leaves the user here
+      if ('status' in result.payload && result.payload.status === 'cancelled') return;
+      navigate(`/profile/bookings/${ref}/paid`, { state: { method } });
     } else {
-      const result = await dispatch(processRemainingPayment({ bookingId: currentBooking.id }));
-      if (processRemainingPayment.fulfilled.match(result)) {
-        if (result.payload.status === 'success') {
-          showSuccess('Paid!', PM.REMAINING_SUCCESS);
-          dispatch(fetchBookingDetails(currentBooking.id));
-        }
-      } else {
-        showError('Payment Failed', (result.payload as string) || PM.REMAINING_PAY_FAILED);
-      }
+      navigate(`/profile/bookings/${ref}/payment-failed`, {
+        state: {
+          method,
+          reason:
+            (result.payload as string) ||
+            (method === 'wallet' ? PM.REMAINING_WALLET_FAILED : PM.REMAINING_PAY_FAILED),
+        },
+      });
     }
   };
 
