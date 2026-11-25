@@ -287,3 +287,5 @@
 - 2026-11-25 — Fixed: after paying, View booking then back went to the "You're booked!" page again. Payment
   success and the remaining-payment result pages now replace history (checkout → result → booking), and the
   booking page's back arrow goes to My Bookings when opened from a payment result.
+- 2026-11-25 — Customer profile area on phones: a coral home button on the right of the top bar goes to the home
+  page (hidden from tablet width up).
