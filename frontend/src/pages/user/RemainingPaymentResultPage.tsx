@@ -71,7 +71,7 @@ export default function RemainingPaymentResultPage({
 
         <div className="grid gap-3 sm:grid-cols-2">
           <Button asChild className="h-11 font-semibold">
-            <Link to={detailLink}>
+            <Link to={detailLink} replace state={{ fromPayment: true }}>
               <Icon
                 icon={success ? 'solar:document-text-bold-duotone' : 'solar:refresh-bold'}
                 className="mr-2 size-5"

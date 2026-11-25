@@ -1,6 +1,7 @@
 import { Loader } from '@/components/common/Loader';
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { APP_ROUTES } from '@/common/constants/app.routes';
 import { matchesBookingRef } from '@/common/utils/bookingRef';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchBookingDetails, cancelBooking } from '@/features/booking/booking.thunks';
@@ -149,9 +150,10 @@ export default function BookingDetailPage() {
     ) {
       // Closing the Razorpay window without paying just leaves the user here
       if ('status' in result.payload && result.payload.status === 'cancelled') return;
-      navigate(`/profile/bookings/${ref}/paid`, { state: { method } });
+      navigate(`/profile/bookings/${ref}/paid`, { replace: true, state: { method } });
     } else {
       navigate(`/profile/bookings/${ref}/payment-failed`, {
+        replace: true,
         state: {
           method,
           reason:
@@ -175,7 +177,17 @@ export default function BookingDetailPage() {
           <>
             {/* Header */}
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Back"
+                onClick={() =>
+                  // Coming from a payment result, "back" means the bookings list, not that page again
+                  (location.state as { fromPayment?: boolean } | null)?.fromPayment
+                    ? navigate(APP_ROUTES.USER.BOOKINGS)
+                    : navigate(-1)
+                }
+              >
                 <Icon icon="solar:arrow-left-linear" className="size-5" />
               </Button>
               <div>

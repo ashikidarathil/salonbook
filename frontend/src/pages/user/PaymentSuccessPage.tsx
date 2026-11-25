@@ -100,6 +100,8 @@ export default function PaymentSuccessPage() {
                     ? APP_ROUTES.USER.BOOKING_DETAIL(booking.bookingNumber || booking.id)
                     : APP_ROUTES.USER.BOOKINGS
                 }
+                replace
+                state={{ fromPayment: true }}
               >
                 <Icon icon="solar:document-text-bold-duotone" className="mr-2 size-5" />
                 View booking
