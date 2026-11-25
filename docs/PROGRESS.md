@@ -255,3 +255,5 @@
   date, time, customer, payment and reschedules; services with stylists and totals; customer note;
   cancellation details; Completed, No Show and Cancel along the bottom for confirmed bookings). Shared status
   colours; no text under 11px; details two per row on phones.
+- 2026-11-25 — Services list: phones use the original card again (4:3 photo on top, details below) instead of
+  the small side photo. One card per row on phones, two from 640px, three on laptops.

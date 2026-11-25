@@ -237,23 +237,22 @@ export default function ServicesListingPage() {
             resetError={() => dispatch(clearError())}
             backPath="/services"
           >
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8 lg:grid-cols-3">
               {services.map((service) => (
                 <Card
                   key={service.serviceId}
-                  className="group relative flex cursor-pointer overflow-hidden border-border/60 transition-colors hover:border-primary/50 md:block"
+                  className="group relative flex cursor-pointer flex-col overflow-hidden border-border/60 transition-colors hover:border-primary/50"
                 >
                   {/* Service Image */}
-                  {/* Phones: small photo beside the details; wider screens: photo on top */}
-                  <div className="relative flex w-28 shrink-0 items-center justify-center overflow-hidden bg-muted/30 sm:w-36 md:w-auto md:p-8">
+                  <div className="relative flex items-center justify-center overflow-hidden bg-muted/30 p-4 sm:p-6 md:p-8">
                     {service.imageUrl ? (
                       <img
                         src={service.imageUrl}
                         alt={service.name}
-                        className="size-full object-cover transition-transform duration-300 group-hover:scale-105 md:aspect-[4/3] md:h-auto"
+                        className="aspect-[4/3] w-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="flex size-full items-center justify-center rounded-lg bg-white opacity-50 shadow-sm md:aspect-[4/3] md:h-auto">
+                      <div className="flex aspect-[4/3] w-full items-center justify-center rounded-lg bg-white opacity-50 shadow-sm">
                         <Icon
                           icon="solar:scissors-square-bold-duotone"
                           className="size-16 text-muted-foreground/30"
@@ -263,7 +262,7 @@ export default function ServicesListingPage() {
                   </div>
 
                   {/* Service Details */}
-                  <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4 md:p-6">
+                  <div className="flex min-w-0 flex-1 flex-col p-4 md:p-6">
                     <div className="mb-2 flex flex-wrap items-start justify-between gap-x-2 gap-y-1">
                       <h3 className="min-w-0 break-words text-base font-bold md:text-lg">
                         {/* Stretched link: the whole card opens the service page */}
