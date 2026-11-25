@@ -81,7 +81,7 @@ export default function DashboardContent() {
       </div>
 
       <LoadingGate
-        loading={loading && !stats}
+        loading={loading}
         error={error}
         data={stats}
         emptyMessage="No dashboard data available for the selected period."

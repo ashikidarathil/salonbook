@@ -257,3 +257,7 @@
   colours; no text under 11px; details two per row on phones.
 - 2026-11-25 — Services list: phones use the original card again (4:3 photo on top, details below) instead of
   the small side photo. One card per row on phones, two from 640px, three on laptops.
+- 2026-11-25 — Loading on filters: when a list reloads (category, search, page, period), the current results fade
+  and the loader shows over them until the new data arrives. Done once in LoadingGate, so every page using it
+  gets it (services, stylists, branches, admin lists, both dashboards, holidays). Before, the loader only
+  showed when the list was empty.

@@ -85,7 +85,7 @@ export default function StylistDashboard() {
       </div>
 
       <LoadingGate
-        loading={loading && !stats}
+        loading={loading}
         error={error}
         data={stats}
         emptyMessage="No data available for the selected period."
