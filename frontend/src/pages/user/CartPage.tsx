@@ -124,7 +124,7 @@ export default function CartPage() {
     return (
       <div className="flex flex-col min-h-screen bg-background">
         <Header />
-        <RouteBreadcrumbs className="w-full px-4 pt-4 sm:px-6 lg:px-8" />
+        <RouteBreadcrumbs className="container mx-auto px-4 pt-4" />
         <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
           <div className="bg-primary/5 p-8 rounded-full mb-6">
             <Icon icon="solar:cart-large-2-broken" className="size-24 text-primary/40" />
@@ -146,8 +146,8 @@ export default function CartPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
-      <RouteBreadcrumbs className="w-full px-4 pt-4 sm:px-6 lg:px-8" />
-      <main className="w-full flex-1 px-4 py-6 sm:px-6 lg:px-8">
+      <RouteBreadcrumbs className="container mx-auto px-4 pt-4" />
+      <main className="container mx-auto flex-1 px-4 py-6">
         <div className="mb-6 flex flex-wrap items-center gap-3 sm:mb-8">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-full">
             <Icon icon="solar:arrow-left-linear" className="size-6" />
