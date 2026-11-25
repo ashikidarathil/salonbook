@@ -206,7 +206,14 @@ export default function ProfileLayout() {
               </h1>
             </div>
 
-
+            {/* Phones have no site header here, so give them a way back to the home page */}
+            <Link
+              to="/"
+              aria-label="Go to home page"
+              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors hover:bg-primary/20 md:hidden"
+            >
+              <Icon icon="solar:home-2-bold-duotone" className="size-6" />
+            </Link>
           </header>
 
           <main className="flex-1 overflow-x-hidden overflow-y-auto w-full">
