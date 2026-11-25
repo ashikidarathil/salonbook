@@ -157,6 +157,7 @@ export default function RescheduleBookingPage() {
           },
         ]}
         initialStylistId={booking.stylistId}
+        fixedStylist
         submitLabel="Confirm Reschedule"
         isSubmitting={isSaving}
         cancelTo={detailHref}

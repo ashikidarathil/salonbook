@@ -7,6 +7,7 @@ import { Loader } from '@/components/common/Loader';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent } from '@/components/ui/card';
+import { StepHeader, type StepInfo } from '@/components/common/StepHeader';
 import type { SlotItem } from '@/features/slot/slot.types';
 import { slotService } from '@/services/slot.service';
 
@@ -42,15 +43,17 @@ interface SlotPickerProps {
   cancelTo: string;
   /** Extra fields shown above the confirm button */
   children?: ReactNode;
+  /** Skip the stylist step: the booking keeps its stylist (used when rescheduling). */
+  fixedStylist?: boolean;
   onConfirm: (selection: SlotSelection) => void;
 }
 
-type Step = 1 | 2 | 3;
+type StepKey = 'date' | 'stylist' | 'time';
 
 const UNAVAILABLE_DAY = ['OFF_DAY', 'NON_WORKING', 'NO_SCHEDULE', 'HOLIDAY'];
 const BOOKABLE = ['AVAILABLE', 'SPECIAL'];
 
-/** Choose a date, then a stylist, then a time: three steps, with Back to change an earlier one. */
+/** Choose a date, then a stylist, then a time, one step at a time, with Back to change an earlier one. */
 export function SlotPicker({
   branchId,
   services,
@@ -60,9 +63,12 @@ export function SlotPicker({
   isSubmitting,
   cancelTo,
   children,
+  fixedStylist = false,
   onConfirm,
 }: SlotPickerProps) {
-  const [step, setStep] = useState<Step>(1);
+  const order: StepKey[] = fixedStylist ? ['date', 'time'] : ['date', 'stylist', 'time'];
+  const [stepIndex, setStepIndex] = useState(0);
+  const step = order[stepIndex];
   const topRef = useRef<HTMLDivElement>(null);
   const [date, setDate] = useState(() => new Date());
   const [chosenStylistId, setChosenStylistId] = useState('');
@@ -121,73 +127,40 @@ export function SlotPicker({
   };
 
   const stylistName = stylists.find((item) => item.userId === stylistId)?.name;
-  const canLeave = { 1: true, 2: !!stylistId, 3: !!selectedSlot } as const;
+  const canLeave: Record<StepKey, boolean> = {
+    date: true,
+    stylist: !!stylistId,
+    time: !!selectedSlot,
+  };
 
-  const goTo = (next: Step) => {
-    setStep(next);
+  const goTo = (index: number) => {
+    setStepIndex(index);
     // On phones the next step starts below the fold; bring the picker back into view
     topRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
   };
 
-  const STEPS: { n: Step; label: string; value?: string; icon: string }[] = [
-    { n: 1, label: 'Date', value: format(date, 'd MMM'), icon: 'solar:calendar-bold' },
+  const STEP_INFO: Record<StepKey, StepInfo> = {
+    date: { label: 'Date', value: format(date, 'd MMM') },
     // First name keeps the step short enough for phones
-    { n: 2, label: 'Stylist', value: stylistName?.split(' ')[0], icon: 'solar:user-bold' },
-    {
-      n: 3,
-      label: 'Time',
-      value: selectedSlot?.startTime,
-      icon: 'solar:clock-circle-bold',
-    },
-  ];
+    stylist: { label: 'Stylist', value: stylistName?.split(' ')[0] },
+    time: { label: 'Time', value: selectedSlot?.startTime },
+  };
+  const isLast = stepIndex === order.length - 1;
+  const nextKey = order[stepIndex + 1];
 
   return (
     <div ref={topRef} className="mx-auto w-full max-w-3xl scroll-mt-24">
       <Card className="min-w-0 overflow-hidden">
         <CardContent className="!p-0">
           {/* Steps: done ones can be tapped to go back */}
-          <ol className="grid grid-cols-3 border-b bg-muted/30">
-            {STEPS.map((item) => {
-              const done = item.n < step;
-              const current = item.n === step;
-              return (
-                <li key={item.n} className="min-w-0">
-                  <button
-                    type="button"
-                    disabled={!done}
-                    aria-current={current ? 'step' : undefined}
-                    onClick={() => goTo(item.n)}
-                    className={`flex w-full min-w-0 items-center gap-2 border-b-2 px-2 py-3 text-left transition-colors sm:px-4 ${
-                      current
-                        ? 'border-primary bg-white'
-                        : done
-                          ? 'border-transparent hover:bg-white/60'
-                          : 'border-transparent opacity-60'
-                    }`}
-                  >
-                    <span
-                      className={`flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold sm:size-8 ${
-                        done || current
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-muted-foreground'
-                      }`}
-                    >
-                      {done ? <Icon icon="solar:check-read-linear" className="size-4" /> : item.n}
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-xs text-muted-foreground">Step {item.n}</span>
-                      <span className="block truncate text-sm font-semibold">
-                        {done && item.value ? item.value : item.label}
-                      </span>
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
+          <StepHeader
+            steps={order.map((key) => STEP_INFO[key])}
+            current={stepIndex + 1}
+            onSelect={(n) => goTo(n - 1)}
+          />
 
           <div className="p-4 sm:p-6">
-            {step === 1 && (
+            {step === 'date' && (
               <section className="space-y-3">
                 <h2 className="flex items-center gap-2 font-semibold">
                   <Icon icon="solar:calendar-bold" className="text-primary" />
@@ -209,7 +182,7 @@ export function SlotPicker({
               </section>
             )}
 
-            {step === 2 && (
+            {step === 'stylist' && (
               <section className="space-y-3">
                 <h2 className="flex items-center gap-2 font-semibold">
                   <Icon icon="solar:user-bold" className="text-primary" />
@@ -276,7 +249,7 @@ export function SlotPicker({
               </section>
             )}
 
-            {step === 3 && (
+            {step === 'time' && (
               <section className="space-y-4">
                 <div>
                   <h2 className="flex items-center gap-2 font-semibold">
@@ -355,7 +328,7 @@ export function SlotPicker({
           </div>
 
           <div className="flex items-center justify-between gap-3 border-t bg-muted/20 p-4 sm:px-6">
-            {step === 1 ? (
+            {stepIndex === 0 ? (
               <Button type="button" variant="ghost" className="h-11" asChild>
                 <Link to={cancelTo}>Cancel</Link>
               </Button>
@@ -364,20 +337,20 @@ export function SlotPicker({
                 type="button"
                 variant="outline"
                 className="h-11 gap-1"
-                onClick={() => goTo((step - 1) as Step)}
+                onClick={() => goTo(stepIndex - 1)}
               >
                 <Icon icon="solar:alt-arrow-left-linear" className="size-4" />
                 Back
               </Button>
             )}
-            {step < 3 ? (
+            {!isLast ? (
               <Button
                 type="button"
                 className="h-11 gap-1 font-semibold"
                 disabled={!canLeave[step]}
-                onClick={() => goTo((step + 1) as Step)}
+                onClick={() => goTo(stepIndex + 1)}
               >
-                {step === 1 ? 'Next: stylist' : 'Next: time'}
+                {`Next: ${STEP_INFO[nextKey].label.toLowerCase()}`}
                 <Icon icon="solar:alt-arrow-right-linear" className="size-4" />
               </Button>
             ) : (
