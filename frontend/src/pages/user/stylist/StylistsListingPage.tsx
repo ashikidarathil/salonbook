@@ -216,7 +216,7 @@ export default function StylistsListingPage() {
           </div>
 
           <LoadingGate
-            loading={loading && stylists.length === 0}
+            loading={loading}
             error={error}
             data={stylists}
             emptyMessage="No stylists found matching your criteria."

@@ -74,7 +74,7 @@ export default function HolidayManagementPage() {
       />
 
       <LoadingGate
-        loading={loading && holidays.length === 0}
+        loading={loading}
         error={error}
         data={holidays}
         resetError={() => dispatch(clearError())}

@@ -76,6 +76,20 @@ export function LoadingGate({
     );
   }
 
-  // 4. Success State
+  // 4. Success State. When new data is loading (a filter, search or page change),
+  // keep the old results faded underneath and show the loader over them.
+  if (loading) {
+    return (
+      <div className="relative" aria-busy="true">
+        <div className="pointer-events-none select-none opacity-40 transition-opacity">{children}</div>
+        <div className="absolute inset-x-0 top-0 flex justify-center pt-16">
+          <div className="sticky top-1/3 rounded-2xl bg-background/90 p-4 shadow-sm">
+            <Loader label={loadingMessage} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return <>{children}</>;
 }
