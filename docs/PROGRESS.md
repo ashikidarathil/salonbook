@@ -297,3 +297,6 @@
   branch and stylist counts, "Why book with us" (pick your stylist, live slots, 20% advance, one reschedule up
   to 24h before, chat, wallet refunds), How it works, top stylists and a Become a stylist banner. Footer links
   now work: Services column → /services; Our Team → /stylists, About, Careers → /contact/apply, Contact.
+- 2026-11-25 — README rewritten for GitHub visitors: what SalonBook is, live link, CI badge, screenshots
+  (docs/screenshots, demo data), features for customers / stylists / admin, tech stack, architecture, project
+  structure, setup with every environment variable (names only), demo data, scripts, deployment and workflow.
