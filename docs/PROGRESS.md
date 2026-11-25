@@ -281,3 +281,6 @@
 - 2026-11-25 — Checkout on phones is 3 steps (Booking → Offers → Pay) with a step bar, Next / Skip to pay and
   Back; laptops keep both columns. Summary now shows the appointment date and time. Fixed the old "10-minute"
   expiry text (the window is 15 minutes). Shared StepHeader component for step bars.
+- 2026-11-25 — Reschedule picker is 2 steps (date → time): the booking keeps its stylist, so the stylist step is
+  skipped (SlotPicker fixedStylist). Cart and booking-from-stylist keep 3 steps. The picker now uses the shared
+  StepHeader.
