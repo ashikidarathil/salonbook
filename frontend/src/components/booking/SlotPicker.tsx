@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '@iconify/react';
@@ -45,10 +45,12 @@ interface SlotPickerProps {
   onConfirm: (selection: SlotSelection) => void;
 }
 
+type Step = 1 | 2 | 3;
+
 const UNAVAILABLE_DAY = ['OFF_DAY', 'NON_WORKING', 'NO_SCHEDULE', 'HOLIDAY'];
 const BOOKABLE = ['AVAILABLE', 'SPECIAL'];
 
-/** Choose a date, stylist and time directly on a page. */
+/** Choose a date, then a stylist, then a time: three steps, with Back to change an earlier one. */
 export function SlotPicker({
   branchId,
   services,
@@ -60,6 +62,8 @@ export function SlotPicker({
   children,
   onConfirm,
 }: SlotPickerProps) {
+  const [step, setStep] = useState<Step>(1);
+  const topRef = useRef<HTMLDivElement>(null);
   const [date, setDate] = useState(() => new Date());
   const [chosenStylistId, setChosenStylistId] = useState('');
   const [selectedSlotId, setSelectedSlotId] = useState('');
@@ -116,177 +120,276 @@ export function SlotPicker({
     });
   };
 
-  return (
-    <div className="grid gap-6 lg:grid-cols-3">
-      <Card className="min-w-0">
-        <CardContent className="space-y-3 p-4 !pt-4 sm:p-6 sm:!pt-6">
-          <h2 className="flex items-center gap-2 font-semibold">
-            <Icon icon="solar:calendar-bold" className="text-primary" />
-            1. Choose Date
-          </h2>
-          <div className="flex justify-center">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={(day) => {
-                if (!day) return;
-                setDate(day);
-                setSelectedSlotId('');
-              }}
-              className="rounded-md border-none p-0"
-              disabled={(day) => isBefore(day, startOfDay(new Date()))}
-            />
-          </div>
-        </CardContent>
-      </Card>
+  const stylistName = stylists.find((item) => item.userId === stylistId)?.name;
+  const canLeave = { 1: true, 2: !!stylistId, 3: !!selectedSlot } as const;
 
-      <Card className="min-w-0">
-        <CardContent className="space-y-3 p-4 !pt-4 sm:p-6 sm:!pt-6">
-          <h2 className="flex items-center gap-2 font-semibold">
-            <Icon icon="solar:user-bold" className="text-primary" />
-            2. Choose Stylist
-          </h2>
-          {stylists.length === 0 ? (
-            <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-              No stylists are available for this service at this branch.
-            </p>
-          ) : (
-            <div className="grid max-h-96 gap-2 overflow-y-auto">
-              {stylists.map((stylist) => {
-                const isSelected = stylistId === stylist.userId;
-                return (
+  const goTo = (next: Step) => {
+    setStep(next);
+    // On phones the next step starts below the fold; bring the picker back into view
+    topRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  };
+
+  const STEPS: { n: Step; label: string; value?: string; icon: string }[] = [
+    { n: 1, label: 'Date', value: format(date, 'd MMM'), icon: 'solar:calendar-bold' },
+    // First name keeps the step short enough for phones
+    { n: 2, label: 'Stylist', value: stylistName?.split(' ')[0], icon: 'solar:user-bold' },
+    {
+      n: 3,
+      label: 'Time',
+      value: selectedSlot?.startTime,
+      icon: 'solar:clock-circle-bold',
+    },
+  ];
+
+  return (
+    <div ref={topRef} className="mx-auto w-full max-w-3xl scroll-mt-24">
+      <Card className="min-w-0 overflow-hidden">
+        <CardContent className="!p-0">
+          {/* Steps: done ones can be tapped to go back */}
+          <ol className="grid grid-cols-3 border-b bg-muted/30">
+            {STEPS.map((item) => {
+              const done = item.n < step;
+              const current = item.n === step;
+              return (
+                <li key={item.n} className="min-w-0">
                   <button
-                    key={stylist.userId}
                     type="button"
-                    aria-pressed={isSelected}
-                    onClick={() => {
-                      setChosenStylistId(stylist.userId);
-                      setSelectedSlotId('');
-                    }}
-                    className={`flex min-h-14 items-center gap-3 rounded-xl border p-3 text-left transition-all ${
-                      isSelected
-                        ? 'border-primary bg-primary/5 ring-1 ring-primary'
-                        : 'border-border/60 bg-background hover:border-primary/40'
+                    disabled={!done}
+                    aria-current={current ? 'step' : undefined}
+                    onClick={() => goTo(item.n)}
+                    className={`flex w-full min-w-0 items-center gap-2 border-b-2 px-2 py-3 text-left transition-colors sm:px-4 ${
+                      current
+                        ? 'border-primary bg-white'
+                        : done
+                          ? 'border-transparent hover:bg-white/60'
+                          : 'border-transparent opacity-60'
                     }`}
                   >
-                    <span className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
-                      {stylist.profilePicture ? (
-                        <img
-                          src={stylist.profilePicture}
-                          alt=""
-                          className="size-full object-cover"
-                        />
-                      ) : (
-                        <Icon icon="solar:user-bold" className="size-5 text-muted-foreground/40" />
-                      )}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-semibold">{stylist.name}</span>
-                      {stylist.specialization && (
-                        <span className="block truncate text-xs text-muted-foreground">
-                          {stylist.specialization}
-                        </span>
-                      )}
-                    </span>
-                    {isSelected && (
-                      <Icon
-                        icon="solar:check-circle-bold"
-                        className="size-5 shrink-0 text-primary"
-                      />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card className="min-w-0">
-        <CardContent className="flex h-full flex-col gap-4 p-4 !pt-4 sm:p-6 sm:!pt-6">
-          <h2 className="flex items-center gap-2 font-semibold">
-            <Icon icon="solar:clock-circle-bold" className="text-primary" />
-            3. Choose Time
-          </h2>
-
-          <div className="min-h-40 flex-1">
-            {!stylistId ? (
-              <p className="py-10 text-center text-sm text-muted-foreground">
-                Choose a stylist to see available times.
-              </p>
-            ) : isLoading ? (
-              <div className="flex flex-col items-center gap-2 py-10 text-sm text-muted-foreground">
-                <Loader size="sm" label="Finding slots" />
-              </div>
-            ) : failed ? (
-              <p role="alert" className="py-10 text-center text-sm text-red-600">
-                Could not load times. Try another date.
-              </p>
-            ) : closedDay ? (
-              <div className="rounded-xl border border-red-100 bg-red-50/40 p-6 text-center">
-                <p className="font-semibold text-red-600">
-                  {closedDay.status === 'HOLIDAY'
-                    ? 'Salon Holiday'
-                    : closedDay.status === 'OFF_DAY'
-                      ? 'On Leave'
-                      : 'Not Available'}
-                </p>
-                <p className="mt-1 text-sm text-red-500/80">
-                  {closedDay.status === 'HOLIDAY'
-                    ? closedDay.note || 'The salon is closed on this day.'
-                    : 'The stylist is not available on this date.'}
-                </p>
-              </div>
-            ) : visibleSlots.length === 0 ? (
-              <p className="py-10 text-center text-sm text-muted-foreground">
-                No times available. Try another date or stylist.
-              </p>
-            ) : (
-              <div className="grid max-h-72 grid-cols-3 gap-2 overflow-y-auto p-0.5 lg:grid-cols-2 xl:grid-cols-3">
-                {visibleSlots.map((slot) => {
-                  const isSelected = selectedSlotId === slot.id;
-                  return (
-                    <button
-                      key={slot.id}
-                      type="button"
-                      aria-pressed={isSelected}
-                      disabled={!BOOKABLE.includes(slot.status)}
-                      onClick={() => setSelectedSlotId(slot.id)}
-                      className={`min-h-11 rounded-lg border p-2 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40 ${
-                        isSelected
-                          ? 'border-primary bg-primary text-white shadow-lg shadow-primary/20'
-                          : 'border-border/60 bg-background hover:border-primary/40'
+                    <span
+                      className={`flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold sm:size-8 ${
+                        done || current
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted text-muted-foreground'
                       }`}
                     >
-                      {slot.startTime}
-                    </button>
-                  );
-                })}
-              </div>
+                      {done ? <Icon icon="solar:check-read-linear" className="size-4" /> : item.n}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-xs text-muted-foreground">Step {item.n}</span>
+                      <span className="block truncate text-sm font-semibold">
+                        {done && item.value ? item.value : item.label}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+
+          <div className="p-4 sm:p-6">
+            {step === 1 && (
+              <section className="space-y-3">
+                <h2 className="flex items-center gap-2 font-semibold">
+                  <Icon icon="solar:calendar-bold" className="text-primary" />
+                  Choose a date
+                </h2>
+                <div className="flex justify-center">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={(day) => {
+                      if (!day) return;
+                      setDate(day);
+                      setSelectedSlotId('');
+                    }}
+                    className="rounded-md border-none p-0"
+                    disabled={(day) => isBefore(day, startOfDay(new Date()))}
+                  />
+                </div>
+              </section>
+            )}
+
+            {step === 2 && (
+              <section className="space-y-3">
+                <h2 className="flex items-center gap-2 font-semibold">
+                  <Icon icon="solar:user-bold" className="text-primary" />
+                  Choose a stylist
+                </h2>
+                {stylists.length === 0 ? (
+                  <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+                    No stylists are available for this service at this branch.
+                  </p>
+                ) : (
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    {stylists.map((stylist) => {
+                      const isSelected = stylistId === stylist.userId;
+                      return (
+                        <button
+                          key={stylist.userId}
+                          type="button"
+                          aria-pressed={isSelected}
+                          onClick={() => {
+                            setChosenStylistId(stylist.userId);
+                            setSelectedSlotId('');
+                          }}
+                          className={`flex min-h-14 items-center gap-3 rounded-xl border p-3 text-left transition-all ${
+                            isSelected
+                              ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                              : 'border-border/60 bg-background hover:border-primary/40'
+                          }`}
+                        >
+                          <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
+                            {stylist.profilePicture ? (
+                              <img
+                                src={stylist.profilePicture}
+                                alt=""
+                                className="size-full object-cover"
+                              />
+                            ) : (
+                              <Icon
+                                icon="solar:user-bold"
+                                className="size-5 text-muted-foreground/40"
+                              />
+                            )}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-sm font-semibold">
+                              {stylist.name}
+                            </span>
+                            {stylist.specialization && (
+                              <span className="block truncate text-xs text-muted-foreground">
+                                {stylist.specialization}
+                              </span>
+                            )}
+                          </span>
+                          {isSelected && (
+                            <Icon
+                              icon="solar:check-circle-bold"
+                              className="size-5 shrink-0 text-primary"
+                            />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {step === 3 && (
+              <section className="space-y-4">
+                <div>
+                  <h2 className="flex items-center gap-2 font-semibold">
+                    <Icon icon="solar:clock-circle-bold" className="text-primary" />
+                    Choose a time
+                  </h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {format(date, 'EEEE, d MMMM')} with {stylistName}
+                  </p>
+                </div>
+                <div className="min-h-40">
+                  {isLoading ? (
+                    <div className="flex flex-col items-center gap-2 py-10 text-sm text-muted-foreground">
+                      <Loader size="sm" label="Finding slots" />
+                    </div>
+                  ) : failed ? (
+                    <p role="alert" className="py-10 text-center text-sm text-red-600">
+                      Could not load times. Go back and try another date.
+                    </p>
+                  ) : closedDay ? (
+                    <div className="rounded-xl border border-red-100 bg-red-50/40 p-6 text-center">
+                      <p className="font-semibold text-red-600">
+                        {closedDay.status === 'HOLIDAY'
+                          ? 'Salon Holiday'
+                          : closedDay.status === 'OFF_DAY'
+                            ? 'On Leave'
+                            : 'Not Available'}
+                      </p>
+                      <p className="mt-1 text-sm text-red-500/80">
+                        {closedDay.status === 'HOLIDAY'
+                          ? closedDay.note || 'The salon is closed on this day.'
+                          : 'The stylist is not available on this date.'}
+                      </p>
+                    </div>
+                  ) : visibleSlots.length === 0 ? (
+                    <p className="py-10 text-center text-sm text-muted-foreground">
+                      No times available. Go back and try another date or stylist.
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5">
+                      {visibleSlots.map((slot) => {
+                        const isSelected = selectedSlotId === slot.id;
+                        return (
+                          <button
+                            key={slot.id}
+                            type="button"
+                            aria-pressed={isSelected}
+                            disabled={!BOOKABLE.includes(slot.status)}
+                            onClick={() => setSelectedSlotId(slot.id)}
+                            className={`min-h-11 rounded-lg border p-2 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-40 ${
+                              isSelected
+                                ? 'border-primary bg-primary text-white shadow-lg shadow-primary/20'
+                                : 'border-border/60 bg-background hover:border-primary/40'
+                            }`}
+                          >
+                            {slot.startTime}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-3 border-t pt-4">
+                  {children}
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <span>Services</span>
+                    <span>{services.length}</span>
+                  </div>
+                  <div className="flex justify-between font-bold">
+                    <span>Total</span>
+                    <span className="text-primary">₹{total.toLocaleString('en-IN')}</span>
+                  </div>
+                </div>
+              </section>
             )}
           </div>
 
-          <div className="space-y-3 border-t pt-4">
-            {children}
-            <div className="flex justify-between text-sm text-muted-foreground">
-              <span>Services</span>
-              <span>{services.length}</span>
-            </div>
-            <div className="flex justify-between font-bold">
-              <span>Total</span>
-              <span className="text-primary">₹{total.toLocaleString('en-IN')}</span>
-            </div>
-            <Button
-              type="button"
-              className="h-12 w-full font-bold"
-              disabled={!selectedSlot || !stylistId || isSubmitting}
-              onClick={confirm}
-            >
-              {isSubmitting ? 'Saving...' : submitLabel}
-            </Button>
-            <Button type="button" variant="ghost" className="w-full" asChild>
-              <Link to={cancelTo}>Cancel</Link>
-            </Button>
+          <div className="flex items-center justify-between gap-3 border-t bg-muted/20 p-4 sm:px-6">
+            {step === 1 ? (
+              <Button type="button" variant="ghost" className="h-11" asChild>
+                <Link to={cancelTo}>Cancel</Link>
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 gap-1"
+                onClick={() => goTo((step - 1) as Step)}
+              >
+                <Icon icon="solar:alt-arrow-left-linear" className="size-4" />
+                Back
+              </Button>
+            )}
+            {step < 3 ? (
+              <Button
+                type="button"
+                className="h-11 gap-1 font-semibold"
+                disabled={!canLeave[step]}
+                onClick={() => goTo((step + 1) as Step)}
+              >
+                {step === 1 ? 'Next: stylist' : 'Next: time'}
+                <Icon icon="solar:alt-arrow-right-linear" className="size-4" />
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                className="h-11 font-bold"
+                disabled={!selectedSlot || !stylistId || isSubmitting}
+                onClick={confirm}
+              >
+                {isSubmitting ? 'Saving...' : submitLabel}
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>

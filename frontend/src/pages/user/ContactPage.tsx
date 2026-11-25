@@ -25,9 +25,9 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <RouteBreadcrumbs className="w-full px-4 pt-4 sm:px-6 lg:px-8" />
+      <RouteBreadcrumbs className="container mx-auto px-4 pt-4" />
 
-      <main className="w-full px-4 py-10 sm:px-6 md:py-16 lg:px-8">
+      <main className="container mx-auto px-4 py-10 md:py-16">
         <div className="mb-12 text-center">
           <h1 className="mb-4 text-4xl font-semibold tracking-tight md:text-5xl font-heading">
             Get In Touch

@@ -155,8 +155,8 @@ export default function CheckoutPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
-      <RouteBreadcrumbs className="w-full px-4 pt-4 sm:px-6 lg:px-8" />
-      <main className="w-full flex-1 px-4 py-6 sm:px-6 lg:px-8">
+      <RouteBreadcrumbs className="container mx-auto px-4 pt-4" />
+      <main className="container mx-auto flex-1 px-4 py-6">
         <div className="flex items-center justify-between mb-8">
           <h1 className="break-words text-2xl font-bold sm:text-3xl">Checkout</h1>
           {currentBooking?.paymentWindowExpiresAt && (

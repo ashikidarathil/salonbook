@@ -274,3 +274,7 @@
 - 2026-11-25 — Stylist wallet restyled like the customer wallet: big blue Available balance card, with Held
   (escrow) and Lifetime earnings as smaller cards beside it (below it on phones). List renamed Earnings and
   fades while it reloads after a filter or search.
+- 2026-11-25 — Customer pages keep the services-list width on laptops (centred container, breadcrumbs lined up
+  with the content): cart, checkout, stylist & time picker, book-from-stylist, Contact and Branches. The
+  stylist & time picker is now 3 steps (date → stylist → time) with Back and tappable done steps; used by the
+  cart, booking from a stylist page and rescheduling.
