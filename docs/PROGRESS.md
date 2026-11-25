@@ -289,3 +289,5 @@
   booking page's back arrow goes to My Bookings when opened from a payment result.
 - 2026-11-25 — Customer profile area on phones: a coral home button on the right of the top bar goes to the home
   page (hidden from tablet width up).
+- 2026-11-25 — Stylist portal on phones: blue home button in the top bar (before chat) goes to the stylist
+  Dashboard; hidden from tablet width up.
