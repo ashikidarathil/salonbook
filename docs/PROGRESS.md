@@ -261,3 +261,9 @@
   and the loader shows over them until the new data arrives. Done once in LoadingGate, so every page using it
   gets it (services, stylists, branches, admin lists, both dashboards, holidays). Before, the loader only
   showed when the list was empty.
+- 2026-11-25 — Payment result pages redesigned around one shared booking summary (date block, time, booking
+  number, each service with stylist/time/price, money rows). Success: "You're booked!", paid now / pay at the
+  salon / total, View booking and Add to calendar (Google Calendar link in salon time). Failure: shows the
+  reason, a live countdown while the 15-minute hold lasts with Try payment again (straight to checkout), or a
+  "slot released" note with Book a new time once it ends. Fixed the old "10 minutes" text (real hold is 15) and
+  Retry Payment going to My Bookings. Breadcrumbs removed from these two pages.

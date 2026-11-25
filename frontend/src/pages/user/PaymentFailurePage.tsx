@@ -1,114 +1,150 @@
-'use client';
-
-import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
-import { useEffect } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { matchesBookingRef } from '@/common/utils/bookingRef';
+import { useEffect, useState } from 'react';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Header } from '@/components/user/Header';
 import { Footer } from '@/components/user/Footer';
+import { Loader } from '@/components/common/Loader';
+import { PaymentCountdown } from '@/components/common/PaymentCountdown';
+import { AmountRow, BookingSummaryCard } from '@/components/payment/BookingSummaryCard';
 import { APP_ROUTES } from '@/common/constants/app.routes';
+import { matchesBookingRef } from '@/common/utils/bookingRef';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchBookingDetails } from '@/features/booking/booking.thunks';
+import { BookingStatus } from '@/features/booking/booking.constants';
 
 export default function PaymentFailurePage() {
-  const navigate = useNavigate();
   // URL holds the booking number (or the id, for old links)
   const { bookingId } = useParams<{ bookingId: string }>();
   const dispatch = useAppDispatch();
   const reason = (useLocation().state as { reason?: string } | null)?.reason;
   const { currentBooking: storedBooking } = useAppSelector((state) => state.booking);
   // The store keeps the last viewed item until the new one loads; only use it if it matches the URL
-  const currentBooking = matchesBookingRef(storedBooking, bookingId) ? storedBooking : null;
+  const booking = matchesBookingRef(storedBooking, bookingId) ? storedBooking : null;
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     if (bookingId) dispatch(fetchBookingDetails(bookingId));
   }, [bookingId, dispatch]);
 
+  // Re-check every second so the buttons switch the moment the hold runs out
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const expiresAt = booking?.paymentWindowExpiresAt;
+  const canRetry =
+    booking?.status === BookingStatus.PENDING_PAYMENT &&
+    !!expiresAt &&
+    new Date(expiresAt).getTime() > now;
+  const ref = booking ? booking.bookingNumber || booking.id : bookingId;
+  const shownReason =
+    reason && reason !== 'Payment failed' ? reason.replace(/^Payment failed:\s*/, '') : null;
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#F9FAFB]">
+    <div className="flex min-h-screen flex-col bg-muted/20">
       <Header />
-      <RouteBreadcrumbs className="w-full px-4 pt-4 sm:px-6 lg:px-8" />
-      <main className="flex-grow flex items-center justify-center p-6 sm:p-12">
+      <main className="flex flex-1 justify-center px-4 py-8 sm:py-12">
         <motion.div
-          className="w-full max-w-lg"
-          initial={{ opacity: 0, y: 20 }}
+          className="w-full max-w-xl space-y-6"
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          <Card className="w-full p-8 sm:p-10 space-y-8 shadow-2xl shadow-slate-200/50 border-white/40 bg-white/80 backdrop-blur-sm rounded-[2.5rem]">
-            {/* Elegant Failure Icon */}
-            <div className="flex justify-center">
-              <motion.div
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                className="size-24 bg-rose-50 rounded-full flex items-center justify-center border border-rose-100/50"
-              >
-                <div className="size-16 bg-rose-500 rounded-full flex items-center justify-center shadow-lg shadow-rose-200">
-                  <Icon icon="solar:danger-triangle-linear" className="size-10 text-white" />
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Refined Title Section */}
-            <div className="space-y-2 text-center">
-              <h1 className="break-words text-2xl font-bold sm:text-3xl">Payment Unsuccessful</h1>
-              <p className="text-slate-500 text-lg leading-relaxed">
-                We couldn't process your transaction. Please check your payment details and try
-                again.
-              </p>
-              {reason && reason !== 'Payment failed' && (
-                <p className="mt-3 rounded-lg bg-red-50 px-4 py-2 text-sm font-medium text-red-700">
-                  {reason.replace(/^Payment failed:\s*/, 'Reason: ')}
-                </p>
-              )}
-            </div>
-
-            {/* Minimalist Booking ID */}
-            <div className="flex flex-col items-center justify-center py-4 border-y border-slate-100/60">
-              <span className="text-xs font-medium text-slate-400 mb-1">Booking Reference</span>
-              <span className="text-xl font-mono font-semibold text-slate-700">
-                #{currentBooking?.bookingNumber ?? bookingId?.slice(-6).toUpperCase()}
+          <div className="text-center">
+            <motion.span
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.15, type: 'spring', stiffness: 220 }}
+              className="mx-auto flex size-20 items-center justify-center rounded-full bg-rose-50 ring-8 ring-rose-50/50"
+            >
+              <span className="flex size-14 items-center justify-center rounded-full bg-rose-500 shadow-lg shadow-rose-200">
+                <Icon icon="solar:close-circle-linear" className="size-8 text-white" />
               </span>
-            </div>
+            </motion.span>
+            <h1 className="mt-5 text-2xl font-bold sm:text-3xl">Payment didn&apos;t go through</h1>
+            <p className="mt-2 text-muted-foreground">
+              {!booking || canRetry
+                ? 'Your booking isn’t confirmed yet. You can try paying again.'
+                : 'Your booking wasn’t confirmed.'}
+            </p>
+            {shownReason && (
+              <p className="mx-auto mt-3 max-w-md rounded-lg bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700">
+                Reason: {shownReason}
+              </p>
+            )}
+          </div>
 
-            {/* Info Box - Slot Protection */}
-            <div className="p-5 rounded-2xl bg-amber-50/50 border border-amber-100/50 flex gap-4 items-start shadow-sm">
-              <div className="bg-amber-500/10 p-2.5 rounded-xl shrink-0">
-                <Icon icon="solar:clock-circle-line-duotone" className="size-6 text-amber-600" />
+          {!booking ? (
+            <div className="flex justify-center rounded-2xl border bg-white py-16">
+              <Loader label="Loading your booking" />
+            </div>
+          ) : canRetry ? (
+            <div className="flex flex-col items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-center sm:flex-row sm:text-left">
+              <Icon
+                icon="solar:clock-circle-bold-duotone"
+                className="size-8 shrink-0 text-amber-600"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-amber-900">We&apos;re holding your slot</p>
+                <p className="text-sm text-amber-800/80">
+                  Pay before the timer ends to keep this time.
+                </p>
               </div>
+              <PaymentCountdown expiresAt={expiresAt!} variant="header" />
+            </div>
+          ) : (
+            <div className="flex items-start gap-3 rounded-2xl border bg-white p-4">
+              <Icon
+                icon="solar:calendar-mark-bold-duotone"
+                className="size-7 shrink-0 text-muted-foreground"
+              />
               <div>
-                <h4 className="font-semibold text-amber-900 text-sm">
-                  Slot reserved for 10 minutes
-                </h4>
-                <p className="text-xs text-amber-700/80 leading-relaxed mt-1">
-                  Don't worry, your selected slot is still held for you. Navigate to "My Bookings"
-                  to safely retry before the window expires.
+                <p className="font-semibold">This slot has been released</p>
+                <p className="text-sm text-muted-foreground">
+                  The 15-minute hold has ended. Pick a new time to book again.
                 </p>
               </div>
             </div>
+          )}
 
-            {/* Soft CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Button
-                variant="outline"
-                className="flex-1 h-16 rounded-2xl text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-all font-medium text-base"
-                onClick={() => navigate('/')}
-              >
-                Return Home
+          {booking && (
+            <BookingSummaryCard booking={booking}>
+              <AmountRow
+                label={canRetry ? 'Advance to pay now (20%)' : 'Advance (20%)'}
+                amount={booking.advanceAmount}
+                strong
+              />
+              <AmountRow label="Booking total" amount={booking.payableAmount} tone="muted" />
+            </BookingSummaryCard>
+          )}
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            {canRetry ? (
+              <Button asChild className="h-11 font-semibold">
+                <Link to={`/checkout/${ref}`}>
+                  <Icon icon="solar:refresh-bold" className="mr-2 size-5" />
+                  Try payment again
+                </Link>
               </Button>
-              <Button
-                className="flex-1 h-16 rounded-2xl bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 transition-all font-semibold text-base"
-                onClick={() => navigate(APP_ROUTES.USER.BOOKINGS)}
-              >
-                Retry Payment
+            ) : (
+              <Button asChild className="h-11 font-semibold">
+                <Link to="/services">
+                  <Icon icon="solar:calendar-add-bold-duotone" className="mr-2 size-5" />
+                  Book a new time
+                </Link>
               </Button>
-            </div>
-          </Card>
+            )}
+            <Button asChild variant="outline" className="h-11 font-semibold">
+              <Link to={APP_ROUTES.USER.BOOKINGS}>My bookings</Link>
+            </Button>
+          </div>
+          <p className="text-center text-xs leading-relaxed text-muted-foreground">
+            If money left your account for this attempt, your bank usually returns it within 5–7
+            working days.
+          </p>
         </motion.div>
       </main>
       <Footer />

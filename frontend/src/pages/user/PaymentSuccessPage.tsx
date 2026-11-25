@@ -1,155 +1,124 @@
-'use client';
-
-import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
-import { formatRupees } from '@/common/utils/money';
 import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { matchesBookingRef } from '@/common/utils/bookingRef';
+import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Icon } from '@iconify/react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Header } from '@/components/user/Header';
 import { Footer } from '@/components/user/Footer';
+import { Loader } from '@/components/common/Loader';
+import { AmountRow, BookingSummaryCard } from '@/components/payment/BookingSummaryCard';
 import { APP_ROUTES } from '@/common/constants/app.routes';
+import { matchesBookingRef } from '@/common/utils/bookingRef';
 import { useAppDispatch, useAppSelector } from '@/app/hooks';
 import { fetchBookingDetails } from '@/features/booking/booking.thunks';
+import type { BookingItem } from '@/features/booking/booking.types';
+
+/** Google Calendar "add event" link, in salon time. Opens Google, nothing is sent from here. */
+const calendarLink = (booking: BookingItem) => {
+  const day = booking.date.slice(0, 10).replace(/-/g, '');
+  const time = (t: string) => `${t.replace(':', '')}00`;
+  const services = booking.items
+    .map((item) => item.serviceName)
+    .filter(Boolean)
+    .join(', ');
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: `SalonBook: ${services || 'Salon appointment'}`,
+    dates: `${day}T${time(booking.startTime)}/${day}T${time(booking.endTime)}`,
+    ctz: 'Asia/Kolkata',
+    details: `Booking #${booking.bookingNumber}`,
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+};
 
 export default function PaymentSuccessPage() {
-  const navigate = useNavigate();
   // URL holds the booking number (or the id, for old links)
   const { bookingId } = useParams<{ bookingId: string }>();
   const dispatch = useAppDispatch();
   const { currentBooking: storedBooking } = useAppSelector((state) => state.booking);
   // The store keeps the last viewed item until the new one loads; only use it if it matches the URL
-  const currentBooking = matchesBookingRef(storedBooking, bookingId) ? storedBooking : null;
+  const booking = matchesBookingRef(storedBooking, bookingId) ? storedBooking : null;
 
   useEffect(() => {
     if (bookingId) dispatch(fetchBookingDetails(bookingId));
   }, [bookingId, dispatch]);
 
+  const fullyPaid = booking?.paymentStatus === 'PAID';
+  const paidNow = booking ? (fullyPaid ? booking.payableAmount : booking.advanceAmount) : 0;
+  const atSalon = booking ? Math.max(booking.payableAmount - paidNow, 0) : 0;
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#F9FAFB]">
+    <div className="flex min-h-screen flex-col bg-muted/20">
       <Header />
-      <RouteBreadcrumbs className="w-full px-4 pt-4 sm:px-6 lg:px-8" />
-      <main className="flex-grow flex items-center justify-center p-6 sm:p-12">
+      <main className="flex flex-1 justify-center px-4 py-8 sm:py-12">
         <motion.div
-          className="w-full max-w-lg"
-          initial={{ opacity: 0, y: 20 }}
+          className="w-full max-w-xl space-y-6"
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
-          <Card className="w-full p-8 sm:p-10 space-y-8 shadow-2xl shadow-slate-200/50 border-white/40 bg-white/80 backdrop-blur-sm rounded-[2.5rem]">
-            {/* Elegant Success Icon */}
-            <div className="flex justify-center">
-              <motion.div
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                className="size-24 bg-emerald-50 rounded-full flex items-center justify-center border border-emerald-100/50"
-              >
-                <div className="size-16 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-emerald-200">
-                  <Icon icon="solar:check-read-linear" className="size-10 text-white" />
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Refined Title Section */}
-            <div className="space-y-2 text-center">
-              <h1 className="break-words text-2xl font-bold sm:text-3xl">Booking Confirmed</h1>
-              <p className="text-slate-500 text-lg leading-relaxed">
-                Thank you! Your payment was successful and your appointment is scheduled.
-              </p>
-            </div>
-
-            {/* Minimalist Booking ID */}
-            <div className="flex flex-col items-center justify-center py-4 border-y border-slate-100/60">
-              <span className="text-xs font-medium text-slate-400 mb-1">Booking Reference</span>
-              <span className="text-xl font-mono font-semibold text-slate-700">
-                #{currentBooking?.bookingNumber ?? bookingId?.slice(-6).toUpperCase()}
+          <div className="text-center">
+            <motion.span
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.15, type: 'spring', stiffness: 220 }}
+              className="mx-auto flex size-20 items-center justify-center rounded-full bg-emerald-50 ring-8 ring-emerald-50/50"
+            >
+              <span className="flex size-14 items-center justify-center rounded-full bg-emerald-500 shadow-lg shadow-emerald-200">
+                <Icon icon="solar:check-read-linear" className="size-8 text-white" />
               </span>
-            </div>
+            </motion.span>
+            <h1 className="mt-5 text-2xl font-bold sm:text-3xl">You&apos;re booked!</h1>
+            <p className="mt-2 text-muted-foreground">
+              Your payment went through and your appointment is confirmed.
+            </p>
+          </div>
 
-            {/* Minimalist Booking Summary */}
-            {currentBooking && (
-              <div className="space-y-4">
-                <div className="space-y-3">
-                  {currentBooking.items.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50/50 border border-slate-100/50 transition-colors hover:bg-slate-50"
-                    >
-                      {item.serviceImageUrl ? (
-                        <img
-                          src={item.serviceImageUrl}
-                          alt={item.serviceName}
-                          className="size-14 rounded-xl object-cover shadow-sm bg-white"
-                        />
-                      ) : (
-                        <div className="size-14 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                          <Icon icon="solar:scissors-outline" className="size-7 text-primary" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-slate-800 text-base truncate">
-                          {item.serviceName}
-                        </h4>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="text-sm text-slate-500">{item.stylistName}</span>
-                        </div>
-                        {item.date && (
-                          <p className="text-xs text-primary font-medium mt-1">
-                            {new Date(item.date).toLocaleDateString('en-IN', {
-                              weekday: 'short',
-                              day: 'numeric',
-                              month: 'short',
-                            })}
-                            {' · '}
-                            {item.startTime}
-                          </p>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-slate-900">{formatRupees(item.price)}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 pt-4">
-                  <div className="p-4 rounded-2xl bg-emerald-50/40 border border-emerald-100/40">
-                    <p className="text-xs font-medium text-emerald-600 mb-1">Paid Advance</p>
-                    <p className="text-2xl font-semibold text-emerald-700">
-                      {formatRupees(currentBooking.advanceAmount)}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-2xl bg-slate-50/40 border border-slate-100/40">
-                    <p className="text-xs font-medium text-slate-500 mb-1">Payable at Salon</p>
-                    <p className="text-2xl font-semibold text-slate-700">
-                      {formatRupees(currentBooking.payableAmount - currentBooking.advanceAmount)}
-                    </p>
-                  </div>
-                </div>
+          {booking ? (
+            <BookingSummaryCard booking={booking}>
+              <AmountRow
+                label={fullyPaid ? 'Paid in full' : 'Paid now (20% advance)'}
+                amount={paidNow}
+                tone="green"
+              />
+              {atSalon > 0 && <AmountRow label="Pay at the salon" amount={atSalon} />}
+              <div className="border-t pt-2">
+                <AmountRow label="Total" amount={booking.payableAmount} strong />
               </div>
-            )}
-
-            {/* Soft CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Button
-                variant="outline"
-                className="flex-1 h-16 rounded-2xl text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-all font-medium text-base"
-                onClick={() => navigate('/')}
-              >
-                Go to Home
-              </Button>
-              <Button
-                className="flex-1 h-16 rounded-2xl bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 transition-all font-semibold text-base"
-                onClick={() => navigate(APP_ROUTES.USER.BOOKINGS)}
-              >
-                View Bookings
-              </Button>
+            </BookingSummaryCard>
+          ) : (
+            <div className="flex justify-center rounded-2xl border bg-white py-16">
+              <Loader label="Loading your booking" />
             </div>
-          </Card>
+          )}
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Button asChild className="h-11 font-semibold">
+              <Link
+                to={
+                  booking
+                    ? APP_ROUTES.USER.BOOKING_DETAIL(booking.bookingNumber || booking.id)
+                    : APP_ROUTES.USER.BOOKINGS
+                }
+              >
+                <Icon icon="solar:document-text-bold-duotone" className="mr-2 size-5" />
+                View booking
+              </Link>
+            </Button>
+            {booking && (
+              <Button asChild variant="outline" className="h-11 font-semibold">
+                <a href={calendarLink(booking)} target="_blank" rel="noreferrer">
+                  <Icon icon="solar:calendar-add-bold-duotone" className="mr-2 size-5" />
+                  Add to calendar
+                </a>
+              </Button>
+            )}
+          </div>
+          <p className="text-center text-sm">
+            <Link to="/" className="font-medium text-muted-foreground hover:text-primary">
+              Back to home
+            </Link>
+          </p>
         </motion.div>
       </main>
       <Footer />
