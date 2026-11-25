@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   SidebarProvider,
   Sidebar,
@@ -166,6 +166,10 @@ export function SalonAdminLayout() {
               </Sheet>
             </div>
             <div className="flex items-center gap-4">
+              {/* Phones: quick way back to the dashboard */}
+              <Link to="/admin" aria-label="Go to dashboard" className="flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-primary md:hidden">
+                <Icon icon="solar:home-2-bold-duotone" className="size-6" />
+              </Link>
               <NotificationCenter />
               <Avatar>
                 <AvatarImage src="https://randomuser.me/api/portraits/women/34.jpg" />

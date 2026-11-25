@@ -190,9 +190,9 @@ export function StylistLayout() {
               <Link
                 to="/stylist"
                 aria-label="Go to dashboard"
-                className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors hover:bg-primary/20 md:hidden"
+                className="flex size-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-primary md:hidden"
               >
-                <Icon icon="solar:home-2-bold-duotone" className="size-5" />
+                <Icon icon="solar:home-2-bold-duotone" className="size-6" />
               </Link>
               {/* Chat icon button */}
               <Button
