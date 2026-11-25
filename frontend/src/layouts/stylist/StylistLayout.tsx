@@ -2,7 +2,7 @@
 
 import { RouteBreadcrumbs } from '@/components/common/RouteBreadcrumbs';
 import { useState, useEffect } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   SidebarProvider,
   Sidebar,
@@ -186,6 +186,14 @@ export function StylistLayout() {
             </div>
 
             <div className="flex items-center gap-3">
+              {/* Phones: quick way back to the dashboard, like the customer profile's home button */}
+              <Link
+                to="/stylist"
+                aria-label="Go to dashboard"
+                className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors hover:bg-primary/20 md:hidden"
+              >
+                <Icon icon="solar:home-2-bold-duotone" className="size-5" />
+              </Link>
               {/* Chat icon button */}
               <Button
                 variant="ghost"
